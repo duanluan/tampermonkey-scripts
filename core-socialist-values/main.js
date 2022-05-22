@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         社会主义核心价值观（Core Socialist Values）
 // @namespace    http://tampermonkey.net/
-// @version      0.2.0
+// @version      0.2.1
 // @description  替换网站条幅为社会主义核心价值观。
-// @author       You
-// @license      MIT
+// @author       duanluan
+// @license      Apache 2.0
 // @match        *://reactjs.org/*
 // @match        *://junit.org/*
 // @match        *://codecept.io/*
@@ -17,7 +17,7 @@
 const txt = '富强民主文明和谐自由平等公正法治爱国敬业诚信友善ProsperityDemocracyCivilityHarmonyFreedomEqualityJusticeRuleoflawPatriotismDedicationIntegrityFriendship',
   host = window.location.host,
   href = window.location.href,
-  imgsUrl = 'https://raw.githubusercontent.com/csa-f/core-socialist-values/main/imgs/',
+  imgsUrl = 'https://raw.githubusercontent.com/duanluan/tampermonkey-scripts/main/core-socialist-values/imgs/',
   junitLogoUrl = imgsUrl + 'junit5-logo-csv.png',
 
   selectors = {
@@ -48,7 +48,6 @@ const txt = '富强民主文明和谐自由平等公正法治爱国敬业诚信�
 })();
 
 function runReplace(selector) {
-   
   loopReplaceBar(selector);
   // 监听条幅变化，变化后再次执行
   $dom.bind("DOMNodeInserted", selector, function (e) {
