@@ -1,0 +1,23 @@
+{
+  "restartable": "rs",
+  "ignore": [
+    ".git",
+    ".svn",
+    "logs",
+    "pem",
+    "node_modules/**/node_modules",
+    "src/**/*.spec.ts"
+  ],
+  "verbose": true,
+  "execMap": {
+    "js": "node server/index.js"
+  },
+  "watch": [
+    "src"
+  ],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "ext": "ts js json",
+  "exec": "ts-node -r tsconfig-paths/register src/main.ts"
+}
