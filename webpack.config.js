@@ -3,8 +3,8 @@ const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 
 const baseConfig = {
-  mode: 'development',
-  // mode: 'production',
+  // mode: 'development',
+  mode: 'production',
   // 使用 source map：https://webpack.docschina.org/guides/development/#using-source-maps
   devtool: 'inline-source-map',
   module: {
@@ -27,36 +27,29 @@ const baseConfig = {
   resolve: {
     // 路径映射为别名，方便 import
     alias: {
-      '@common': path.resolve(__dirname, 'common/src')
+      '@utils': path.resolve(__dirname, 'utils/src'),
+      '@utils/gm': path.resolve(__dirname, 'utils/src/gm')
     },
     // 忽略路径后缀
     extensions: ['.ts']
   },
   // 保留注释：https://webpack.docschina.org/plugins/terser-webpack-plugin/#preserve-comments
-  optimization: {
-    minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          format: {
-            comments: /==(\/|)UserScript==|@(name|namespace|version|description|author|license|match|icon|require|grant)/i,
-          },
-        },
-        extractComments: true,
-      }),
-    ],
-  },
+  // optimization: {
+  //   minimize: true,
+  //   minimizer: [
+  //     new TerserPlugin({
+  //       terserOptions: {
+  //         format: {
+  //           comments: /==(\/|)UserScript==|@(name|namespace|version|description|author|license|match|icon|require|grant)/i,
+  //         },
+  //       },
+  //       extractComments: true,
+  //     }),
+  //   ],
+  // },
 };
 
 module.exports = [
-  // {
-  //   ...baseConfig,
-  //   entry: glob.sync('./common/src/*.ts'),
-  //   output: {
-  //     path: path.resolve(__dirname, 'common/dist'),
-  //     filename: 'main.js',
-  //   }
-  // },
   {
     ...baseConfig,
     entry: glob.sync('./amazon-kindle-douban-score/src/*.ts'),
