@@ -3,8 +3,8 @@ const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 
 const baseConfig = {
-  // mode: 'development',
-  mode: 'production',
+  mode: 'development',
+  // mode: 'production',
   // 使用 source map：https://webpack.docschina.org/guides/development/#using-source-maps
   devtool: 'inline-source-map',
   module: {
@@ -55,6 +55,16 @@ module.exports = [
     entry: glob.sync('./amazon-kindle-douban-score/src/*.ts'),
     output: {
       path: path.resolve(__dirname, 'amazon-kindle-douban-score/dist'),
+      filename: 'main.js',
+      // 清理 /dist 文件夹：https://webpack.docschina.org/guides/output-management/#cleaning-up-the-dist-folder
+      clean: true
+    }
+  },
+  {
+    ...baseConfig,
+    entry: glob.sync('./core-socialist-values/src/*.ts'),
+    output: {
+      path: path.resolve(__dirname, 'core-socialist-values/dist'),
       filename: 'main.js',
       // 清理 /dist 文件夹：https://webpack.docschina.org/guides/output-management/#cleaning-up-the-dist-folder
       clean: true
