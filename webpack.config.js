@@ -3,8 +3,8 @@ const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 
 const baseConfig = {
-  mode: 'development',
-  // mode: 'production',
+  // mode: 'development',
+  mode: 'production',
   // 使用 source map：https://webpack.docschina.org/guides/development/#using-source-maps
   devtool: 'inline-source-map',
   module: {
@@ -34,19 +34,19 @@ const baseConfig = {
     extensions: ['.ts']
   },
   // 保留注释：https://webpack.docschina.org/plugins/terser-webpack-plugin/#preserve-comments
-  // optimization: {
-  //   minimize: true,
-  //   minimizer: [
-  //     new TerserPlugin({
-  //       terserOptions: {
-  //         format: {
-  //           comments: /==(\/|)UserScript==|@(name|namespace|version|description|author|license|match|icon|require|grant)/i,
-  //         },
-  //       },
-  //       extractComments: true,
-  //     }),
-  //   ],
-  // },
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          format: {
+            comments: /\s*(==(\/|)UserScript==|@(name|namespace|version|description|author|license|match|icon|require|grant))/i,
+          },
+        },
+        extractComments: true,
+      }),
+    ],
+  },
 };
 
 module.exports = [

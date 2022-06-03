@@ -1,20 +1,3 @@
-// ==UserScript==
-// @name         亚马逊 Kindle 展示豆瓣评分
-// @namespace    http://tampermonkey.net/
-// @version      0.0.1
-// @description  亚马逊 Kindle 展示豆瓣评分，目前仅支持中亚。
-// @author       duanluan
-// @license      Apache 2.0
-// @match        *://www.amazon.cn/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=amazon.cn
-// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.slim.min.js
-// @require      https://cdn.bootcdn.net/ajax/libs/limonte-sweetalert2/11.4.14/sweetalert2.all.min.js
-// @require      https://cdn.bootcdn.net/ajax/libs/limonte-sweetalert2/11.4.14/sweetalert2.min.css
-// @grant        GM_xmlhttpRequest
-// @grant        GM_getValue
-// @grant        GM_setValue
-// ==/UserScript==
-
 import UrlUtils from '../../utils/src/Url';
 import StoreUtils from '../../utils/src/gm/Store';
 import HttpUtils from '../../utils/src/gm/Http';
@@ -116,3 +99,20 @@ function loadScore() {
     });
   })
 }
+
+// ==UserScript==
+// @name         亚马逊 Kindle 展示豆瓣评分
+// @namespace    http://tampermonkey.net/
+// @version      0.0.1
+// @description  亚马逊 Kindle 展示豆瓣评分，目前仅支持中亚。
+// @author       duanluan
+// @license      Apache 2.0
+// @match        *://www.amazon.cn/*
+// @icon         https://www.google.com/s2/favicons?sz=64&domain=amazon.cn
+// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.slim.min.js
+// @require      https://cdn.bootcdn.net/ajax/libs/limonte-sweetalert2/11.4.14/sweetalert2.all.min.js
+// @require      https://cdn.bootcdn.net/ajax/libs/limonte-sweetalert2/11.4.14/sweetalert2.min.css
+// @grant        GM_xmlhttpRequest
+// @grant        GM_getValue
+// @grant        GM_setValue
+// ==/UserScript==
