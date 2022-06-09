@@ -1,6 +1,6 @@
 import Bar from "../common/Bar";
 
-export default class Reactjs {
+export default class React {
 
   private static selectors = {
     bar: '.css-lpiycv',
@@ -9,7 +9,7 @@ export default class Reactjs {
 
   static replace() {
     if (location.host === 'reactjs.org') {
-      Bar.replace(Reactjs.selectors.bar, Reactjs.selectors.observingBar);
+      Bar.replace(React.selectors.bar, React.selectors.observingBar);
     }
   }
 }
