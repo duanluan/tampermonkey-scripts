@@ -8,6 +8,7 @@ Greasy Fork：[https://greasyfork.org/zh-CN/scripts/440854-社会主义核心价
 # 支持列表
 
 * [React](https://reactjs.org/)：条幅
+* [Angular](https://angular.io/)：通知
 * [Junit](https://junit.org/junit5/)：Logo
 * [CodeceptJS](https://codecept.io/)：条幅
 * [GitHub](https://github.com/)：通知
