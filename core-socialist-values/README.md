@@ -12,3 +12,4 @@ Greasy Fork：[https://greasyfork.org/zh-CN/scripts/440854-社会主义核心价
 * [Junit](https://junit.org/junit5/)：Logo
 * [CodeceptJS](https://codecept.io/)：条幅
 * [GitHub](https://github.com/)：通知
+* [NestJS](https://docs.nestjs.com/)：条幅
