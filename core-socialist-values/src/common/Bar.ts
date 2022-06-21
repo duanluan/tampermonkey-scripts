@@ -1,6 +1,9 @@
 export default class Bar {
 
   static replace(selector, observingSelector) {
+    if ($(selector).text().toLowerCase().indexOf('ukraine') == -1) {
+      return;
+    }
     Bar.loopReplaceBar(selector);
     // 监听条幅变化，变化后再次执行
     new MutationObserver((mutations: MutationRecord[], observer: MutationObserver) => {
@@ -24,13 +27,26 @@ export default class Bar {
   }
 
   private static replaceBar(selector) {
+    const barSelector = '.csv_bar', barUlSelector = barSelector + ' .csv_bar_ul';
+
+    $(selector).css({'minHeight': '40px'});
     $(selector).html(`
-    <div>
-      <ul class='csv_ul'><li>富强</li><li>民主</li><li>文明</li><li>和谐</li><li>自由</li><li>平等</li><li>公正</li><li>法治</li><li>爱国</li><li>敬业</li><li>诚信</li><li>友善</li></ul><br>
-      <ul class='csv_ul'><li>Prosperity</li><li>Democracy</li><li>Civility</li><li>Harmony</li><li>Freedom</li><li>Equality</li><li>Justice</li><li>Rule of law</li><li>Patriotism</li><li>Dedication</li><li>Integrity</li><li>Friendship</li>
+    <div class="csv_bar">
+      <ul class='csv_bar_ul'><li>富强</li><li>民主</li><li>文明</li><li>和谐</li><li>自由</li><li>平等</li><li>公正</li><li>法治</li><li>爱国</li><li>敬业</li><li>诚信</li><li>友善</li></ul><br>
+      <ul class='csv_bar_ul'><li>Prosperity</li><li>Democracy</li><li>Civility</li><li>Harmony</li><li>Freedom</li><li>Equality</li><li>Justice</li><li>Rule of law</li><li>Patriotism</li><li>Dedication</li><li>Integrity</li><li>Friendship</li>
       </ul>
     </div>`);
-    $('.csv_ul').css({'listStyle': 'none', 'margin': 0, 'padding': 0, 'width': 'auto'});
-    $('.csv_ul li').css({'color': '#DE2910', 'fontSize': '13px', 'fontWeight': 'bold', 'float': 'left', 'padding-right': '10px', 'width': '80px', 'text-align': 'center'});
+
+    // 避免出现多个导致样式添加失败
+    const $bar = $(barSelector);
+    if ($bar.length == 2) {
+      $bar.eq(0).remove();
+    }
+
+    $(barUlSelector).css({'display': 'inline-block', 'listStyle': 'none', 'margin': 0, 'padding': 0, 'width': 'auto'});
+    $(barUlSelector + ' li').css({'color': '#DE2910', 'fontWeight': 'bold', 'fontFamily': 'KaiTi', 'float': 'left', 'paddingRight': '10px', 'min-width': '80px', 'textAlign': 'center'});
+    $(barUlSelector + ':first').css('verticalAlign', 'bottom');
+    $(barUlSelector + ':first li').css('fontSize', '18px');
+    $(barUlSelector + ':eq(1) li').css('fontSize', '13px');
   }
 }
