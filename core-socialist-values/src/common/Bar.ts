@@ -6,7 +6,7 @@ export default class Bar {
    * @param observingSelector 变化选择器
    */
   static replace(selector, observingSelector) {
-    if ($(selector).text().toLowerCase().indexOf('ukraine') == -1) {
+    if (!$(selector).text().match(/ukraine|乌克兰|black|黑人/i)) {
       return;
     }
     Bar.loopReplaceBar(selector);
