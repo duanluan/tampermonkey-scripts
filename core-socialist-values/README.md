@@ -14,3 +14,4 @@ Greasy Fork：[https://greasyfork.org/zh-CN/scripts/440854-社会主义核心价
 * [GitHub](https://github.com/)：通知
 * [NestJS](https://docs.nestjs.com/)：条幅
 * [Ember](https://emberjs.com/)：条幅
+* [Electron](https://www.electronjs.org/)：条幅

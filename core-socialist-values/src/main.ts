@@ -6,6 +6,7 @@ import Codecept from "./codecept/Codecept";
 import Github from "./github/Github";
 import Nest from "./nest/Nest";
 import Ember from "./ember/Ember";
+import Electron from "./electron/Electron";
 
 (() => {
   'use strict';
@@ -17,6 +18,7 @@ import Ember from "./ember/Ember";
   Github.replace();
   Nest.replace();
   Ember.replace();
+  Electron.replace();
 })();
 
 // ==UserScript==
@@ -33,6 +35,7 @@ import Ember from "./ember/Ember";
 // @match        *://github.com/*
 // @match        *://docs.nestjs.com/*
 // @match        *://emberjs.com/*
+// @match        *://www.electronjs.org/*
 // @icon         <$ICON$>
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.slim.min.js
 // @grant        none
