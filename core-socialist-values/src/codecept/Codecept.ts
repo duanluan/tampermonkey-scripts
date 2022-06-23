@@ -9,7 +9,7 @@ export default class Codecept {
 
   static replace() {
     if (location.host === 'codecept.io') {
-      Bar.replace(Codecept.selectors.bar, Codecept.selectors.observingBar);
+      Bar.replace(this.selectors.bar, null);
     }
   }
 }

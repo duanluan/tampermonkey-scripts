@@ -12,9 +12,9 @@ export default class Junit {
 
   static replace() {
     if (location.href === 'https://junit.org/junit5/') {
-      $(Junit.selectors.junitAbout).prevAll().remove();
-      $(Junit.selectors.junitLogo).attr('src', Junit.junitLogoUrl);
-      $(Junit.selectors.junitFavicon).attr('href', Junit.junitLogoUrl);
+      $(this.selectors.junitAbout).prevAll().remove();
+      $(this.selectors.junitLogo).attr('src', this.junitLogoUrl);
+      $(this.selectors.junitFavicon).attr('href', this.junitLogoUrl);
     }
   }
 }

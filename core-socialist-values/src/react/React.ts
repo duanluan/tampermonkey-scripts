@@ -9,7 +9,7 @@ export default class React {
 
   static replace() {
     if (location.host === 'reactjs.org') {
-      Bar.replace(React.selectors.bar, React.selectors.observingBar);
+      Bar.replace(this.selectors.bar, this.selectors.observingBar);
     }
   }
 }

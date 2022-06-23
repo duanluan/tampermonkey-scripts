@@ -9,8 +9,8 @@ export default class Codecept {
 
   static replace() {
     if (location.host === 'docs.nestjs.com') {
-      Bar.replace(Codecept.selectors.bar, Codecept.selectors.observingBar);
-      $(Codecept.selectors.bar).css('padding', '0');
+      Bar.replace(this.selectors.bar, null);
+      $(this.selectors.bar).css('padding', '0');
     }
   }
 }

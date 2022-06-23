@@ -1,14 +1,21 @@
 export default class Bar {
 
+  /**
+   * 替换条幅
+   * @param selector 条幅选择器
+   * @param observingSelector 变化选择器
+   */
   static replace(selector, observingSelector) {
     if ($(selector).text().toLowerCase().indexOf('ukraine') == -1) {
       return;
     }
     Bar.loopReplaceBar(selector);
-    // 监听条幅变化，变化后再次执行
-    new MutationObserver((mutations: MutationRecord[], observer: MutationObserver) => {
-      Bar.loopReplaceBar(selector);
-    }).observe($(observingSelector)[0], {childList: true})
+    if (observingSelector) {
+      // 监听条幅变化，变化后再次执行
+      new MutationObserver((mutations: MutationRecord[], observer: MutationObserver) => {
+        Bar.loopReplaceBar(selector);
+      }).observe($(observingSelector)[0], {childList: true})
+    }
   }
 
   private static txt = '富强民主文明和谐自由平等公正法治爱国敬业诚信友善ProsperityDemocracyCivilityHarmonyFreedomEqualityJusticeRuleoflawPatriotismDedicationIntegrityFriendship';
