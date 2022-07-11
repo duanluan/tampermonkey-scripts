@@ -15,3 +15,4 @@ Greasy Fork：[https://greasyfork.org/zh-CN/scripts/440854-社会主义核心价
 * [NestJS](https://docs.nestjs.com/)：条幅
 * [Ember](https://emberjs.com/)：条幅
 * [Electron](https://www.electronjs.org/)：条幅
+* [Jenkins](https://www.jenkins.io/)：Logo、摘要
