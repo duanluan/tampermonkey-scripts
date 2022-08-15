@@ -35,17 +35,18 @@ const baseConfig = {
   },
   // 保留注释：https://webpack.docschina.org/plugins/terser-webpack-plugin/#preserve-comments
   optimization: {
-    minimize: true,
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          format: {
-            comments: /\s*(==(\/|)UserScript==|@(name|namespace|version|description|author|license|match|icon|require|grant))/i,
-          },
-        },
-        extractComments: true,
-      }),
-    ],
+    // 是否压缩最小化代码
+    minimize: false,
+    // minimizer: [
+    //   new TerserPlugin({
+    //     terserOptions: {
+    //       format: {
+    //         comments: /\s*(==(\/|)UserScript==|@(name|namespace|version|description|author|license|match|icon|require|grant))/i,
+    //       },
+    //     },
+    //     extractComments: true,
+    //   }),
+    // ],
   },
 };
 

@@ -26,7 +26,7 @@ import Jenkins from "./jenkins/Jenkins";
 // ==UserScript==
 // @name         社会主义核心价值观（Core Socialist Values）
 // @namespace    http://tampermonkey.net/
-// @version      0.8.0
+// @version      0.8.1
 // @description  替换政治相关条幅为社会主义核心价值观，替换政治相关 Logo 颜色为中国红，去除政治相关通知，让技术远离政治。
 // @author       duanluan
 // @license      Apache 2.0
