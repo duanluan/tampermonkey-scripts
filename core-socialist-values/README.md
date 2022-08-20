@@ -3,7 +3,10 @@
 * 替换政治相关 Logo 颜色为中国红；
 * 去除政治相关通知。
 
-Greasy Fork：[https://greasyfork.org/zh-CN/scripts/440854-社会主义核心价值观-core-socialist-values](https://greasyfork.org/zh-CN/scripts/440854-%E7%A4%BE%E4%BC%9A%E4%B8%BB%E4%B9%89%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E8%A7%82-core-socialist-values)
+# 资源
+* Github：[https://github.com/duanluan/tampermonkey-scripts/tree/main/core-socialist-values](https://github.com/duanluan/tampermonkey-scripts/tree/main/core-socialist-values)
+* Greasy Fork：[https://greasyfork.org/zh-CN/scripts/440854-社会主义核心价值观-core-socialist-values](https://greasyfork.org/zh-CN/scripts/440854-%E7%A4%BE%E4%BC%9A%E4%B8%BB%E4%B9%89%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E8%A7%82-core-socialist-values)
+* OpenUserJS：[https://openuserjs.org/scripts/duanluan/社会主义核心价值观（Core_Socialist_Values）](https://openuserjs.org/scripts/duanluan/%E7%A4%BE%E4%BC%9A%E4%B8%BB%E4%B9%89%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E8%A7%82%EF%BC%88Core_Socialist_Values%EF%BC%89)
 
 # 支持列表
 
