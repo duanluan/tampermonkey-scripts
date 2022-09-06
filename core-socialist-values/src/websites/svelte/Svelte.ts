@@ -1,10 +1,13 @@
+import Bar from "../../common/Bar";
+
 export default class Svelte {
 
   private static selectors = {
     navSpot: '.nav-spot',
-    footer: '.ukr',
-    footerHeight: ':root',
-    footerHeightAttrName: '--ukr-footer-height',
+    bar: '.ukr',
+    barHeight: ':root',
+    barHeightAttrName: '--ukr-footer-height',
+    observing: '#main',
   }
 
   private static svelteLogoStyle = 'background-image: url(https://svelte.dev/svelte-logo-horizontal.svg)';
@@ -18,9 +21,6 @@ export default class Svelte {
         if ($navSpot.length > 0) {
           // 替换 Logo
           $navSpot.attr('style', this.svelteLogoStyle);
-          // 去除底部横幅
-          $(this.selectors.footer).remove();
-          $(this.selectors.footerHeight).css(this.selectors.footerHeightAttrName, 0);
           // 替换两次后结束监听
           if (i >= 1) {
             observer.disconnect();
@@ -28,7 +28,14 @@ export default class Svelte {
           i++;
         }
       });
-      observer.observe($('#main')[0], {childList: true});
+      observer.observe($(this.selectors.observing)[0], {childList: true});
+
+      // 底部横幅
+      Bar.replace({
+        barSelector: this.selectors.bar, isObserveBar: true, hideBarSelector: this.selectors.bar, isObserveHideBar: true, replaceCallback: () => {
+          $(this.selectors.bar).css({'backgroundColor': '#1c1e24', 'paddingTop': '20px'});
+        }
+      });
     }
   }
 }

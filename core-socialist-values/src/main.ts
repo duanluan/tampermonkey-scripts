@@ -1,35 +1,8 @@
-// 替换后的条幅去除空格换行后的文本
-import Junit from "./junit/Junit";
-import React from "./react/React";
-import Angular from "./angular/Angular";
-import Codecept from "./codecept/Codecept";
-import Github from "./github/Github";
-import Nest from "./nest/Nest";
-import Ember from "./ember/Ember";
-import Electron from "./electron/Electron";
-import Jenkins from "./jenkins/Jenkins";
-import Svelte from "./svelte/Svelte";
-
-(() => {
-  'use strict';
-
-  React.replace();
-  Angular.replace();
-  Junit.replace();
-  Codecept.replace();
-  Github.replace();
-  Nest.replace();
-  Ember.replace();
-  Electron.replace();
-  Jenkins.replace();
-  Svelte.replace();
-})();
-//
 // ==UserScript==
-// @name         社会主义核心价值观（Core Socialist Values）
+// @name         技术远离政治
 // @namespace    http://tampermonkey.net/
-// @version      0.9.0
-// @description  替换政治相关条幅为社会主义核心价值观，替换政治相关 Logo 颜色为中国红，去除政治相关通知，让技术远离政治。
+// @version      1.0.0
+// @description  移除政治相关条幅或替换为社会主义核心价值观，替换政治相关 Logo 为原版 Logo，去除政治相关通知，让技术远离政治。
 // @author       duanluan
 // @copyright    2022, duanluan (https://github.com/duanluan)
 // @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
@@ -44,9 +17,69 @@ import Svelte from "./svelte/Svelte";
 // @match        *://www.jenkins.io/*
 // @match        *://svelte.dev/*
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.slim.min.js
-// @grant        none
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_registerMenuCommand
+// @grant        GM_unregisterMenuCommand
 // ==/UserScript==
 
 // ==OpenUserJS==
 // @author duanluan
 // ==/OpenUserJS==
+
+import Junit from "./websites/junit/Junit";
+import React from "./websites/react/React";
+import Angular from "./websites/angular/Angular";
+import Codecept from "./websites/codecept/Codecept";
+import Github from "./websites/github/Github";
+import Nest from "./websites/nest/Nest";
+import Ember from "./websites/ember/Ember";
+import Electron from "./websites/electron/Electron";
+import Jenkins from "./websites/jenkins/Jenkins";
+import Svelte from "./websites/svelte/Svelte";
+import Store from "../../utils/src/gm/Store";
+import MenuCmd from "../../utils/src/gm/MenuCmd";
+import Options from "./common/Options";
+
+(() => {
+  'use strict';
+
+  const options = [{label: '移除条幅', name: Options.Keys.removeBar, value: false}];
+
+  function register(option: any) {
+    const val = Store.get(option.name);
+    const valIsBool = (typeof val === 'boolean');
+    const menuCmdId = MenuCmd.register((typeof valIsBool ? (val ? '☑️ ' : '🔲 ') : '') + option.label, () => {
+      if (option.name === Options.Keys.removeBar) {
+        Store.set(option.name, !val);
+      }
+      // 如果是布尔类型就重新注册选项
+      if (valIsBool) {
+        MenuCmd.unregister(menuCmdId);
+        register(option);
+      }
+    });
+  }
+
+  for (const option of options) {
+    // 存储选项默认值
+    if (Store.get(option.name) === null) {
+      Store.set(option.name, option.value)
+    }
+    // 注册选项
+    for (const option of options) {
+      register(option);
+    }
+  }
+
+  React.replace();
+  Angular.replace();
+  Junit.replace();
+  Codecept.replace();
+  Github.replace();
+  Nest.replace();
+  Ember.replace();
+  Electron.replace();
+  Jenkins.replace();
+  Svelte.replace();
+})();

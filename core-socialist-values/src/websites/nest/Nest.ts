@@ -1,15 +1,14 @@
-import Bar from "../common/Bar";
+import Bar from "../../common/Bar";
 
 export default class Codecept {
 
   static selectors = {
     bar: '.top-bar',
-    observingBar: '.ng-star-inserted'
   }
 
   static replace() {
     if (location.host === 'docs.nestjs.com') {
-      Bar.replace(this.selectors.bar, null);
+      Bar.replace({barSelector: this.selectors.bar, isObserveBar: false, hideBarSelector: this.selectors.bar, isObserveHideBar: false});
       $(this.selectors.bar).css('padding', '0');
     }
   }

@@ -1,4 +1,4 @@
-import Bar from "../common/Bar";
+import Bar from "../../common/Bar";
 
 export default class Ember {
 
@@ -8,7 +8,7 @@ export default class Ember {
 
   static replace() {
     if (location.host === 'emberjs.com') {
-      Bar.replace(this.selectors.bar, null);
+      Bar.replace({barSelector: this.selectors.bar, isObserveBar: false, hideBarSelector: this.selectors.bar, isObserveHideBar: false});
       $(this.selectors.bar).css({'backgroundColor': '#1c1e24', 'padding': 0});
     }
   }

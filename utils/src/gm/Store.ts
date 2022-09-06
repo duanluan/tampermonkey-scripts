@@ -1,12 +1,24 @@
-export default class Request {
+/**
+ * 存储
+ */
+export default class Store {
 
-  static get(key: string) {
+  /**
+   * 获取
+   * @param key 键
+   */
+  static get(key: string): any {
     // @ts-ignore
     return GM_getValue(key);
   }
 
-  static set(key: string, value: string) {
+  /**
+   * 设置
+   * @param key 键
+   * @param value 值
+   */
+  static set(key: string, value: any) {
     // @ts-ignore
-    return GM_setValue(key, value);
+    GM_setValue(key, value);
   }
 }
