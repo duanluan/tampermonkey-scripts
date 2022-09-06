@@ -4,6 +4,8 @@
 * 替换政治相关 Logo 为原版 Logo；
 * 去除政治相关通知。
 
+![8L7HNCWPIS)6OC10Y~2G0HV](https://user-images.githubusercontent.com/14957667/188654509-d1f31096-4d6b-4e26-9988-3b392ed4b212.png)
+
 # 资源
 
 * Github：[https://github.com/duanluan/tampermonkey-scripts/tree/main/core-socialist-values](https://github.com/duanluan/tampermonkey-scripts/tree/main/core-socialist-values)
