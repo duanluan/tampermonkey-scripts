@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         技术远离政治
 // @namespace    http://tampermonkey.net/
-// @version      1.0.0
+// @version      1.1.0
 // @description  移除政治相关条幅或替换为社会主义核心价值观，替换政治相关 Logo 为原版 Logo，去除政治相关通知，让技术远离政治。
 // @author       duanluan
 // @copyright    2022, duanluan (https://github.com/duanluan)
@@ -16,6 +16,7 @@
 // @match        *://www.electronjs.org/*
 // @match        *://www.jenkins.io/*
 // @match        *://svelte.dev/*
+// @match        *://sveltematerialui.com/*
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.slim.min.js
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -40,6 +41,7 @@ import Svelte from "./websites/svelte/Svelte";
 import Store from "../../utils/src/gm/Store";
 import MenuCmd from "../../utils/src/gm/MenuCmd";
 import Options from "./common/Options";
+import SvelteMaterialUi from "./websites/sveltematerialui/SvelteMaterialUi";
 
 (() => {
   'use strict';
@@ -58,6 +60,8 @@ import Options from "./common/Options";
         MenuCmd.unregister(menuCmdId);
         register(option);
       }
+      // 刷新页面
+      window.location.reload();
     });
   }
 
@@ -82,4 +86,5 @@ import Options from "./common/Options";
   Electron.replace();
   Jenkins.replace();
   Svelte.replace();
+  SvelteMaterialUi.replace();
 })();
