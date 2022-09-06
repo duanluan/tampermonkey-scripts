@@ -8,7 +8,7 @@ export default class Junit {
     codeceptBar: '.sub-bar .message',
   }
 
-  private static junitLogoUrl = 'https://raw.githubusercontent.com/duanluan/tampermonkey-scripts/main/core-socialist-values/src/junit/imgs/junit5-logo-csv.png'
+  private static junitLogoUrl = 'https://raw.githubusercontent.com/duanluan/tampermonkey-scripts/main/core-socialist-values/src/junit/imgs/junit5-logo.png'
 
   static replace() {
     if (location.href === 'https://junit.org/junit5/') {
