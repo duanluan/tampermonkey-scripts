@@ -8,6 +8,7 @@ import Nest from "./nest/Nest";
 import Ember from "./ember/Ember";
 import Electron from "./electron/Electron";
 import Jenkins from "./jenkins/Jenkins";
+import Svelte from "./svelte/Svelte";
 
 (() => {
   'use strict';
@@ -21,12 +22,13 @@ import Jenkins from "./jenkins/Jenkins";
   Ember.replace();
   Electron.replace();
   Jenkins.replace();
+  Svelte.replace();
 })();
 //
 // ==UserScript==
 // @name         社会主义核心价值观（Core Socialist Values）
 // @namespace    http://tampermonkey.net/
-// @version      0.8.2
+// @version      0.9.0
 // @description  替换政治相关条幅为社会主义核心价值观，替换政治相关 Logo 颜色为中国红，去除政治相关通知，让技术远离政治。
 // @author       duanluan
 // @copyright    2022, duanluan (https://github.com/duanluan)
@@ -40,6 +42,7 @@ import Jenkins from "./jenkins/Jenkins";
 // @match        *://emberjs.com/*
 // @match        *://www.electronjs.org/*
 // @match        *://www.jenkins.io/*
+// @match        *://svelte.dev/*
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.slim.min.js
 // @grant        none
 // ==/UserScript==
