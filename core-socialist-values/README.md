@@ -1,6 +1,6 @@
 # 简介
 
-* 移除政治相关条幅或替换为社会主义核心价值观；
+* 移除政治相关条幅或替换为社会主义核心价值观、今日诗词；
 * 替换政治相关 Logo 为原版 Logo；
 * 去除政治相关通知。
 
@@ -24,5 +24,5 @@
 * [Electron](https://www.electronjs.org/)：条幅
 * [Jenkins](https://www.jenkins.io/)：Logo、摘要
 * [Svelte](https://svelte.dev/)：Logo、底部条幅
-* [Svelte Material UI](https://sveltematerialui.com/)：条幅
+* [Svelte Material UI](https://sveltematerialui.com/)：条幅（隐藏）
 * [Syncthing](https://syncthing.net/)：条幅

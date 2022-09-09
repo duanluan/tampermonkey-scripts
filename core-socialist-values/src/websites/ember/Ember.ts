@@ -8,7 +8,11 @@ export default class Ember {
 
   static replace() {
     if (location.host === 'emberjs.com') {
-      Bar.replace({barSelector: this.selectors.bar, isObserveBar: false, hideBarSelector: this.selectors.bar, isObserveHideBar: false});
+      Bar.replace({
+        barSelector: this.selectors.bar, isObserveBar: false, hideBarSelector: this.selectors.bar, isObserveHideBar: false, jinrishiciCallback: () => {
+          $(this.selectors.bar).css('color', '#fff');
+        }
+      });
       $(this.selectors.bar).css({'backgroundColor': '#1c1e24', 'padding': 0});
     }
   }

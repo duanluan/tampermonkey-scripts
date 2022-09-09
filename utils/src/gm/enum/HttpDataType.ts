@@ -1,3 +1,3 @@
 export enum HttpDataType {
-  JSON = ""
+  JSON = "JSON"
 }

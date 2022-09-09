@@ -9,7 +9,11 @@ export default class Codecept {
 
   static replace() {
     if (location.host === 'codecept.io') {
-      Bar.replace({barSelector: this.selectors.bar, isObserveBar: false, hideBarSelector: this.selectors.hideBar, isObserveHideBar: false});
+      Bar.replace({
+        barSelector: this.selectors.bar, isObserveBar: false, hideBarSelector: this.selectors.hideBar, isObserveHideBar: false, jinrishiciCallback: () => {
+          $(this.selectors.bar).css('color', '#edf2f7');
+        }
+      });
     }
   }
 }

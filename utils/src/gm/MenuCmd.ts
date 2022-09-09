@@ -1,5 +1,5 @@
 /**
- * 设置菜单
+ * 选项菜单
  */
 export default class MenuCmd {
 
