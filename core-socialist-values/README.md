@@ -4,7 +4,7 @@
 * 替换政治相关 Logo 为原版 Logo；
 * 去除政治相关通知。
 
-![](https://user-images.githubusercontent.com/14957667/188654509-d1f31096-4d6b-4e26-9988-3b392ed4b212.png)
+![脚本设置](https://user-images.githubusercontent.com/14957667/189288306-c039bdd7-befe-4d15-90f1-d74d43ec0aef.png)
 
 # 资源
 
