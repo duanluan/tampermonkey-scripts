@@ -1,8 +1,8 @@
 import {HttpDataType} from "./enum/HttpDataType";
 
-export default class Http {
+export default class Request {
 
-  static get(option: { url: string, dataType?: HttpDataType, synchronous?: boolean, onload?: Function }) {
+  static async get(option: { url: string, dataType?: HttpDataType, synchronous?: boolean, headers?: {}, onload?: Function }): Promise<any> {
     option['method'] = 'GET';
 
     // 同步时返回 Promise

@@ -1,6 +1,6 @@
 import UrlUtils from '../../utils/src/Url';
 import StoreUtils from '../../utils/src/gm/Store';
-import HttpUtils from '../../utils/src/gm/Http';
+import HttpUtils from '../../utils/src/gm/Request';
 import {HttpDataType} from "../../utils/src/gm/enum/HttpDataType";
 
 const selectors = {

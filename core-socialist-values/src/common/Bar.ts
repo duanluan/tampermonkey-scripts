@@ -1,6 +1,6 @@
 import Store from "../../../utils/src/gm/Store";
-import Http from "../../../utils/src/gm/Http";
-import Options from "./Options";
+import Request from "../../../utils/src/gm/Request";
+import Options from "../Options";
 import {HttpDataType} from "../../../utils/src/gm/enum/HttpDataType";
 
 export default class Bar {
@@ -32,14 +32,16 @@ export default class Bar {
    * 替换条幅
    * @param options {
    *   barSelector: string,              // 条幅选择器
-   *   isObserveBar: boolean,            // 是否监听条幅变化
+   *   isObserveBar: boolean,            // 是否监听条幅变化，会监听两次变化，重新替换。配合 followUpObserveSelector 后续监听
+   *   followUpObserveSelector?: string, // 后续监听选择器，即条幅替换后有可能会再变回原样，此处就是再监听的父级选择器，isObserveBar 为 true 时生效
    *   hideBarSelector: string,          // 隐藏条幅选择器
-   *   isObserveHideBar: boolean,        // 是否监听隐藏条幅变化
-   *   followUpObserveSelector?: string, // 后续监听选择器
-   *   csvCallback?: Function        // 替换后回调
+   *   isObserveHideBar: boolean,        // 是否监听隐藏条幅变化，会监听两次变化，重新隐藏。
+   *   replaceBarCallback?: Function,    // 每次替换后回调
+   *   jinrishiciCallback?: Function,    // 每次替换为今日诗词后回调
+   *   hideBarCallback? Function         // 隐藏后回调
    * }
    */
-  static replace(options: { barSelector: string, isObserveBar: boolean, hideBarSelector: string, isObserveHideBar: boolean, followUpObserveSelector?: string, csvCallback?: Function, jinrishiciCallback?: Function }) {
+  static replace(options: { barSelector: string, isObserveBar: boolean, followUpObserveSelector?: string, hideBarSelector: string, isObserveHideBar: boolean, replaceBarCallback?: Function, jinrishiciCallback?: Function, hideBarCallback?: Function }) {
     if (!$(options.barSelector).text().match(/ukraine|乌克兰|black|黑人/i)) {
       return;
     }
@@ -61,6 +63,9 @@ export default class Bar {
         });
         observer.observe($(options.hideBarSelector)[0], {childList: true, subtree: true});
       }
+      if (options.hideBarCallback) {
+        options.hideBarCallback();
+      }
       return;
     }
 
@@ -80,16 +85,16 @@ export default class Bar {
    * @param options
    * @private
    */
-  private static replaceObserver(options: { barSelector: string, isObserveBar: boolean, hideBarSelector: string, isObserveHideBar: boolean, followUpObserveSelector?: string, csvCallback?: Function, jinrishiciCallback?: Function }) {
+  private static replaceObserver(options: { barSelector: string, isObserveBar: boolean, hideBarSelector: string, isObserveHideBar: boolean, followUpObserveSelector?: string, replaceBarCallback?: Function, jinrishiciCallback?: Function }) {
     // 首次替换横幅
-    this.replaceBar(options.barSelector, options.csvCallback, options.jinrishiciCallback);
+    this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback);
     if (!options.isObserveBar) {
       return;
     }
     let i = 0;
     // 条幅首次加载：监听条幅变化，变化后再次执行
     const observer = new MutationObserver(() => {
-      this.replaceBar(options.barSelector, options.csvCallback, options.jinrishiciCallback);
+      this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback);
       // 替换两次后结束监听
       if (i >= 1) {
         observer.disconnect();
@@ -101,7 +106,7 @@ export default class Bar {
     if (options.followUpObserveSelector) {
       // 后续变化
       new MutationObserver(() => {
-        this.replaceBar(options.barSelector, options.csvCallback, options.jinrishiciCallback);
+        this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback);
       }).observe($(options.followUpObserveSelector)[0], {childList: true});
     }
   }
@@ -109,11 +114,11 @@ export default class Bar {
   /**
    * 实际替换条幅
    * @param selector 条幅选择器
-   * @param csvCallback 替换后回调
+   * @param replaceBarCallback 替换后回调
    * @param jinrishiciCallback 替换为今日诗词后回调
    * @private
    */
-  private static replaceBar(selector: string, csvCallback?: Function, jinrishiciCallback?: Function) {
+  private static replaceBar(selector: string, replaceBarCallback?: Function, jinrishiciCallback?: Function) {
     if ($($(selector)[0]).text().replace(/\s+/g, "") === Bar.txt) {
       return;
     }
@@ -153,8 +158,8 @@ export default class Bar {
     $(barUlSelector + ':first li').css('fontSize', '18px');
     $(barUlSelector + ':eq(1) li').css('fontSize', '13px');
 
-    if (csvCallback) {
-      csvCallback();
+    if (replaceBarCallback) {
+      replaceBarCallback();
     }
   }
 
@@ -168,7 +173,7 @@ export default class Bar {
       return;
     }
 
-    let response = await Http.get({
+    let response = await Request.get({
       url: 'https://v2.jinrishici.com/one.json',
       dataType: HttpDataType.JSON,
       // headers: {
