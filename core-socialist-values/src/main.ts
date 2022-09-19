@@ -2,6 +2,7 @@
 // @name         技术远离政治
 // @namespace    http://tampermonkey.net/
 // @version      1.3.1
+// @updateURL    https://raw.iqiq.io/duanluan/tampermonkey-scripts/main/core-socialist-values/dist/main.js
 // @description  移除政治相关条幅或替换为社会主义核心价值观、今日诗词，替换政治相关 Logo 为原版 Logo，去除政治相关通知，让技术远离政治。
 // @author       duanluan
 // @copyright    2022, duanluan (https://github.com/duanluan)
