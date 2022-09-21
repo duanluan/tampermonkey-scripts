@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX 主题回复增强
 // @namespace    http://tampermonkey.net/
-// @version      0.0.2
+// @version      0.0.3
 // @description  增强 V2EX 主题的回复。
 // @author       duanluan
 // @copyright    2022, duanluan (https://github.com/duanluan)
