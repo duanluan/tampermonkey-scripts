@@ -67,7 +67,15 @@ module.exports = [
     output: {
       path: path.resolve(__dirname, 'core-socialist-values/dist'),
       filename: 'main.js',
-      // 清理 /dist 文件夹：https://webpack.docschina.org/guides/output-management/#cleaning-up-the-dist-folder
+      clean: true
+    }
+  },
+  {
+    ...baseConfig,
+    entry: glob.sync('./v2ex-replies-pro/src/*.ts'),
+    output: {
+      path: path.resolve(__dirname, 'v2ex-replies-pro/dist'),
+      filename: 'main.js',
       clean: true
     }
   }
