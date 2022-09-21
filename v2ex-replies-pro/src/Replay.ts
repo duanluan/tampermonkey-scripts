@@ -219,8 +219,8 @@ export default class Replay {
           this.winbox = new WinBox({
             class: selector.taSay.substring(1),
             title: username + ' 说了什么？',
-            x: 'right',
-            y: 'bottom',
+            x: localStorage.getItem('ta_say_x') || 'right',
+            y: localStorage.getItem('ta_say_y') || 'bottom',
             width: localStorage.getItem('ta_say_width') || '540px',
             height: localStorage.getItem('ta_say_height') || '70%',
             html: `<div style="padding: 10px; font-size: 14px">${html}</div>`,
@@ -228,6 +228,11 @@ export default class Replay {
               // 改变窗口大小时记录窗口大小
               localStorage.setItem('ta_say_width', width + 'px');
               localStorage.setItem('ta_say_height', height + 'px');
+            },
+            onmove: (x, y) => {
+              // 移动窗口时记录窗口位置
+              localStorage.setItem('ta_say_x', x);
+              localStorage.setItem('ta_say_y', y);
             },
             onclose: () => {
               // 关闭弹窗时取消回复高亮
