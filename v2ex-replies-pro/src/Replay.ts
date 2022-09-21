@@ -59,7 +59,7 @@ export default class Replay {
     }
 
     // 清空数据库
-    const db = openDatabase('v2ex-replies-pro', Info.getVersion(), Info.getName(), 10 * 1024 * 1024);
+    const db = openDatabase('v2ex-replies-pro', '0.0.1', Info.getName(), 10 * 1024 * 1024);
     db.transaction(tx => {
       tx.executeSql(`drop table if exists rendered_replies`);
     }, error => {
