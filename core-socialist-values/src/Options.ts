@@ -1,8 +1,8 @@
 import Store from "../../utils/src/gm/Store";
 import MenuCmd from "../../utils/src/gm/MenuCmd";
-import BaseOptions from "../../utils/src/BaseOptions";
+import CommonOptions from "../../utils/src/CommonOptions";
 
-export default class Options extends BaseOptions {
+export default class Options {
 
   private static SCRIPT_ID = 440854;
 
@@ -19,8 +19,8 @@ export default class Options extends BaseOptions {
    * @private
    */
   protected static options = [
-    {label: '隐藏条幅', name: Options.Keys.removeBar, version: 1, value: false, menuCmdId: null},
-    {label: '今日诗词', name: Options.Keys.jinrishici, version: 1, value: false, menuCmdId: null, token: ''}
+    {label: '隐藏条幅', name: this.Keys.removeBar, version: 1, value: false, menuCmdId: null},
+    {label: '今日诗词', name: this.Keys.jinrishici, version: 1, value: false, menuCmdId: null, token: ''}
   ];
 
   /**
@@ -28,21 +28,21 @@ export default class Options extends BaseOptions {
    * @param option 选项
    */
   static registerBoolOption(option: any) {
-    super.registerBoolOption(option);
+    CommonOptions.registerBoolOption(option);
   }
 
   /**
    * 注册所有选项
    */
   static registerAll() {
-    super.registerAll(this.SCRIPT_ID);
+    CommonOptions.registerAll('https://greasyfork.org/scripts/' + this.SCRIPT_ID, this.options);
   }
 
   /**
    * 在页面中加载选项
    */
   static loadInGreasyfork() {
-    super.loadInGreasyfork(this.SCRIPT_ID, ($scriptContent) => {
+    CommonOptions.loadInGreasyfork(this.SCRIPT_ID, ($scriptContent) => {
       // 添加脚本设置的内容
       let scriptContent = '';
       for (const option of this.options) {
@@ -50,22 +50,22 @@ export default class Options extends BaseOptions {
 
         scriptContent += `<h3>${option.label}</h3>`;
         switch (optionName) {
-          case Options.Keys.removeBar:
+          case this.Keys.removeBar:
             scriptContent += `<label><input type="checkbox" id="script-options-${optionName}" ${optionVal ? 'checked' : ''}> 是否隐藏条幅（勾选后将隐藏条幅而不是替换其内容）</label>`;
             break;
-          case Options.Keys.jinrishici:
+          case this.Keys.jinrishici:
             scriptContent += `<label><input type="checkbox" id="script-options-${optionName}-enabled" ${optionVal ? 'checked' : ''}> 启用<a href="https://www.jinrishici.com" target = "_blank">今日诗词</a>（仍需取消勾选“是否隐藏条幅”才能生效）</label>`;
             break;
         }
       }
       $scriptContent.html(scriptContent);
 
-      const $body = $('body');
+      const $body = $(document.body);
       // region 添加脚本设置的事件
       // 是否隐藏条幅
-      let optionSelector = '#script-options-' + Options.Keys.removeBar;
+      let optionSelector = '#script-options-' + this.Keys.removeBar;
       $body.on('change', optionSelector, () => {
-        const removeBarOption = JSON.parse(Store.get(Options.Keys.removeBar));
+        const removeBarOption = JSON.parse(Store.get(this.Keys.removeBar));
         removeBarOption.value = !removeBarOption.value;
         // 重新注册菜单
         MenuCmd.unregister(removeBarOption.menuCmdId);
@@ -73,9 +73,9 @@ export default class Options extends BaseOptions {
       });
 
       // 启用今日诗词
-      optionSelector = '#script-options-' + Options.Keys.jinrishici + '-enabled';
+      optionSelector = '#script-options-' + this.Keys.jinrishici + '-enabled';
       $body.on('change', optionSelector, () => {
-        const jinrishiciOption = JSON.parse(Store.get(Options.Keys.jinrishici));
+        const jinrishiciOption = JSON.parse(Store.get(this.Keys.jinrishici));
         jinrishiciOption.value = !jinrishiciOption.value;
         // 重新注册菜单
         MenuCmd.unregister(jinrishiciOption.menuCmdId);

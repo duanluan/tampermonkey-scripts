@@ -8,7 +8,6 @@ export default class Store {
    * @param key 键
    */
   static get(key: string): any {
-    // @ts-ignore
     return GM_getValue(key);
   }
 
@@ -18,7 +17,6 @@ export default class Store {
    * @param value 值
    */
   static set(key: string, value: any) {
-    // @ts-ignore
     GM_setValue(key, value);
   }
 }

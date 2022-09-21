@@ -4,32 +4,22 @@ import MenuCmd from "../../utils/src/gm/MenuCmd";
 /**
  * 选项菜单
  */
-export default class BaseOptions {
-  /**
-   * 脚本 ID
-   */
-  scriptId: number;
+export default class CommonOptions {
 
-  constructor(scriptId) {
-    this.scriptId = scriptId;
-  }
-
-  /**
-   * 选项 Key
-   */
-  protected static Keys = {
-    // demo
-    // xxx: 'xxx'
-  }
-
-  /**
-   * 选项
-   * @private
-   */
-  protected static options = [
-    // demo
-    // {label: '', name: this.Keys.xxx, version: 1, value: false, menuCmdId: null},
-  ];
+  // /**
+  //  * 选项 Key
+  //  */
+  // protected static Keys = {
+  //   // xxx: 'xxx'
+  // }
+  //
+  // /**
+  //  * 选项
+  //  * @private
+  //  */
+  // protected static options = [
+  //   // {label: '', name: this.Keys.xxx, version: 1, value: false, menuCmdId: null},
+  // ];
 
   /**
    * 注册 bool 类型的选项
@@ -62,17 +52,19 @@ export default class BaseOptions {
 
   /**
    * 注册所有选项
+   * @param url 设置页面 URL
+   * @param options
    */
-  static registerAll(scriptId: number) {
+  static registerAll(url: string, options: any[]) {
     MenuCmd.register('更多设置', () => {
-      window.open('https://greasyfork.org/scripts/' + scriptId, '_blank');
+      window.open(url, '_blank');
     });
 
-    for (const option of this.options) {
+    for (const option of options) {
       // TODO 【调试】不保留选项的值，每次都从 Store 中获取
       // Store.set(option.name, null);
 
-      let storeOption = JSON.parse(Store.get(option.name));
+      let storeOption = Store.get(option.name) ? JSON.parse(Store.get(option.name)) : null;
       // 如果选项不存在 || 版本不一致 时重置选项
       if (storeOption === null || !storeOption['version'] || storeOption['version'] < option.version) {
         Store.set(option.name, JSON.stringify(option));
@@ -94,16 +86,19 @@ export default class BaseOptions {
       scriptOptions: '#script-options',
       scriptContent: '#script-content',
     }
-    const $body = $('body'), $scriptLinks = $(selector.scriptLinks), $scriptContent = $(selector.scriptContent);
+    const $body = $(document.body), $scriptLinks = $(selector.scriptLinks), $scriptContent = $(selector.scriptContent);
 
     // 添加脚本设置的选项卡
     $scriptLinks.children('li:eq(0)').after(`<li><a href="javascript:;" id="script-options">脚本设置</a></li>`)
+    // 脚本设置选项点击事件
     $body.on('click', selector.scriptOptions, () => {
-      const $scriptOptions = $(selector.scriptOptions);
-      // 点击脚本设置的菜单样式
+      // 移除已选中选项的样式
       const $currentLi = $scriptLinks.children('li.current');
       $currentLi.html(`<a href="${location.href}">${$currentLi.text()}</a>`);
       $currentLi.removeClass('current');
+
+      // 添加选中选项的样式
+      const $scriptOptions = $(selector.scriptOptions);
       $scriptOptions.parent().addClass('current');
 
       loadOptionContentFn($scriptContent);

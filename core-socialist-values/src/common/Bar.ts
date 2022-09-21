@@ -182,7 +182,6 @@ export default class Bar {
       synchronous: true
     });
 
-    // @ts-ignore
     if (!response || response.status !== 'success') {
       console.error('今日诗词获取失败', response);
     }
@@ -191,7 +190,6 @@ export default class Bar {
     //   jinrishiciOption.token = response.data.token;
     //   Store.set(Options.Keys.jinrishici, JSON.stringify(jinrishiciOption));
     // }
-    // @ts-ignore
     return response.data.content + ' —— ' + response.data.origin.author + '《' + response.data.origin.title + '》';
   }
 }

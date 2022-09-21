@@ -8,7 +8,6 @@ export default class Request {
     // 同步时返回 Promise
     if (option.synchronous) {
       return new Promise((resolve, reject) => {
-        // @ts-ignore
         GM_xmlhttpRequest({
           ...option,
           onload: (response) => {
@@ -29,7 +28,6 @@ export default class Request {
         }
         option.onload(response);
       }
-      // @ts-ignore
       GM_xmlhttpRequest({...option, onload: onload1});
     }
   }

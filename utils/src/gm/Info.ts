@@ -4,7 +4,6 @@
 export default class Info {
 
   static get() {
-    // @ts-ignore
     return GM_info.script;
   }
 
