@@ -2,6 +2,10 @@
 
 因为 V2EX 的主题回复之间没有关联，所以想知道发生了什么还得 Ctrl + F 搜索被艾特的人说了什么。
 
+点击“@xxx”的链接即可打开右侧“xxx 说了什么？”的弹窗，而且弹窗中的“@xxx”仍可点击。
+
+![](https://user-images.githubusercontent.com/14957667/191446904-9dfa13de-600f-42f7-87bc-cc2cc3e01724.png)
+
 # 资源
 
 * Github：[https://github.com/duanluan/tampermonkey-scripts/tree/main/v2ex-replies-pro](https://github.com/duanluan/tampermonkey-scripts/tree/main/core-socialist-values)
