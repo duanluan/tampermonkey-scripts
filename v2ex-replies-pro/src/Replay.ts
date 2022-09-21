@@ -179,8 +179,8 @@ export default class Replay {
      */
     const showTaSay = (replyDivId: string, username: string, created: number) => {
       // 关闭弹窗
-      if (this.winbox) {
-        this.winbox.close();
+      if (Replay.winbox) {
+        Replay.winbox.close();
       }
       console.log(replyDivId)
 
@@ -216,7 +216,7 @@ export default class Replay {
             isGeByPrev = created > row.created;
           }
 
-          this.winbox = new WinBox({
+          Replay.winbox = new WinBox({
             class: selector.taSay.substring(1),
             title: username + ' 说了什么？',
             x: localStorage.getItem('ta_say_x') || 'right',
@@ -238,6 +238,7 @@ export default class Replay {
               // 关闭弹窗时取消回复高亮
               $reply.css('border', 'none');
               $reply.css('border-bottom', '1px solid #e2e2e2');
+              Replay.winbox = null;
             }
           });
         });
