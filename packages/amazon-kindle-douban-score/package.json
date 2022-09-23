@@ -1,0 +1,15 @@
+{
+  "name": "amazon-kindle-douban-score",
+  "private": true,
+  "scripts": {
+    "serve": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "utils": "workspace:*"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}
