@@ -1,6 +1,6 @@
-import Store from "../../utils/src/gm/Store";
-import MenuCmd from "../../utils/src/gm/MenuCmd";
-import CommonOptions from "../../utils/src/CommonOptions";
+import Store from "@utils/gm/Store";
+import MenuCmd from "@utils/gm/MenuCmd";
+import CommonOptions from "@utils/CommonOptions";
 
 export default class Options {
 

@@ -11,7 +11,6 @@ const baseConfig = {
     rules: [
       // 转译 TS：https://webpack.docschina.org/loaders/babel-loader、https://www.babeljs.cn/docs/babel-preset-typescript
       {
-        // test: /\.m?js$/,
         test: /\.ts$/,
         use: {
           loader: 'babel-loader',
@@ -25,10 +24,9 @@ const baseConfig = {
   },
   // https://webpack.docschina.org/configuration/resolve/#resolve
   resolve: {
-    // 路径映射为别名，方便 import
+    // 路径映射为别名，方便 import。同时需要在 tsconfig.json 中配置 paths
     alias: {
-      '@utils': path.resolve(__dirname, 'utils/src'),
-      '@utils/gm': path.resolve(__dirname, 'utils/src/gm')
+      '@utils': path.resolve(__dirname, 'utils/src')
     },
     // 忽略路径后缀
     extensions: ['.ts']

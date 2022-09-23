@@ -1,7 +1,7 @@
-import Request from "../../../utils/src/gm/Request";
-import {HttpDataType} from "../../../utils/src/gm/enum/HttpDataType";
-import Info from "../../../utils/src/gm/Info";
-import Store from "../../../utils/src/gm/Store";
+import Request from "@utils/gm/Request";
+import {HttpDataType} from "@utils/gm/enum/HttpDataType";
+import Info from "@utils/gm/Info";
+import Store from "@utils/gm/Store";
 import Options from "../Options";
 
 export default class V2ex {

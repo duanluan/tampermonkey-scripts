@@ -1,7 +1,7 @@
-import UrlUtils from '../../utils/src/Url';
-import StoreUtils from '../../utils/src/gm/Store';
-import HttpUtils from '../../utils/src/gm/Request';
-import {HttpDataType} from "../../utils/src/gm/enum/HttpDataType";
+import UrlUtils from '@utils/Url';
+import StoreUtils from '@utils/gm/Store';
+import HttpUtils from '@utils/gm/Request';
+import {HttpDataType} from "@utils/gm/enum/HttpDataType";
 
 const selectors = {
     // 书名链接

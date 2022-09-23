@@ -1,5 +1,5 @@
-import CommonOptions from "../../utils/src/CommonOptions";
-import Store from "../../utils/src/gm/Store";
+import CommonOptions from "@utils/CommonOptions";
+import Store from "@utils/gm/Store";
 
 export default class Options {
 

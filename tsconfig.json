@@ -4,6 +4,14 @@
       "node_modules/@types",
       // "node_modules/@types/webpack-env",
       "utils/src/types"
-    ]
+    ],
+    // 路径映射：https://www.tslang.cn/docs/handbook/module-resolution.html#path-mapping
+    "baseUrl": ".",
+    // 同时需要在 webpack.config.js 中配置 resolve.alias
+    "paths": {
+      "@utils/*": [
+        "utils/src/*"
+      ]
+    }
   }
 }

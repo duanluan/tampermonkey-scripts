@@ -1,7 +1,7 @@
-import Store from "../../../utils/src/gm/Store";
-import Request from "../../../utils/src/gm/Request";
+import Store from "@utils/gm/Store";
+import Request from "@utils/gm/Request";
 import Options from "../Options";
-import {HttpDataType} from "../../../utils/src/gm/enum/HttpDataType";
+import {HttpDataType} from "@utils/gm/enum/HttpDataType";
 
 export default class Bar {
 

@@ -1,5 +1,5 @@
-import Store from "../../utils/src/gm/Store";
-import MenuCmd from "../../utils/src/gm/MenuCmd";
+import Store from "@utils/gm/Store";
+import MenuCmd from "@utils/gm/MenuCmd";
 
 /**
  * 选项菜单

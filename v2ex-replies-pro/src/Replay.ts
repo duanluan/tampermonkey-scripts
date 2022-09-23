@@ -1,5 +1,5 @@
 import V2ex from "./api/V2ex";
-import Info from "../../utils/src/gm/Info";
+import Info from "@utils/gm/Info";
 
 export default class Replay {
 
