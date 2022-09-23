@@ -1,0 +1,21 @@
+{
+  "name": "v2ex-replies-pro",
+  "private": true,
+  "scripts": {
+    "serve": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "layer-src": "3.5.1",
+    "moment": "2.29.4",
+    "utils": "workspace:*",
+    "winbox": "0.2.6"
+  },
+  "devDependencies": {
+    "@types/winbox": "0.2.1"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}

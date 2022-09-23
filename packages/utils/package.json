@@ -1,0 +1,13 @@
+{
+  "name": "utils",
+  "private": true,
+  "files": [
+    "src"
+  ],
+  "scripts": {},
+  "devDependencies": {},
+  "dependencies": {},
+  "volta": {
+    "extends": "../../package.json"
+  }
+}
