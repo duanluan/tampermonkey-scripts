@@ -4,6 +4,8 @@
 
 点击“@xxx”的链接即可打开右侧“xxx 说了什么？”的弹窗，而且弹窗中的“@xxx”仍可点击。
 
+首次使用请允许弹出窗口。
+
 ![](https://user-images.githubusercontent.com/14957667/191448189-aba183d0-ada0-4f4d-a827-4069053be489.png)
 
 # 资源

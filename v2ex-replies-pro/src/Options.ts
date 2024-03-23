@@ -63,12 +63,12 @@ export default class Options {
         <form>
           <div class="inner">
             <div class="topic_content markdown_body">
-              <p>请在这填写你的 <a href="https://www.v2ex.com/settings/tokens" target="_blank">V2EX Token</a></p>          
+              <!--<p><a href="https://www.v2ex.com/settings/tokens" target="_blank">获取 V2EX Token</a></p>          -->
             </div>
             <div class="sep20"></div>
             <div class="social-settings-form">
               <div>
-                <div>V2EX Token</div>
+                <div><a href="https://www.v2ex.com/settings/tokens" target="_blank">V2EX Token</a>：</div>
                 <input type="password" class="sl" name="v2exToken" value="${JSON.parse(Store.get(this.Keys.v2exToken)).value}">
               </div>
             </div>

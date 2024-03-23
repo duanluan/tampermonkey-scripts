@@ -3,8 +3,8 @@ const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 
 const baseConfig = {
-  // mode: 'development',
-  mode: 'production',
+  mode: 'development',
+  // mode: 'production',
   // 使用 source map：https://webpack.docschina.org/guides/development/#using-source-maps
   devtool: 'inline-source-map',
   module: {
