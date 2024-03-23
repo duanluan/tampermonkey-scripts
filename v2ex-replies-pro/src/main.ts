@@ -8,7 +8,6 @@
 // @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
 // @match        *://*.v2ex.com/*
 // @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js
-// @require      https://cdn.jsdelivr.net/npm/jsstore/dist/jsstore.min.js
 // @require      https://cdn.bootcdn.net/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js
 // @require      https://cdn.bootcdn.net/ajax/libs/moment.js/2.29.4/locale/zh-cn.min.js
 // @require      https://cdn.jsdelivr.net/npm/winbox@0.2.82/dist/winbox.bundle.min.js
