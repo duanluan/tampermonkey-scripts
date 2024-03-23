@@ -32,7 +32,7 @@ export default class Svelte {
 
       // 底部横幅
       Bar.replace({
-        barSelector: this.selectors.bar, isObserveBar: true, hideBarSelector: this.selectors.bar, isObserveHideBar: true, replaceBarCallback: () => {
+        barSelector: this.selectors.bar, isObserveBar: true, replaceBarCallback: () => {
           $(this.selectors.bar).css({'backgroundColor': '#1c1e24', 'paddingTop': '20px'});
         }
       });

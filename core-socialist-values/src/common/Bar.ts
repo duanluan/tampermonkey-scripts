@@ -41,31 +41,21 @@ export default class Bar {
    *   hideBarCallback? Function         // 隐藏后回调
    * }
    */
-  static replace(options: { barSelector: string, isObserveBar: boolean, followUpObserveSelector?: string, hideBarSelector: string, isObserveHideBar: boolean, replaceBarCallback?: Function, jinrishiciCallback?: Function, hideBarCallback?: Function }) {
+  static replace(options: { barSelector: string, isObserveBar: boolean, followUpObserveSelector?: string, hideBarSelector?: string, isObserveHideBar?: boolean, replaceBarCallback?: Function, jinrishiciCallback?: Function, hideBarCallback?: Function }) {
     if (!$(options.barSelector).text().match(/ukraine|乌克兰|black|黑人/i)) {
       return;
     }
+    // 一般隐藏条幅和替换条幅相同
+    if (!options.hideBarSelector) {
+      options.hideBarSelector = options.barSelector;
+    }
+    if (!options.isObserveHideBar) {
+      options.isObserveHideBar = options.isObserveBar;
+    }
 
-    // 如果移除横幅
+    // 隐藏横幅设置勾选
     if (JSON.parse(Store.get(Options.Keys.removeBar)).value) {
-      // 隐藏横幅
-      $(options.hideBarSelector).hide();
-      if (options.isObserveHideBar) {
-        let i = 0;
-        // 隐藏条幅首次加载：监听条幅变化，变化后再次执行
-        const observer = new MutationObserver(() => {
-          $(options.hideBarSelector).hide();
-          // 替换两次后结束监听
-          if (i >= 1) {
-            observer.disconnect();
-          }
-          i++;
-        });
-        observer.observe($(options.hideBarSelector)[0], {childList: true, subtree: true});
-      }
-      if (options.hideBarCallback) {
-        options.hideBarCallback();
-      }
+      this.hideBar(options);
       return;
     }
 
@@ -81,11 +71,37 @@ export default class Bar {
   }
 
   /**
+   * 隐藏条幅
+   * @param options
+   * @private
+   */
+  private static hideBar(options: { hideBarSelector?: string, isObserveHideBar?: boolean, hideBarCallback?: Function }) {
+    // 隐藏横幅
+    $(options.hideBarSelector).hide();
+    if (options.isObserveHideBar) {
+      let i = 0;
+      // 隐藏条幅首次加载：监听条幅变化，变化后再次执行
+      const observer = new MutationObserver(() => {
+        $(options.hideBarSelector).hide();
+        // 替换两次后结束监听
+        if (i >= 1) {
+          observer.disconnect();
+        }
+        i++;
+      });
+      observer.observe($(options.hideBarSelector)[0], {childList: true, subtree: true});
+    }
+    if (options.hideBarCallback) {
+      options.hideBarCallback();
+    }
+  }
+
+  /**
    * 替换条幅监听
    * @param options
    * @private
    */
-  private static replaceObserver(options: { barSelector: string, isObserveBar: boolean, hideBarSelector: string, isObserveHideBar: boolean, followUpObserveSelector?: string, replaceBarCallback?: Function, jinrishiciCallback?: Function }) {
+  private static replaceObserver(options: { barSelector: string, isObserveBar: boolean, followUpObserveSelector?: string, replaceBarCallback?: Function, jinrishiciCallback?: Function }) {
     // 首次替换横幅
     this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback);
     if (!options.isObserveBar) {
@@ -123,6 +139,7 @@ export default class Bar {
       return;
     }
 
+    // 替换为今日诗词
     if (this.storeJinrishiciVal) {
       $(selector).css({'minHeight': '30px', 'lineHeight': '30px'});
       $(selector).html(`
@@ -136,6 +153,8 @@ export default class Bar {
       return;
     }
 
+
+    // 替换为社会主义核心价值观
     $(selector).css({'minHeight': '40px'});
     $(selector).html(`
         <div class="csv_bar">
@@ -144,13 +163,11 @@ export default class Bar {
           </ul>
         </div>`
     );
-
     // 避免出现多个导致样式添加失败
     const $bar = $(this.replaceBarSelector.bar);
     if ($bar.length == 2) {
       $bar.eq(0).remove();
     }
-
     const barUlSelector = this.replaceBarSelector.barUl;
     $(barUlSelector).css({'display': 'inline-block', 'listStyle': 'none', 'margin': 0, 'padding': 0, 'width': 'auto'});
     $(barUlSelector + ' li').css({'color': '#DE2910', 'fontWeight': 'bold', 'fontFamily': 'KaiTi', 'float': 'left', 'paddingRight': '10px', 'min-width': '80px', 'textAlign': 'center'});
