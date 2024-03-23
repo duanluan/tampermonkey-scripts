@@ -29,7 +29,9 @@ const baseConfig = {
       '@utils': path.resolve(__dirname, 'utils/src')
     },
     // 忽略路径后缀
-    extensions: ['.ts']
+    extensions: ['.ts'],
+    // 优先解析相对路径。webpack 从 5.72.1 升级到 5.91.0，glob 从 8.0.3 升级到 10.3.10 后，不开启此配置，会导致 glob.sync 报错“Module not found: Error: Can't resolve ”。
+    preferRelative: true,
   },
   // 保留注释：https://webpack.docschina.org/plugins/terser-webpack-plugin/#preserve-comments
   optimization: {
