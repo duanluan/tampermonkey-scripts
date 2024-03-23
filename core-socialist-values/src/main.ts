@@ -6,7 +6,7 @@
 // @author       duanluan
 // @copyright    2022, duanluan (https://github.com/duanluan)
 // @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
-// @match        *://reactjs.org/*
+// @match        *://react.dev/*
 // @match        *://angular.io/*
 // @match        *://junit.org/*
 // @match        *://codecept.io/*
@@ -29,7 +29,7 @@
 
 // ==OpenUserJS==
 // @author       duanluan
-// @updateURL    https://raw.iqiq.io/duanluan/tampermonkey-scripts/main/core-socialist-values/dist/main.js
+// @updateURL    https://fastly.jsdelivr.net/gh/duanluan/tampermonkey-scripts/main/core-socialist-values/dist/main.js
 // ==/OpenUserJS==
 
 import Junit from "./websites/junit/Junit";
@@ -52,16 +52,16 @@ import Syncthing from "./websites/syncthing/Syncthing";
   Options.registerAll();
   Options.loadInGreasyfork();
 
-  React.replace();
-  Angular.replace();
+  // React.replace();
+  // Angular.replace();
   Junit.replace();
   Codecept.replace();
   Github.replace();
   Nest.replace();
   Ember.replace();
-  Electron.replace();
+  // Electron.replace();
   Jenkins.replace();
-  Svelte.replace();
+  // Svelte.replace();
   SvelteMaterialUi.replace();
   Syncthing.replace();
 })();
