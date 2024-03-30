@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         V2EX 主题回复增强
 // @namespace    http://tampermonkey.net/
-// @version      0.0.5
+// @version      0.1.0
 // @description  增强 V2EX 主题的回复。
 // @author       duanluan
 // @copyright    2022, duanluan (https://github.com/duanluan)
@@ -26,7 +26,7 @@
 // @author duanluan
 // ==/OpenUserJS==
 
-import Replay from "./Replay";
+import Reply from "./Reply";
 import Options from "./Options";
 
 (async () => {
@@ -34,10 +34,9 @@ import Options from "./Options";
 
   // 加载 CSS
   GM_addStyle(GM_getResourceText('css'));
-  // 设置 layer 图标
+  // layer 图标未知原因失效，手动添加样式
   $(document.head).append(`<style>
     .layui-layer-ico{background:url('https://cdn.bootcdn.net/ajax/libs/layer/3.5.1/theme/default/icon.png') no-repeat}
-    /* 原样式不知为何会失效，导致 icon 设置无效 */
     .layui-layer-ico1{background-position:-30px 0}
     .layui-layer-ico2{background-position:-60px 0}
     .layui-layer-ico3{background-position:-90px 0}
@@ -49,5 +48,5 @@ import Options from "./Options";
   Options.registerAll();
   Options.loadInV2ex();
 
-  Replay.run();
+  Reply.run();
 })();

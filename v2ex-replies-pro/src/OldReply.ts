@@ -1,6 +1,6 @@
 import V2ex from "./api/V2ex";
 
-export default class Replay {
+export default class Reply {
 
   private static winbox: any;
 
@@ -201,8 +201,8 @@ export default class Replay {
      */
     const showTaSay = async (connection, replyDivId: string, username: string, created: number) => {
       // 关闭弹窗
-      if (Replay.winbox) {
-        Replay.winbox.close();
+      if (OldReply.winbox) {
+        OldReply.winbox.close();
       }
 
       // 高亮点击 @ 链接的那条回复
@@ -235,7 +235,7 @@ export default class Replay {
         isGeByPrev = created > row.created;
       }
 
-      Replay.winbox = new WinBox({
+      OldReply.winbox = new WinBox({
         class: selector.taSay.substring(1),
         title: username + ' 说了什么？',
         x: localStorage.getItem('ta_say_x') || 'right',
@@ -257,7 +257,7 @@ export default class Replay {
           // 关闭弹窗时取消回复高亮
           $reply.css('border', 'none');
           $reply.css('border-bottom', '1px solid #e2e2e2');
-          Replay.winbox = null;
+          OldReply.winbox = null;
         }
       });
     }

@@ -2,11 +2,11 @@
 
 因为 V2EX 的主题回复之间没有关联，所以想知道发生了什么还得 Ctrl + F 搜索被艾特的人说了什么。
 
-点击“@xxx”的链接即可打开右侧“xxx 说了什么？”的弹窗，而且弹窗中的“@xxx”仍可点击。
+点击“@xxx”的链接即可打开右侧“xxx 在讨论……”的弹窗。
 
-首次使用请允许弹出窗口。
+首次使用请允许弹出窗口并在 [V2EX > 设置 > 脚本设置](https://v2ex.com/settings)中配置 Token。
 
-![](https://user-images.githubusercontent.com/14957667/191448189-aba183d0-ada0-4f4d-a827-4069053be489.png)
+![](https://github.com/duanluan/tampermonkey-scripts/assets/14957667/07748232-4b37-41d7-9afc-a39b4363e270)
 
 # 资源
 
