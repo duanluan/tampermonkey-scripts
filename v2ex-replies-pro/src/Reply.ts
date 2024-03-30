@@ -31,12 +31,14 @@ export default class Reply {
         taSayBody: '.ta-say .wb-body',
         // 讨论弹窗的回复
         taSayRepliesDiv: '.ta-say .wb-body div[id^="r_"]'
-      },
-      $body = $(document.body), $head = $(document.head),
-      $repliesNumber = $(selector.repliesNumber),
-      $atLinks = $(selector.atLinks)
-    // 回复内容匹配器
-    const replyContentUsernameMatcher = /@<a href="\/member\/.+?">(.+?)<\/a>/
+      }
+      , $body = $(document.body), $head = $(document.head)
+      , $repliesNumber = $(selector.repliesNumber)
+      , $atLinks = $(selector.atLinks)
+      // @用户名正则
+      , atLinkReg = '@<a href="\\/member\\/.+?">(.+?)<\\/a>'
+      , atLinkMatcher = new RegExp(atLinkReg)
+      , atLinkAllMatcher = new RegExp(atLinkReg, 'g')
 
     // 根据回复数获取所有回复
     const repliesNumber = $repliesNumber.text().substring(0, $repliesNumber.text().indexOf('条'))
@@ -56,8 +58,8 @@ export default class Reply {
 
       userAndAtUserReplyHtml[username] = []
       for (const reply of replies) {
-        // 回复的用户 != @用户名 && 回复内容中的 @用户名 != @用户名，跳过
-        if (reply.member.username != username && reply.content_rendered.match(replyContentUsernameMatcher)?.[1] != username) {
+        // 回复的用户 != @用户名 && 回复内容中的 @用户名 不包含 @用户名，跳过
+        if (reply.member.username != username && !(reply.content_rendered.match(atLinkAllMatcher)?.some(item => item.match(atLinkMatcher)?.[1] == username))) {
           continue
         }
         const replyId = reply.id

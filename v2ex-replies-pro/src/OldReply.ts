@@ -201,8 +201,8 @@ export default class Reply {
      */
     const showTaSay = async (connection, replyDivId: string, username: string, created: number) => {
       // 关闭弹窗
-      if (OldReply.winbox) {
-        OldReply.winbox.close();
+      if (Reply.winbox) {
+        Reply.winbox.close();
       }
 
       // 高亮点击 @ 链接的那条回复
@@ -235,7 +235,7 @@ export default class Reply {
         isGeByPrev = created > row.created;
       }
 
-      OldReply.winbox = new WinBox({
+      Reply.winbox = new WinBox({
         class: selector.taSay.substring(1),
         title: username + ' 说了什么？',
         x: localStorage.getItem('ta_say_x') || 'right',
@@ -257,7 +257,7 @@ export default class Reply {
           // 关闭弹窗时取消回复高亮
           $reply.css('border', 'none');
           $reply.css('border-bottom', '1px solid #e2e2e2');
-          OldReply.winbox = null;
+          Reply.winbox = null;
         }
       });
     }
