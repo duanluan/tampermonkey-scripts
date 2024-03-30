@@ -6,7 +6,7 @@ const baseConfig = {
   mode: 'development',
   // mode: 'production',
   // 使用 source map：https://webpack.docschina.org/guides/development/#using-source-maps
-  devtool: 'inline-source-map',
+  devtool: 'source-map',
   module: {
     rules: [
       // 转译 TS：https://webpack.docschina.org/loaders/babel-loader、https://www.babeljs.cn/docs/babel-preset-typescript
@@ -66,6 +66,15 @@ module.exports = [
     entry: glob.sync('./core-socialist-values/src/*.ts'),
     output: {
       path: path.resolve(__dirname, 'core-socialist-values/dist'),
+      filename: 'main.js',
+      clean: true
+    }
+  },
+  {
+    ...baseConfig,
+    entry: glob.sync('./github-block/src/*.ts'),
+    output: {
+      path: path.resolve(__dirname, 'github-block/dist'),
       filename: 'main.js',
       clean: true
     }
