@@ -10,6 +10,7 @@
 
 # 资源
 
+* V2EX：[https://v2ex.com/t/881909](https://v2ex.com/t/881909)
 * Github：[https://github.com/duanluan/tampermonkey-scripts/tree/main/v2ex-replies-pro](https://github.com/duanluan/tampermonkey-scripts/tree/main/v2ex-replies-pro)
 * Greasy Fork：[https://greasyfork.org/zh-CN/scripts/451752](https://greasyfork.org/zh-CN/scripts/451752)
 * OpenUserJS：[https://openuserjs.org/scripts/duanluan/V2EX_主题回复增强](https://openuserjs.org/scripts/duanluan/V2EX_%E4%B8%BB%E9%A2%98%E5%9B%9E%E5%A4%8D%E5%A2%9E%E5%BC%BA)
