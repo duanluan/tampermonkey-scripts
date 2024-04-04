@@ -1004,7 +1004,7 @@ Vim_defineProperty(Vim_SvelteMaterialUi, "selectors", {
 
 // ==OpenUserJS==
 // @author       duanluan
-// @updateURL    https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/core-socialist-values/dist/main.js
+// @updateURL    https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/core-socialist-values/dist/core-socialist-values.user.js
 // ==/OpenUserJS==
 
 
@@ -1140,4 +1140,4 @@ var Store = /*#__PURE__*/function () {
 /******/ 	
 /******/ })()
 ;
-//# sourceMappingURL=main.js.map
+//# sourceMappingURL=core-socialist-values.user.js.map

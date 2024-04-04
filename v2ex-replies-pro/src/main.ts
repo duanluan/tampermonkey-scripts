@@ -23,7 +23,8 @@
 // ==/UserScript==
 
 // ==OpenUserJS==
-// @author duanluan
+// @author       duanluan
+// @updateURL    https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/v2ex-replies-pro/dist/core-socialist-values.user.js
 // ==/OpenUserJS==
 
 import Reply from "./Reply";

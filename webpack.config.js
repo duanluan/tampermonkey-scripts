@@ -56,7 +56,7 @@ module.exports = [
     entry: glob.sync('./amazon-kindle-douban-score/src/*.ts'),
     output: {
       path: path.resolve(__dirname, 'amazon-kindle-douban-score/dist'),
-      filename: 'main.js',
+      filename: 'amazon-kindle-douban-score.user.js',
       // 清理 /dist 文件夹：https://webpack.docschina.org/guides/output-management/#cleaning-up-the-dist-folder
       clean: true
     }
@@ -66,16 +66,7 @@ module.exports = [
     entry: glob.sync('./core-socialist-values/src/*.ts'),
     output: {
       path: path.resolve(__dirname, 'core-socialist-values/dist'),
-      filename: 'main.js',
-      clean: true
-    }
-  },
-  {
-    ...baseConfig,
-    entry: glob.sync('./github-block/src/*.ts'),
-    output: {
-      path: path.resolve(__dirname, 'github-block/dist'),
-      filename: 'main.js',
+      filename: 'core-socialist-values.user.js',
       clean: true
     }
   },
@@ -84,7 +75,7 @@ module.exports = [
     entry: glob.sync('./v2ex-replies-pro/src/*.ts'),
     output: {
       path: path.resolve(__dirname, 'v2ex-replies-pro/dist'),
-      filename: 'main.js',
+      filename: 'v2ex-replies-pro.user.js',
       clean: true
     }
   }

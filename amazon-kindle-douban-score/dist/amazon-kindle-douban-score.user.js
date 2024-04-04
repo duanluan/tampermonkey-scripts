@@ -272,4 +272,4 @@ function loadScore() {
 // ==/UserScript==
 /******/ })()
 ;
-//# sourceMappingURL=main.js.map
+//# sourceMappingURL=amazon-kindle-douban-score.user.js.map

@@ -26,7 +26,7 @@
 
 // ==OpenUserJS==
 // @author       duanluan
-// @updateURL    https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/core-socialist-values/dist/main.js
+// @updateURL    https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/core-socialist-values/dist/core-socialist-values.user.js
 // ==/OpenUserJS==
 
 import Junit from "./websites/junit/Junit";
