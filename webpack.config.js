@@ -72,6 +72,15 @@ module.exports = [
   },
   {
     ...baseConfig,
+    entry: glob.sync('./you.com-pro/src/*.ts'),
+    output: {
+      path: path.resolve(__dirname, 'you.com-pro/dist'),
+      filename: 'you.com-pro.user.js',
+      clean: true
+    }
+  },
+  {
+    ...baseConfig,
     entry: glob.sync('./v2ex-replies-pro/src/*.ts'),
     output: {
       path: path.resolve(__dirname, 'v2ex-replies-pro/dist'),
