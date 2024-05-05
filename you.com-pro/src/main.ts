@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         You.com Pro for 0v0
+// @name         You.com Pro
 // @namespace    http://tampermonkey.net/
 // @version      0.0.1
 // @description
