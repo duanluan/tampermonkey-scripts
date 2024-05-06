@@ -97,11 +97,11 @@
       // 用正则 (?<=stytch_session":").*?(?=") 获取 value 中内容
       const stytchSessionByScript = value.match(/(?<=stytch_session":").*?(?=")/);
 
-      // 如果脚本中有 stytch_session，且与 cookie 中的 stytch_session 相同，则不执行脚本
-      if (stytchSessionByScript == document.cookie.match(/stytch_session=([^;]+)/)?.[1]) {
-        layer.msg('脚本中账号与当前账号相同，不执行', {icon: 0});
-        return;
-      }
+      // // 如果脚本中有 stytch_session，且与 cookie 中的 stytch_session 相同，则不执行脚本
+      // if (stytchSessionByScript == document.cookie.match(/stytch_session=([^;]+)/)?.[1]) {
+      //   layer.msg('脚本中账号与当前账号相同，不执行', {icon: 0});
+      //   return;
+      // }
 
       // 执行脚本
       eval(value);
