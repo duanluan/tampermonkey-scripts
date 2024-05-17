@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         You.com Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.0
+// @version      0.1.1
 // @description  You.com Pro by script
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -42,9 +42,10 @@
     table = layui.table
   })
 
-  let firstLoadFlag = true;
   const dataTestid = {
+    userDropdown: 'user-dropdown',
     chatItemMenu: 'chat-item-menu',
+    signOption: 'sign-option',
   }, selectorId = {
     // 对话菜单中的认领按钮
     claimChatBtn: 'pro-claim-chat',
@@ -61,17 +62,18 @@
     claimedChatsTableColToolbar: 'pro-claimed-chats-table-col-toolbar',
   }, selector = {
     // 用户名右侧更多按钮
-    userDropdown: '[data-testid="user-dropdown"]',
+    userDropdown: `[data-testid="${dataTestid.userDropdown}"]`,
     // 注销按钮
-    signOption: '[data-testid="sign-option"]',
+    signOption: `[data-testid="${dataTestid.signOption}"]`,
 
     // 对话菜单
-    chatItemMenu: '[data-testid="chat-item-menu"]',
+    chatItemMenu: `[data-testid="${dataTestid.chatItemMenu}"]`,
     // 认领按钮
     claimChat: '#' + selectorId.claimChatBtn,
 
     // 顶栏
     topBar: '#TOP_BAR',
+
     // 操作按钮
     proOperateBtn: '#' + selectorId.proOperateBtn,
     // 操作面板
@@ -85,11 +87,10 @@
   }, localStorageKey = {
     claimedChats: 'pro-claimedChats',
   }
-  let claimedChatsTable = null
 
+  let firstLoadFlag = true;
   // 用户名右侧更多按钮点击事件
   $(document).on('click', selector.userDropdown, () => {
-
     if (firstLoadFlag) {
       setTimeout(() => {
         // 隐藏注销按钮
@@ -165,6 +166,9 @@
     loadMyChat()
   }
 
+  // 已认领对话表格
+  let claimedChatsTable = null
+
   function loadMyChat(addChat: { chatId, chatTitle, dateUpdated } = null) {
     if (addChat) {
       let isReplace = false
@@ -178,18 +182,22 @@
       }
       // 存储已认领对话
       if (!isReplace) {
-        if (claimedChats.length === 0) {
+        const claimedChatsLen = claimedChats.length
+        if (claimedChatsLen === 0) {
           claimedChats.push(addChat)
         } else {
-          // 按照更新时间添加
-          for (const claimedChat of claimedChats) {
-            if (addChat.dateUpdated > claimedChat.dateUpdated) {
-              claimedChats.splice(claimedChats.indexOf(claimedChat), 0, addChat)
-              break
-            } else {
-              claimedChats.push(addChat)
-              break
+          for (let i = 0; i < claimedChats.length; i++) {
+            // 添加对话的更新时间比已认领对话更新时间晚
+            if (addChat.dateUpdated > claimedChats[i].dateUpdated) {
+              // 插入到已认领对话之前，即按照更新时间倒序
+              claimedChats.splice(i, 0, addChat);
+              break;
             }
+          }
+          // 需要认领的对话更新时间最早
+          if (claimedChats.length === claimedChatsLen) {
+            // 添加到最后
+            claimedChats.push(addChat)
           }
         }
       }
@@ -209,14 +217,16 @@
 
   function init() {
     // 顶栏中第一个 div 后添加一个 div
-    $(selector.topBar).children().last().append(`
-      <span>
-        <button class="iLolfv wscSo" id="${selectorId.proOperateBtn}">
+    $(selector.topBar).parent().css('display', 'flex')
+    $(selector.topBar).css('padding-right', '11px')
+    $(selector.topBar).parent().append(`
+      <div class="hjkMwj" style="width: 48px; padding: 0">
+        <button class="iLolfv hNIirp" id="${selectorId.proOperateBtn}">
           <div class="button-children" data-relingo-block="true">
             <svg t="1715405944514" class="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="1.125rem" height="1.125rem"><path d="M881.12 275.23l40.35-65.38L732.41 93.22c-1.09-0.8-2.21-1.58-3.38-2.3L685.48 64 432.25 474.15a249.47 249.47 0 0 0-292.62 105.19c-72.19 117.32-35.82 270.94 81.31 343.44a249.59 249.59 0 0 0 299.48-396.59L625.48 356l151 93.23 40.35-65.33-151-93.23 66.3-107.39z m-403.85 512.6a147 147 0 1 1 18-111.21 146.5 146.5 0 0 1-18 111.21z" fill="#141414"></path></svg>
           </div>
         </button>
-      </span>
+      </div>
     `)
 
     const claimedChatsTableId = selectorId.claimedChatsTable
