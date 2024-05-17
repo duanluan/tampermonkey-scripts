@@ -339,7 +339,7 @@
 
   function reloadClaimedChatsTable() {
     // 重新加载已认领对话表格
-    claimedChatsTable.reload()
+    claimedChatsTable.reloadData({data: claimedChats})
     setClaimedChatsTableStyle()
   }
 

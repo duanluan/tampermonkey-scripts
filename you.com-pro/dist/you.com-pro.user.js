@@ -6,7 +6,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // ==UserScript==
 // @name         You.com Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.1
+// @version      0.1.2
 // @description  You.com Pro by script
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -27,6 +27,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 (function () {
   'use strict';
+
+  if (location.href.indexOf('you.com/search') === -1 && location.href.indexOf('you.com/?chatMode=') === -1) {
+    return;
+  }
 
   // 加载 CSS
   GM_addStyle(GM_getResourceText('css'));
@@ -120,6 +124,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     try {
       for (_iterator.s(); !(_step = _iterator.n()).done;) {
         var mutation = _step.value;
+        // 如果打开对话菜单
         if (mutation.addedNodes.length > 0 && $(mutation.addedNodes[0]).attr('data-testid') === dataTestid.chatItemMenu) {
           // 菜单添加按钮
           $(selector.chatItemMenu).prepend("\n          <button id=\"".concat(selectorId.claimChatBtn, "\" class=\"sc-cdc40633-5 koipfB\">\n            <svg width=\"0.875rem\" height=\"0.875rem\" viewBox=\"0 0 1024 1024\" xmlns=\"http://www.w3.org/2000/svg\"><path stroke=\"#141414\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" d=\"M692.288 674.432a223.168 223.168 0 0 1 103.936-25.408h0.128c3.84 0 5.632-4.48 2.816-6.976a476.16 476.16 0 0 0-132.416-81.92c-0.512-0.32-1.024-0.448-1.536-0.64 79.296-56.192 130.88-147.52 130.88-250.56C796.096 138.304 654.656 0 480.128 0 305.6 0 164.288 138.24 164.288 308.928c0 103.04 51.584 194.368 131.008 250.56-0.512 0.192-1.024 0.32-1.536 0.64a476.48 476.48 0 0 0-254.976 249.216 455.808 455.808 0 0 0-37.504 172.032c-0.128 5.632 4.48 10.24 10.24 10.24h76.416a10.176 10.176 0 0 0 10.24-9.728 367.36 367.36 0 0 1 111.808-254.528 383.744 383.744 0 0 1 270.272-109.44c72.384 0 141.824 19.52 201.728 56.128 3.2 1.92 7.04 2.112 10.304 0.384zM480.256 523.2a220.544 220.544 0 0 1-155.008-62.72 210.688 210.688 0 0 1 0-303.04 220.096 220.096 0 0 1 155.008-62.72c58.624 0 113.472 22.272 155.008 62.72a210.688 210.688 0 0 1 0 302.976 220.544 220.544 0 0 1-155.008 62.784z m151.808 441.856c0 7.936-9.088 12.352-15.168 7.488l-165.312-133.12a9.6 9.6 0 0 1 0-14.912l165.312-133.056c6.08-4.992 15.168-0.448 15.168 7.488v90.24h365.824c5.12 0 9.28 4.352 9.28 9.6v66.496a9.472 9.472 0 0 1-9.28 9.472H632.064v90.24z\"></path></svg>\n            \u8BA4\u9886\n          </button>\n        "));
@@ -229,10 +234,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     }
   }, 100);
   function init() {
+    // 操作按钮已存在不添加
+    if ($(selector.proOperateBtn).length !== 0) {
+      return;
+    }
+
     // 顶栏中第一个 div 后添加一个 div
     $(selector.topBar).parent().css('display', 'flex');
     $(selector.topBar).css('padding-right', '11px');
-    $(selector.topBar).parent().append("\n      <div class=\"hjkMwj\" style=\"width: 48px; padding: 0\">\n        <button class=\"iLolfv hNIirp\" id=\"".concat(selectorId.proOperateBtn, "\">\n          <div class=\"button-children\" data-relingo-block=\"true\">\n            <svg t=\"1715405944514\" class=\"icon\" viewBox=\"0 0 1024 1024\" xmlns=\"http://www.w3.org/2000/svg\" width=\"1.125rem\" height=\"1.125rem\"><path d=\"M881.12 275.23l40.35-65.38L732.41 93.22c-1.09-0.8-2.21-1.58-3.38-2.3L685.48 64 432.25 474.15a249.47 249.47 0 0 0-292.62 105.19c-72.19 117.32-35.82 270.94 81.31 343.44a249.59 249.59 0 0 0 299.48-396.59L625.48 356l151 93.23 40.35-65.33-151-93.23 66.3-107.39z m-403.85 512.6a147 147 0 1 1 18-111.21 146.5 146.5 0 0 1-18 111.21z\" fill=\"#141414\"></path></svg>\n          </div>\n        </button>\n      </div>\n    "));
+    $(selector.topBar).parent().append("\n      <div style=\"width: 48px; padding: 0; display: flex; align-items: center\">\n        <button class=\"iLolfv hNIirp\" id=\"".concat(selectorId.proOperateBtn, "\">\n          <div class=\"button-children\" data-relingo-block=\"true\">\n            <svg t=\"1715405944514\" class=\"icon\" viewBox=\"0 0 1024 1024\" xmlns=\"http://www.w3.org/2000/svg\" width=\"1.125rem\" height=\"1.125rem\"><path d=\"M881.12 275.23l40.35-65.38L732.41 93.22c-1.09-0.8-2.21-1.58-3.38-2.3L685.48 64 432.25 474.15a249.47 249.47 0 0 0-292.62 105.19c-72.19 117.32-35.82 270.94 81.31 343.44a249.59 249.59 0 0 0 299.48-396.59L625.48 356l151 93.23 40.35-65.33-151-93.23 66.3-107.39z m-403.85 512.6a147 147 0 1 1 18-111.21 146.5 146.5 0 0 1-18 111.21z\" fill=\"#141414\"></path></svg>\n          </div>\n        </button>\n      </div>\n    "));
+    $(selector.proOperatePanel).remove();
     var claimedChatsTableId = selectorId.claimedChatsTable;
     var $proOperateBtn = $(selector.proOperateBtn),
       proOperatePanelTop = $proOperateBtn.offset().top + $proOperateBtn.outerHeight();
@@ -333,9 +344,35 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   }
   function reloadClaimedChatsTable() {
     // 重新加载已认领对话表格
-    claimedChatsTable.reload();
+    claimedChatsTable.reloadData({
+      data: claimedChats
+    });
     setClaimedChatsTableStyle();
   }
+
+  // 监听 history 的 pushState：https://segmentfault.com/a/1190000017560688#item-4
+  var _wr = function _wr(type) {
+    var orig = history[type];
+    return function () {
+      var rv = orig.apply(this, arguments);
+      var e = new Event(type);
+      // @ts-ignore
+      e.arguments = arguments;
+      window.dispatchEvent(e);
+      return rv;
+    };
+  };
+  history.pushState = _wr('pushState');
+  // 单页面刷新时
+  window.addEventListener('pushState', function (e) {
+    // 等待页面重新加载后
+    var interval = setInterval(function () {
+      if ($(selector.topBar).length !== 0) {
+        init();
+        clearInterval(interval);
+      }
+    }, 100);
+  });
 })();
 /******/ })()
 ;
