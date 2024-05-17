@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         You.com Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.1
+// @version      0.1.2
 // @description  You.com Pro by script
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -23,6 +23,10 @@
 
 (() => {
   'use strict'
+
+  if (location.href.indexOf('you.com/search') === -1 && location.href.indexOf('you.com/?chatMode=') === -1) {
+    return
+  }
 
   // 加载 CSS
   GM_addStyle(GM_getResourceText('css'))
@@ -121,6 +125,7 @@
   // 监听出现对话菜单元素时
   const observer = new MutationObserver((mutationsList) => {
     for (const mutation of mutationsList) {
+      // 如果打开对话菜单
       if (mutation.addedNodes.length > 0 && $(mutation.addedNodes[0]).attr('data-testid') === dataTestid.chatItemMenu) {
         // 菜单添加按钮
         $(selector.chatItemMenu).prepend(`
@@ -216,6 +221,11 @@
   }, 100)
 
   function init() {
+    // 操作按钮已存在不添加
+    if ($(selector.proOperateBtn).length !== 0) {
+      return
+    }
+
     // 顶栏中第一个 div 后添加一个 div
     $(selector.topBar).parent().css('display', 'flex')
     $(selector.topBar).css('padding-right', '11px')
@@ -229,6 +239,7 @@
       </div>
     `)
 
+    $(selector.proOperatePanel).remove()
     const claimedChatsTableId = selectorId.claimedChatsTable
     const $proOperateBtn = $(selector.proOperateBtn),
       proOperatePanelTop = $proOperateBtn.offset().top + $proOperateBtn.outerHeight()
@@ -331,4 +342,28 @@
     claimedChatsTable.reload()
     setClaimedChatsTableStyle()
   }
+
+  // 监听 history 的 pushState：https://segmentfault.com/a/1190000017560688#item-4
+  var _wr = function (type) {
+    var orig = history[type];
+    return function () {
+      var rv = orig.apply(this, arguments);
+      var e = new Event(type);
+      // @ts-ignore
+      e.arguments = arguments;
+      window.dispatchEvent(e);
+      return rv;
+    };
+  };
+  history.pushState = _wr('pushState');
+  // 单页面刷新时
+  window.addEventListener('pushState', function (e) {
+    // 等待页面重新加载后
+    const interval = setInterval(() => {
+      if ($(selector.topBar).length !== 0) {
+        init()
+        clearInterval(interval)
+      }
+    }, 100)
+  });
 })()
