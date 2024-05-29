@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         You.com Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.2
+// @version      0.1.3
 // @description  You.com Pro by script
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -226,12 +226,12 @@
       return
     }
 
-    // 顶栏中第一个 div 后添加一个 div
+    // 顶栏后添加操作按钮
     $(selector.topBar).parent().css('display', 'flex')
     $(selector.topBar).css('padding-right', '11px')
     $(selector.topBar).parent().append(`
       <div style="width: 48px; padding: 0; display: flex; align-items: center">
-        <button class="iLolfv hNIirp" id="${selectorId.proOperateBtn}">
+        <button class="iLolfv" id="${selectorId.proOperateBtn}">
           <div class="button-children" data-relingo-block="true">
             <svg t="1715405944514" class="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" width="1.125rem" height="1.125rem"><path d="M881.12 275.23l40.35-65.38L732.41 93.22c-1.09-0.8-2.21-1.58-3.38-2.3L685.48 64 432.25 474.15a249.47 249.47 0 0 0-292.62 105.19c-72.19 117.32-35.82 270.94 81.31 343.44a249.59 249.59 0 0 0 299.48-396.59L625.48 356l151 93.23 40.35-65.33-151-93.23 66.3-107.39z m-403.85 512.6a147 147 0 1 1 18-111.21 146.5 146.5 0 0 1-18 111.21z" fill="#141414"></path></svg>
           </div>
@@ -239,10 +239,21 @@
       </div>
     `)
 
+    const $proOperateBtn = $(selector.proOperateBtn)
+    // 操作按钮样式
+    $proOperateBtn.css({
+      'border': '1px solid rgb(229, 229, 229)',
+      'background': 'transparent',
+      'height': 'calc(2.125rem)',
+      'width': 'calc(2.125rem)',
+      'border-radius': '0.5rem',
+      'padding': '0.5rem'
+    })
+
+    // 操作面板
     $(selector.proOperatePanel).remove()
     const claimedChatsTableId = selectorId.claimedChatsTable
-    const $proOperateBtn = $(selector.proOperateBtn),
-      proOperatePanelTop = $proOperateBtn.offset().top + $proOperateBtn.outerHeight()
+    const proOperatePanelTop = $proOperateBtn.offset().top + $proOperateBtn.outerHeight()
     $(document.body).append(`
       <div class="layui-panel" id="${selectorId.proOperatePanel}" style="display: none; background: #eeeef1; padding: 10px; position: absolute; z-index: 99999; right: 0; top:${proOperatePanelTop + 10}px; width: 300px;">
         <script type="text/html" id="${selectorId.claimedChatsTableToolbar}">
