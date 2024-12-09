@@ -351,7 +351,7 @@ _defineProperty(Junit, "selectors", {
   junitLogo: 'img[src="/junit5/assets/img/junit5-logo.png"]',
   junitFavicon: 'link[rel="icon"]'
 });
-_defineProperty(Junit, "junitLogoUrl", 'https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/core-socialist-values/src/junit/imgs/junit5-logo.png');
+_defineProperty(Junit, "junitLogoUrl", 'https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/core-socialist-values/src/websites/junit/imgs/junit5-logo.png');
 
 // EXTERNAL MODULE: ./utils/src/gm/Store.ts
 var Store = __webpack_require__(915);
@@ -979,7 +979,7 @@ Vim_defineProperty(Vim_SvelteMaterialUi, "selectors", {
 // ==UserScript==
 // @name         技术远离政治
 // @namespace    http://tampermonkey.net/
-// @version      1.4.0
+// @version      1.4.1
 // @description  移除政治相关条幅或替换为社会主义核心价值观、今日诗词，替换政治相关 Logo 为原版 Logo，去除政治相关通知，让技术远离政治。
 // @author       duanluan
 // @copyright    2022, duanluan (https://github.com/duanluan)

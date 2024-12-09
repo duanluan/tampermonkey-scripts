@@ -6,7 +6,7 @@ export default class Junit {
     junitFavicon: 'link[rel="icon"]',
   }
 
-  private static junitLogoUrl = 'https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/core-socialist-values/src/junit/imgs/junit5-logo.png'
+  private static junitLogoUrl = 'https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/core-socialist-values/src/websites/junit/imgs/junit5-logo.png'
 
   static replace() {
     if (location.href === 'https://junit.org/junit5/') {
