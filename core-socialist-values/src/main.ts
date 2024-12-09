@@ -16,7 +16,7 @@
 // @match        *://syncthing.net/*
 // @match        *://www.vim.org/*
 // @match        *://greasyfork.org/*
-// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.slim.min.js
+// @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand

@@ -864,12 +864,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 // @copyright    2022, duanluan (https://github.com/duanluan)
 // @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
 // @match        *://*.v2ex.com/*
-// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js
-// @require      https://cdn.bootcdn.net/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js
-// @require      https://cdn.bootcdn.net/ajax/libs/moment.js/2.29.4/locale/zh-cn.min.js
+// @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
+// @require      https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js
+// @require      https://cdn.jsdelivr.net/npm/moment@2.30.1/locale/zh-cn.js
 // @require      https://cdn.jsdelivr.net/npm/winbox@0.2.82/dist/winbox.bundle.min.js
-// @resource css https://cdn.bootcdn.net/ajax/libs/layer/3.5.1/theme/default/layer.min.css
-// @require      https://cdn.bootcdn.net/ajax/libs/layer/3.5.1/layer.min.js
+// @resource css https://cdn.jsdelivr.net/npm/layer-src@3.5.1/src/theme/default/layer.min.css
+// @require      https://cdn.jsdelivr.net/npm/layer-src@3.5.1/src/layer.min.js
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -895,7 +895,7 @@ _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee() {
       case 0:
         GM_addStyle(GM_getResourceText('css'));
         // layer 图标未知原因失效，手动添加样式
-        $(document.head).append("<style>\n    .layui-layer-ico{background:url('https://cdn.bootcdn.net/ajax/libs/layer/3.5.1/theme/default/icon.png') no-repeat}\n    .layui-layer-ico1{background-position:-30px 0}\n    .layui-layer-ico2{background-position:-60px 0}\n    .layui-layer-ico3{background-position:-90px 0}\n    .layui-layer-ico4{background-position:-120px 0}\n    .layui-layer-ico5{background-position:-150px 0}\n    .layui-layer-ico6{background-position:-180px 0}\n  </style>");
+        $(document.head).append("<style>\n    .layui-layer-ico{background:url('https://cdn.jsdelivr.net/npm/layer-src@3.5.1/dist/theme/default/icon.png') no-repeat}\n    .layui-layer-ico1{background-position:-30px 0}\n    .layui-layer-ico2{background-position:-60px 0}\n    .layui-layer-ico3{background-position:-90px 0}\n    .layui-layer-ico4{background-position:-120px 0}\n    .layui-layer-ico5{background-position:-150px 0}\n    .layui-layer-ico6{background-position:-180px 0}\n  </style>");
         _Options__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .A.registerAll();
         _Options__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .A.loadInV2ex();
         _Reply__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.run();

@@ -7,7 +7,7 @@
 // @copyright    2024, duanluan (https://github.com/duanluan)
 // @license      Apache-2.0 https://www.apache.org/licenses/LICENSE-2.0.txt
 // @match        *://*.you.com/*
-// @require      https://cdn.bootcdn.net/ajax/libs/jquery/3.7.1/jquery.min.js
+// @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
 // @resource css https://cdn.jsdelivr.net/npm/layui-tampermonkey@2.9.9-rc.3/css/layui.css
 // @require      https://cdn.jsdelivr.net/npm/layui-tampermonkey@2.9.9-rc.3/layui.js
 // @grant        GM_addStyle
@@ -32,7 +32,7 @@
   GM_addStyle(GM_getResourceText('css'))
   // layer 图标未知原因失效，手动添加样式
   $(document.head).append(`<style>
-    .layui-layer-ico{background:url('https://cdn.bootcdn.net/ajax/libs/layer/3.5.1/theme/default/icon.png') no-repeat}
+    .layui-layer-ico{background:url('https://cdn.jsdelivr.net/npm/layer-src@3.5.1/dist/theme/default/icon.png') no-repeat}
     .layui-layer-ico1{background-position:-30px 0}
     .layui-layer-ico2{background-position:-60px 0}
     .layui-layer-ico3{background-position:-90px 0}

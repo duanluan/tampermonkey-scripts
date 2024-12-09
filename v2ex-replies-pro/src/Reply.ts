@@ -102,7 +102,7 @@ export default class Reply {
       $atLink.on('click', (e) => {
         e.preventDefault()
 
-        // 如果已经打开了讨论弹窗，跳过
+        // TODO 如果已经打开了讨论弹窗，跳过
 
 
         // 移除之前加粗的回复的边框
