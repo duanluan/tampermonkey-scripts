@@ -28,3 +28,4 @@
 * [Svelte Material UI](https://sveltematerialui.com/)：条幅（隐藏）
 * [Syncthing](https://syncthing.net/)：条幅
 * [Vim](https://www.vim.org/)：条幅背景
+* [Pandoc](https://pandoc.org/)：头部按钮
