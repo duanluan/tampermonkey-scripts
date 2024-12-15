@@ -1,6 +1,6 @@
 const glob = require('glob');
 const path = require("path");
-const TerserPlugin = require("terser-webpack-plugin");
+// const TerserPlugin = require("terser-webpack-plugin");
 
 const baseConfig = {
   mode: 'development',
