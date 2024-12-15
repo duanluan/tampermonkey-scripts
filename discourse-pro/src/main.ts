@@ -5,16 +5,12 @@
 // @description  增强 Discourse 论坛。
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
-// @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
+// @license      Apache-2.0 https://www.apache.org/licenses/LICENSE-2.0.txt
 // @homepage     https://greasyfork.org/zh-CN/scripts/520817
 // @supportURL   https://github.com/duanluan/tampermonkey-scripts/issues
 // @match        *://linux.do/*
 // @match        *://meta.appinn.net/*
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
-// @resource css https://cdn.jsdelivr.net/npm/layer-src@3.5.1/src/theme/default/layer.min.css
-// @require      https://cdn.jsdelivr.net/npm/layer-src@3.5.1/src/layer.min.js
-// @grant        GM_addStyle
-// @grant        GM_getResourceText
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
@@ -24,9 +20,9 @@
 // @updateURL    https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/discourse-pro/dist/discourse-pro.user.js
 // ==/OpenUserJS==
 
-import Store from "@utils/gm/Store";
+import Store from "@utils/gm/Store"
 
-const host = location.host;
+const host = location.host
 
 const selector = {
   // 侧边栏和主内容的父容器
@@ -60,77 +56,64 @@ const loadDragBar = () => {
   }
 
   // 拖拽条
-  const $dragBar = $sidebarWrapper.find('.drag-bar');
+  const $dragBar = $sidebarWrapper.find('.drag-bar')
   // 是否正在拖拽
-  let isDragging = false;
+  let isDragging = false
   // 鼠标按下时的 clientX
-  let startClientX = 0;
+  let startClientX = 0
   // 鼠标按下时的侧边栏宽度
-  let startSidebarWidth = 0;
+  let startSidebarWidth = 0
   // 侧边栏宽度范围
-  const minSidebarWidth = 180, maxSidebarWidth = 500;
-  let newSidebarWidth = 0;
+  const minSidebarWidth = 180, maxSidebarWidth = 500
+  let newSidebarWidth = 0
 
   // 鼠标按下事件
   $dragBar.on('mousedown', (e) => {
-    startClientX = e.clientX;
-    startSidebarWidth = $sidebarWrapper.width();
-    isDragging = true;
+    startClientX = e.clientX
+    startSidebarWidth = $sidebarWrapper.width()
+    isDragging = true
     // 改变鼠标样式
-    document.body.style.cursor = 'ew-resize';
+    document.body.style.cursor = 'ew-resize'
     // 设置拖拽条背景色
-    $dragBar.css('background-color', '#e6e6e6');
+    $dragBar.css('background-color', '#e6e6e6')
     // 防止文本被选中
-    e.preventDefault();
-  });
+    e.preventDefault()
+  })
 
   // 鼠标移动事件
   $(document).on('mousemove', (e) => {
-    if (!isDragging) return;
+    if (!isDragging) return
 
     // 计算新的宽度
-    const deltaX = e.clientX - startClientX;
-    newSidebarWidth = startSidebarWidth + deltaX;
+    const deltaX = e.clientX - startClientX
+    newSidebarWidth = startSidebarWidth + deltaX
 
     if (newSidebarWidth >= minSidebarWidth && newSidebarWidth <= maxSidebarWidth) {
-      $mainOutletWrapper.css('grid-template-columns', `${newSidebarWidth}px minmax(0, 1fr)`);
+      $mainOutletWrapper.css('grid-template-columns', `${newSidebarWidth}px minmax(0, 1fr)`)
     }
-  });
+  })
 
   // 鼠标松开事件
   $(document).on('mouseup', () => {
     if (!isDragging) return
 
-    isDragging = false;
+    isDragging = false
     // 恢复鼠标样式
-    document.body.style.cursor = 'default';
+    document.body.style.cursor = 'default'
     // 恢复拖拽条背景色
-    $dragBar.css('background-color', 'transparent');
+    $dragBar.css('background-color', 'transparent')
     // 记忆侧边栏宽度
-    Store.set(storeKeys.sidebarWidth + host, newSidebarWidth);
-  });
+    Store.set(storeKeys.sidebarWidth + host, newSidebarWidth)
+  })
 }
 
 (() => {
-  'use strict';
+  'use strict'
 
   // 判断是否为 Discourse
-  const generator = $('meta[name="generator"]')?.attr('content');
+  const generator = $('meta[name="generator"]')?.attr('content')
   if (!generator || generator.indexOf('Discourse') == -1)
-    return;
-
-  // 加载 CSS
-  GM_addStyle(GM_getResourceText('css'));
-  // layer 图标未知原因失效，手动添加样式
-  $(document.head).append(`<style>
-    .layui-layer-ico{background:url('https://cdn.jsdelivr.net/npm/layer-src@3.5.1/dist/theme/default/icon.png') no-repeat}
-    .layui-layer-ico1{background-position:-30px 0}
-    .layui-layer-ico2{background-position:-60px 0}
-    .layui-layer-ico3{background-position:-90px 0}
-    .layui-layer-ico4{background-position:-120px 0}
-    .layui-layer-ico5{background-position:-150px 0}
-    .layui-layer-ico6{background-position:-180px 0}
-  </style>`);
+    return
 
   loadDragBar()
-})();
+})()
