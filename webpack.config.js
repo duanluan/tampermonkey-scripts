@@ -87,5 +87,14 @@ module.exports = [
       filename: 'v2ex-replies-pro.user.js',
       clean: true
     }
+  },
+  {
+    ...baseConfig,
+    entry: glob.sync('./discourse-pro/src/*.ts'),
+    output: {
+      path: path.resolve(__dirname, 'discourse-pro/dist'),
+      filename: 'discourse-pro.user.js',
+      clean: true
+    }
   }
 ];
