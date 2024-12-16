@@ -1,6 +1,6 @@
 # 🐵 Tampermonkey Scripts
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-orange.svg?style=for-the-badge&logo=internetarchive)](LICENSE.md)
+[![](https://img.shields.io/hexpm/l/plug?style=for-the-badge&logo=apache)](./LICENSE)
 [![GitHub commits](https://img.shields.io/github/commit-activity/m/duanluan/tampermonkey-scripts?style=for-the-badge&label=Commits&logo=github)](https://github.com/duanluan/tampermonkey-scripts/commits)
 
 | 名称 | 评分 | 直接安装 | 发布页 |
