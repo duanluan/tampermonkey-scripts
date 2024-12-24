@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.1
+// @version      0.1.2
 // @description  增强 Discourse 论坛。
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
