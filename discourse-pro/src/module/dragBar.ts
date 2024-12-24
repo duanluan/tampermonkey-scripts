@@ -1,4 +1,5 @@
 import Store from '@utils/gm/Store'
+import {loadWidescreenModeByTopic} from "./widescreenMode";
 
 interface DragBarOptions {
   mainOutletWrapper: string
@@ -69,6 +70,8 @@ export function loadDragBar(options: DragBarOptions) {
     const deltaX = e.clientX - startClientX
     newSidebarWidth = Math.min(maxSidebarWidth, Math.max(minSidebarWidth, startSidebarWidth + deltaX))
     $mainOutletWrapper.css('grid-template-columns', `${newSidebarWidth}px minmax(0, 1fr)`)
+
+    loadWidescreenModeByTopic(options)
   })
 
   // 鼠标松开事件

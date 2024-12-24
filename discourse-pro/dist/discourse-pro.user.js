@@ -310,7 +310,69 @@ _defineProperty(Options, "options", [{
 
 // EXTERNAL MODULE: ./utils/src/gm/Store.ts
 var Store = __webpack_require__(915);
+;// CONCATENATED MODULE: ./discourse-pro/src/module/widescreenMode.ts
+/**
+ * 加载宽屏模式
+ * @param options
+ */
+function loadWidescreenMode(options) {
+  var headerWrap = options.headerWrap,
+    mainOutletWrapper = options.mainOutletWrapper,
+    mainOutlet = options.mainOutlet;
+  var $headerWrap = $(headerWrap),
+    $mainOutletWrapper = $(mainOutletWrapper),
+    $mainOutlet = $(mainOutlet);
+
+  // 顶部撑满
+  $headerWrap.css('max-width', '100%');
+  // 侧边栏和主内容撑满
+  $mainOutletWrapper.css('max-width', '100%');
+  // 主内容撑满
+  $mainOutlet.css('width', '100%');
+  loadWidescreenModeByTopic(options);
+}
+
+/**
+ * 话题页加载宽屏模式
+ * @param options
+ */
+function loadWidescreenModeByTopic(options) {
+  var postStream = options.postStream,
+    topicAvatar = options.topicAvatar,
+    topicBody = options.topicBody,
+    topicMap = options.topicMap,
+    loadingContainer = options.loadingContainer,
+    topicTimerInfo = options.topicTimerInfo,
+    topicFooterBtns = options.topicFooterBtns,
+    moreTopicsContainer = options.moreTopicsContainer;
+  var $postStream = $(postStream),
+    $topicAvatar = $(topicAvatar),
+    $topicBody = $(topicBody),
+    $topicMap = $(topicMap),
+    $loadingContainer = $(loadingContainer),
+    $topicTimerInfo = $(topicTimerInfo),
+    $topicFooterBtns = $(topicFooterBtns),
+    $moreTopicsContainer = $(moreTopicsContainer);
+  if (location.href.indexOf('/topic/') != -1) {
+    var postStreamWidth = $postStream.width();
+    var topicAvatarWidth = $topicAvatar.width();
+    var topicWidth = postStreamWidth - 45;
+    // 话题内容撑满
+    $topicBody.css('width', topicWidth - topicAvatarWidth + 'px');
+    // 话题主内容后浏览量、链接、回复人等信息撑满
+    $topicMap.css('max-width', topicWidth + 'px');
+    // 最后一个回复后的底边框撑满
+    $loadingContainer.css('width', topicWidth + 'px');
+    $topicTimerInfo.css('max-width', topicWidth + 'px');
+    // 话题底部按钮撑满
+    $topicFooterBtns.css('max-width', topicWidth + 'px');
+    // 更多话题列表撑满
+    $moreTopicsContainer.css('max-width', topicWidth + 'px');
+  }
+}
+
 ;// CONCATENATED MODULE: ./discourse-pro/src/module/dragBar.ts
+
 
 function loadDragBar(options) {
   var mainOutletWrapper = options.mainOutletWrapper,
@@ -370,6 +432,7 @@ function loadDragBar(options) {
     var deltaX = e.clientX - startClientX;
     newSidebarWidth = Math.min(maxSidebarWidth, Math.max(minSidebarWidth, startSidebarWidth + deltaX));
     $mainOutletWrapper.css('grid-template-columns', "".concat(newSidebarWidth, "px minmax(0, 1fr)"));
+    loadWidescreenModeByTopic(options);
   });
 
   // 鼠标松开事件
@@ -390,29 +453,19 @@ function loadDragBar(options) {
     $mainOutletWrapper.css('grid-template-columns', "".concat(sidebarExist ? Store/* default */.A.get(sidebarWidthKey) + 'px' : '0', " minmax(0, 1fr)"));
   });
 }
-;// CONCATENATED MODULE: ./discourse-pro/src/module/widescreenMode.ts
-function loadWidescreenMode(options) {
-  var headerWrap = options.headerWrap,
-    mainOutletWrapper = options.mainOutletWrapper,
-    mainOutlet = options.mainOutlet;
-  var $headerWrap = $(headerWrap),
-    $mainOutletWrapper = $(mainOutletWrapper),
-    $mainOutlet = $(mainOutlet);
-
-  // 顶部撑满
-  $headerWrap.css('max-width', '100%');
-  // 侧边栏和主内容撑满
-  $mainOutletWrapper.css('max-width', '100%');
-  // 主内容撑满
-  $mainOutlet.css('width', '100%');
-}
 // EXTERNAL MODULE: ./discourse-pro/src/Options.ts + 2 modules
 var Options = __webpack_require__(545);
 ;// CONCATENATED MODULE: ./discourse-pro/src/main.ts
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.0
+// @version      0.1.1
 // @description  增强 Discourse 论坛。
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -457,32 +510,39 @@ var Options = __webpack_require__(545);
     sidebarWrapper: '.sidebar-wrapper',
     sidebar: '#d-sidebar',
     // 主内容
-    mainOutlet: '#main-outlet'
+    mainOutlet: '#main-outlet',
+    // 话题内容父容器
+    postStream: '.post-stream',
+    // 话题头像
+    topicAvatar: '.topic-avatar',
+    // 话题内容
+    topicBody: '.topic-body',
+    // 话题主内容后浏览量、链接、回复人等信息
+    topicMap: '.topic-map',
+    // 最后一个回复后的底边框
+    loadingContainer: '.loading-container',
+    topicTimerInfo: '.topic-timer-info',
+    // 话题底部按钮
+    topicFooterBtns: '#topic-footer-buttons',
+    // 更多话题列表
+    moreTopicsContainer: '.more-topics__container'
   };
   var storeKeys = {
     // 侧边栏宽度
     sidebarWidth: 'sidebarWidth_'
   };
 
-  // 加载宽屏模式
-  if (JSON.parse(Store/* default */.A.get(Options/* default */.A.Keys.widescreenMode)).value) {
-    loadWidescreenMode({
-      headerWrap: selector.headerWrap,
-      mainOutletWrapper: selector.mainOutletWrapper,
-      mainOutlet: selector.mainOutlet
-    });
-  }
   // 加载拖拽条
   if (JSON.parse(Store/* default */.A.get(Options/* default */.A.Keys.dragBar)).value) {
-    loadDragBar({
-      mainOutletWrapper: selector.mainOutletWrapper,
-      sidebarWrapper: selector.sidebarWrapper,
-      sidebar: selector.sidebar,
-      headerSidebarToggleBtn: selector.headerSidebarToggleBtn,
+    loadDragBar(_objectSpread(_objectSpread({}, selector), {}, {
       sidebarWidthKey: storeKeys.sidebarWidth + location.host,
       minSidebarWidth: 180,
       maxSidebarWidth: 500
-    });
+    }));
+  }
+  // 加载宽屏模式
+  if (JSON.parse(Store/* default */.A.get(Options/* default */.A.Keys.widescreenMode)).value) {
+    loadWidescreenMode(_objectSpread({}, selector));
   }
 })();
 

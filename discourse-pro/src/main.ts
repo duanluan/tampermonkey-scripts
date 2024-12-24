@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.0
+// @version      0.1.1
 // @description  增强 Discourse 论坛。
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -50,6 +50,22 @@ import Store from "@utils/gm/Store";
     sidebar: '#d-sidebar',
     // 主内容
     mainOutlet: '#main-outlet',
+
+    // 话题内容父容器
+    postStream: '.post-stream',
+    // 话题头像
+    topicAvatar: '.topic-avatar',
+    // 话题内容
+    topicBody: '.topic-body',
+    // 话题主内容后浏览量、链接、回复人等信息
+    topicMap: '.topic-map',
+    // 最后一个回复后的底边框
+    loadingContainer: '.loading-container',
+    topicTimerInfo: '.topic-timer-info',
+    // 话题底部按钮
+    topicFooterBtns: '#topic-footer-buttons',
+    // 更多话题列表
+    moreTopicsContainer: '.more-topics__container',
   }
 
   const storeKeys = {
@@ -57,25 +73,20 @@ import Store from "@utils/gm/Store";
     sidebarWidth: 'sidebarWidth_'
   }
 
-  // 加载宽屏模式
-  if (JSON.parse(Store.get(Options.Keys.widescreenMode)).value) {
-    loadWidescreenMode({
-      headerWrap: selector.headerWrap,
-      mainOutletWrapper: selector.mainOutletWrapper,
-      mainOutlet: selector.mainOutlet
-    })
-  }
   // 加载拖拽条
   if (JSON.parse(Store.get(Options.Keys.dragBar)).value) {
     loadDragBar({
-      mainOutletWrapper: selector.mainOutletWrapper,
-      sidebarWrapper: selector.sidebarWrapper,
-      sidebar: selector.sidebar,
-      headerSidebarToggleBtn: selector.headerSidebarToggleBtn,
+      ...selector,
 
       sidebarWidthKey: storeKeys.sidebarWidth + location.host,
       minSidebarWidth: 180,
       maxSidebarWidth: 500
+    })
+  }
+  // 加载宽屏模式
+  if (JSON.parse(Store.get(Options.Keys.widescreenMode)).value) {
+    loadWidescreenMode({
+      ...selector
     })
   }
 })()
