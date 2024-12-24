@@ -22,7 +22,7 @@ export default class Options {
    * 注册所有选项
    */
   static registerAll() {
-    CommonOptions.registerAll('https://www.v2ex.com/settings', this.options);
+    CommonOptions.registerAll(this.options, 'https://www.v2ex.com/settings');
   }
 
   /**

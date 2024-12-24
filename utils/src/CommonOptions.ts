@@ -6,23 +6,9 @@ import MenuCmd from "@utils/gm/MenuCmd";
  */
 export default class CommonOptions {
 
-  // /**
-  //  * 选项 Key
-  //  */
-  // protected static Keys = {
-  //   // xxx: 'xxx'
-  // }
-  //
-  // /**
-  //  * 选项
-  //  * @private
-  //  */
-  // protected static options = [
-  //   // {label: '', name: this.Keys.xxx, version: 1, value: false, menuCmdId: null},
-  // ];
-
   /**
    * 注册 bool 类型的选项
+   *
    * @param option 选项
    */
   static registerBoolOption(option: any) {
@@ -31,15 +17,14 @@ export default class CommonOptions {
     if (!valIsBool) {
       return;
     }
-    // 注册选项
-    const currentMenuCmdId = MenuCmd.register((val ? '☑️ ' : '🔲 ') + option.label, () => {
-      // 点击值取反
+    // 注册选项和选项点击事件
+    const currentMenuCmdId = MenuCmd.register((val ? '✅ ' : '🔲 ') + option.label, () => {
+      // 点击后取反
       option.value = !option.value;
       Store.set(option.name, JSON.stringify(option));
 
-      // 取消注册
-      MenuCmd.unregister(currentMenuCmdId);
       // 重新注册
+      MenuCmd.unregister(currentMenuCmdId);
       this.registerBoolOption(option);
       // 刷新页面
       window.location.reload();
@@ -52,12 +37,14 @@ export default class CommonOptions {
 
   /**
    * 注册所有选项
-   * @param url 设置页面 URL
-   * @param options
+   *
+   * @param options 选项
+   * @param moreOptionsUrl 更多设置页面 URL
    */
-  static registerAll(url: string, options: any[]) {
+  static registerAll(options: any[], moreOptionsUrl: string) {
+    // 注册“更多设置”选项，点击后打开新页面
     MenuCmd.register('更多设置', () => {
-      window.open(url, '_blank');
+      window.open(moreOptionsUrl, '_blank');
     });
 
     for (const option of options) {
@@ -75,9 +62,13 @@ export default class CommonOptions {
   }
 
   /**
-   * 在页面中加载选项
+   * 在 Greasy Fork 脚本详情页中加载选项
+   *
+   * @param scriptId 脚本 ID
+   * @param loadOptionContentFn 加载选项内容的函数
    */
   static loadInGreasyfork(scriptId: number, loadOptionContentFn: Function) {
+    // 非脚本详情页结束
     if (location.host !== 'greasyfork.org' || location.href.indexOf('/scripts/' + scriptId) == -1) {
       return;
     }
@@ -88,16 +79,14 @@ export default class CommonOptions {
     }
     const $body = $(document.body), $scriptLinks = $(selector.scriptLinks), $scriptContent = $(selector.scriptContent);
 
-    // 添加脚本设置的选项卡
+    // 添加“脚本设置”选项卡和点击事件
     $scriptLinks.children('li:eq(0)').after(`<li><a href="javascript:;" id="script-options">脚本设置</a></li>`)
-    // 脚本设置选项点击事件
     $body.on('click', selector.scriptOptions, () => {
-      // 移除已选中选项的样式
+      // 移除其他已选中选项的样式
       const $currentLi = $scriptLinks.children('li.current');
       $currentLi.html(`<a href="${location.href}">${$currentLi.text()}</a>`);
       $currentLi.removeClass('current');
-
-      // 添加选中选项的样式
+      // 给“脚本设置”选项卡添加选中选项的样式
       const $scriptOptions = $(selector.scriptOptions);
       $scriptOptions.parent().addClass('current');
 

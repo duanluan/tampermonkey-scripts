@@ -35,7 +35,7 @@ export default class Options {
    * 注册所有选项
    */
   static registerAll() {
-    CommonOptions.registerAll('https://greasyfork.org/scripts/' + this.SCRIPT_ID, this.options);
+    CommonOptions.registerAll(this.options, 'https://greasyfork.org/scripts/' + this.SCRIPT_ID);
   }
 
   /**
