@@ -25,7 +25,6 @@ export function loadDragBar(options: DragBarOptions) {
   // 侧边栏是否存在
   let sidebarExist = $sidebar.length > 0
   if (sidebarExist) {
-    debugger
     // 读取存储的侧边栏宽度
     const storeSidebarWidth = Store.get(sidebarWidthKey)
     if (storeSidebarWidth) {
