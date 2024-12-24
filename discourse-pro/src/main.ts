@@ -5,7 +5,7 @@
 // @description  增强 Discourse 论坛。
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
-// @license      Apache-2.0 https://www.apache.org/licenses/LICENSE-2.0.txt
+// @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
 // @homepage     https://greasyfork.org/zh-CN/scripts/520817
 // @supportURL   https://github.com/duanluan/tampermonkey-scripts/issues
 // @match        *://greasyfork.org/*

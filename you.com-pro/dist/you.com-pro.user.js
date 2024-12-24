@@ -10,7 +10,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 // @description  You.com Pro by script
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
-// @license      Apache-2.0 https://www.apache.org/licenses/LICENSE-2.0.txt
+// @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
 // @match        *://*.you.com/*
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
 // @resource css https://cdn.jsdelivr.net/npm/layui-tampermonkey@2.9.9-rc.3/css/layui.css
