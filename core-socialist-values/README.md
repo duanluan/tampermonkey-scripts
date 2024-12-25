@@ -20,7 +20,7 @@
 * [Junit](https://junit.org/junit5/)：Logo
 * [CodeceptJS](https://codecept.io/)：条幅
 * [GitHub](https://github.com/)：通知
-* [NestJS](https://docs.nestjs.com/)：条幅
+* ~~[NestJS](https://docs.nestjs.com/)：条幅~~
 * [Ember](https://emberjs.com/)：条幅
 * ~~[Electron](https://www.electronjs.org/)：条幅~~
 * [Jenkins](https://www.jenkins.io/)：Logo、摘要
@@ -29,3 +29,4 @@
 * [Syncthing](https://syncthing.net/)：条幅
 * [Vim](https://www.vim.org/)：条幅背景
 * [Pandoc](https://pandoc.org/)：头部按钮
+* [Namecheap](https://www.namecheap.com/)：底部条幅
