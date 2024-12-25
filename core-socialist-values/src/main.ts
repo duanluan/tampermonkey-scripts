@@ -33,16 +33,16 @@
 // ==/OpenUserJS==
 
 import Junit from "./websites/junit/Junit";
-import Codecept from "./websites/codecept/Codecept";
-import Github from "./websites/github/Github";
-import Nest from "./websites/nest/Nest";
-import Ember from "./websites/ember/Ember";
-import Jenkins from "./websites/jenkins/Jenkins";
+import Codecept from "./websites/Codecept";
+import Github from "./websites/Github";
+import Nest from "./websites/Nest";
+import Ember from "./websites/Ember";
+import Jenkins from "./websites/Jenkins";
 import Options from "./Options";
-import SvelteMaterialUi from "./websites/sveltematerialui/SvelteMaterialUi";
-import Syncthing from "./websites/syncthing/Syncthing";
-import Vim from "./websites/vim/Vim";
-import Pandoc from "./websites/pandoc/Pandoc";
+import SvelteMaterialUi from "./websites/SvelteMaterialUi";
+import Syncthing from "./websites/Syncthing";
+import Vim from "./websites/Vim";
+import Pandoc from "./websites/Pandoc";
 
 (() => {
   'use strict';

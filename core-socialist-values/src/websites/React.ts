@@ -1,4 +1,4 @@
-import Bar from "../../common/Bar";
+import Bar from "../common/Bar";
 
 export default class React {
 
