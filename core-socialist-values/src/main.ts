@@ -32,36 +32,36 @@
 // @updateURL    https://raw.kkgithub.com/duanluan/tampermonkey-scripts/main/core-socialist-values/dist/core-socialist-values.user.js
 // ==/OpenUserJS==
 
-import Junit from "./websites/junit/Junit";
-import Codecept from "./websites/Codecept";
-import Github from "./websites/Github";
-import Nest from "./websites/Nest";
-import Ember from "./websites/Ember";
-import Jenkins from "./websites/Jenkins";
-import Options from "./Options";
-import SvelteMaterialUi from "./websites/SvelteMaterialUi";
-import Syncthing from "./websites/Syncthing";
-import Vim from "./websites/Vim";
-import Pandoc from "./websites/Pandoc";
+import Junit from "./websites/junit/Junit"
+import Codecept from "./websites/Codecept"
+import Github from "./websites/Github"
+import Nest from "./websites/Nest"
+import Ember from "./websites/Ember"
+import Jenkins from "./websites/Jenkins"
+import Options from "./Options"
+import SvelteMaterialUi from "./websites/SvelteMaterialUi"
+import Syncthing from "./websites/Syncthing"
+import Vim from "./websites/Vim"
+import Pandoc from "./websites/Pandoc"
 
 (() => {
-  'use strict';
+  'use strict'
 
-  Options.registerAll();
-  Options.loadInGreasyfork();
+  Options.registerAll()
+  Options.loadInGreasyfork()
 
-  // React.replace();
-  // Angular.replace();
-  Junit.replace();
-  Codecept.replace();
-  Github.replace();
-  Nest.replace();
-  Ember.replace();
-  // Electron.replace();
-  Jenkins.replace();
-  // Svelte.replace();
-  SvelteMaterialUi.replace();
-  Syncthing.replace();
-  Vim.replace();
-  Pandoc.replace();
-})();
+  // React.replace()
+  // Angular.replace()
+  Junit.replace()
+  Codecept.replace()
+  Github.replace()
+  Nest.replace()
+  Ember.replace()
+  // Electron.replace()
+  Jenkins.replace()
+  // Svelte.replace()
+  SvelteMaterialUi.replace()
+  Syncthing.replace()
+  Vim.replace()
+  Pandoc.replace()
+})()

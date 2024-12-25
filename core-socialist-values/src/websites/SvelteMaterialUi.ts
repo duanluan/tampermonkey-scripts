@@ -6,7 +6,8 @@ export default class SvelteMaterialUi {
 
   static replace() {
     if (location.host === 'sveltematerialui.com') {
-      $(this.selectors.bar).attr('class', '');
+      return
     }
+    $(this.selectors.bar).attr('class', '')
   }
 }

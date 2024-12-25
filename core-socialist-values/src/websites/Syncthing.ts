@@ -1,4 +1,4 @@
-import Bar from "../common/Bar";
+import Bar from "../common/Bar"
 
 export default class Syncthing {
 
@@ -8,11 +8,12 @@ export default class Syncthing {
 
   static replace() {
     if (location.host === 'syncthing.net') {
-      Bar.replace({
-        barSelector: this.selectors.bar, isObserveBar: false, replaceBarCallback: () => {
-          $(this.selectors.bar).css('textAlign', 'center');
-        }
-      });
+      return
     }
+    Bar.replace({
+      barSelector: this.selectors.bar, isObserveBar: false, replaceBarCallback: () => {
+        $(this.selectors.bar).css('textAlign', 'center')
+      }
+    })
   }
 }

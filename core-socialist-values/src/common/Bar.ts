@@ -1,7 +1,7 @@
-import Store from "@utils/gm/Store";
-import Request from "@utils/gm/Request";
-import Options from "../Options";
-import {HttpDataType} from "@utils/gm/enum/HttpDataType";
+import Store from "@utils/gm/Store"
+import Request from "@utils/gm/Request"
+import Options from "../Options"
+import {HttpDataType} from "@utils/gm/enum/HttpDataType"
 
 export default class Bar {
 
@@ -11,22 +11,22 @@ export default class Bar {
   static replaceBarSelector = {
     bar: '.csv_bar',
     barUl: '.csv_bar .csv_bar_ul',
-  };
+  }
   /**
    * 替换后的条幅去除空格换行后的文本
    * @private
    */
-  private static txt = '富强民主文明和谐自由平等公正法治爱国敬业诚信友善ProsperityDemocracyCivilityHarmonyFreedomEqualityJusticeRuleoflawPatriotismDedicationIntegrityFriendship';
+  private static txt = '富强民主文明和谐自由平等公正法治爱国敬业诚信友善ProsperityDemocracyCivilityHarmonyFreedomEqualityJusticeRuleoflawPatriotismDedicationIntegrityFriendship'
   /**
    * 是否启用今日诗词
    * @private
    */
-  private static storeJinrishiciVal = false;
+  private static storeJinrishiciVal = false
   /**
    * 今日诗词内容
    * @private
    */
-  private static jinrishiciContent = '';
+  private static jinrishiciContent = ''
 
   /**
    * 替换条幅
@@ -43,30 +43,30 @@ export default class Bar {
    */
   static replace(options: { barSelector: string, isObserveBar: boolean, followUpObserveSelector?: string, hideBarSelector?: string, isObserveHideBar?: boolean, replaceBarCallback?: Function, jinrishiciCallback?: Function, hideBarCallback?: Function }) {
     if (!$(options.barSelector).text().match(/ukraine|乌克兰|black|黑人/i)) {
-      return;
+      return
     }
     // 一般隐藏条幅和替换条幅相同
     if (!options.hideBarSelector) {
-      options.hideBarSelector = options.barSelector;
+      options.hideBarSelector = options.barSelector
     }
     if (!options.isObserveHideBar) {
-      options.isObserveHideBar = options.isObserveBar;
+      options.isObserveHideBar = options.isObserveBar
     }
 
     // 隐藏横幅设置勾选
     if (JSON.parse(Store.get(Options.Keys.removeBar)).value) {
-      this.hideBar(options);
-      return;
+      this.hideBar(options)
+      return
     }
 
-    this.storeJinrishiciVal = JSON.parse(Store.get(Options.Keys.jinrishici)).value;
+    this.storeJinrishiciVal = JSON.parse(Store.get(Options.Keys.jinrishici)).value
     if (this.storeJinrishiciVal) {
       this.getJinrishici().then((data: any) => {
-        this.jinrishiciContent = data;
-        this.replaceObserver(options);
-      });
+        this.jinrishiciContent = data
+        this.replaceObserver(options)
+      })
     } else {
-      this.replaceObserver(options);
+      this.replaceObserver(options)
     }
   }
 
@@ -77,22 +77,22 @@ export default class Bar {
    */
   private static hideBar(options: { hideBarSelector?: string, isObserveHideBar?: boolean, hideBarCallback?: Function }) {
     // 隐藏横幅
-    $(options.hideBarSelector).hide();
+    $(options.hideBarSelector).hide()
     if (options.isObserveHideBar) {
-      let i = 0;
+      let i = 0
       // 隐藏条幅首次加载：监听条幅变化，变化后再次执行
       const observer = new MutationObserver(() => {
-        $(options.hideBarSelector).hide();
+        $(options.hideBarSelector).hide()
         // 替换两次后结束监听
         if (i >= 1) {
-          observer.disconnect();
+          observer.disconnect()
         }
-        i++;
-      });
-      observer.observe($(options.hideBarSelector)[0], {childList: true, subtree: true});
+        i++
+      })
+      observer.observe($(options.hideBarSelector)[0], {childList: true, subtree: true})
     }
     if (options.hideBarCallback) {
-      options.hideBarCallback();
+      options.hideBarCallback()
     }
   }
 
@@ -103,27 +103,27 @@ export default class Bar {
    */
   private static replaceObserver(options: { barSelector: string, isObserveBar: boolean, followUpObserveSelector?: string, replaceBarCallback?: Function, jinrishiciCallback?: Function }) {
     // 首次替换横幅
-    this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback);
+    this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback)
     if (!options.isObserveBar) {
-      return;
+      return
     }
-    let i = 0;
+    let i = 0
     // 条幅首次加载：监听条幅变化，变化后再次执行
     const observer = new MutationObserver(() => {
-      this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback);
+      this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback)
       // 替换两次后结束监听
       if (i >= 1) {
-        observer.disconnect();
+        observer.disconnect()
       }
-      i++;
-    });
-    observer.observe($(options.barSelector)[0], {childList: true});
+      i++
+    })
+    observer.observe($(options.barSelector)[0], {childList: true})
 
     if (options.followUpObserveSelector) {
       // 后续变化
       new MutationObserver(() => {
-        this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback);
-      }).observe($(options.followUpObserveSelector)[0], {childList: true});
+        this.replaceBar(options.barSelector, options.replaceBarCallback, options.jinrishiciCallback)
+      }).observe($(options.followUpObserveSelector)[0], {childList: true})
     }
   }
 
@@ -136,19 +136,19 @@ export default class Bar {
    */
   private static replaceBar(selector: string, replaceBarCallback?: Function, jinrishiciCallback?: Function) {
     if ($($(selector)[0]).text().replace(/\s+/g, "") === Bar.txt) {
-      return;
+      return
     }
 
     // 替换为今日诗词
     if (this.storeJinrishiciVal) {
-      $(selector).css({'minHeight': '30px', 'lineHeight': '30px'});
+      $(selector).css({'minHeight': '30px', 'lineHeight': '30px'})
       $(selector).html(`
         <div class="csv_bar">
           ${this.jinrishiciContent}
         </div>`
-      );
+      )
       if (jinrishiciCallback) {
-        jinrishiciCallback();
+        jinrishiciCallback()
       }
     } else {
       // 替换为社会主义核心价值观
@@ -174,7 +174,7 @@ export default class Bar {
     }
 
     if (replaceBarCallback) {
-      replaceBarCallback();
+      replaceBarCallback()
     }
   }
 
@@ -183,9 +183,9 @@ export default class Bar {
    * @private
    */
   static async getJinrishici() {
-    let jinrishiciOption = JSON.parse(Store.get(Options.Keys.jinrishici));
+    let jinrishiciOption = JSON.parse(Store.get(Options.Keys.jinrishici))
     if (!jinrishiciOption.value) {
-      return;
+      return
     }
 
     let response = await Request.get({
@@ -195,16 +195,16 @@ export default class Bar {
       //   'X-User-Token': jinrishiciOption.token,
       // },
       synchronous: true
-    });
+    })
 
     if (!response || response.status !== 'success') {
-      console.error('今日诗词获取失败', response);
+      console.error('今日诗词获取失败', response)
     }
     // // 存储 Token
     // if (jinrishiciOption.token !== response.data.token) {
-    //   jinrishiciOption.token = response.data.token;
-    //   Store.set(Options.Keys.jinrishici, JSON.stringify(jinrishiciOption));
+    //   jinrishiciOption.token = response.data.token
+    //   Store.set(Options.Keys.jinrishici, JSON.stringify(jinrishiciOption))
     // }
-    return response.data.content + ' —— ' + response.data.origin.author + '《' + response.data.origin.title + '》';
+    return response.data.content + ' —— ' + response.data.origin.author + '《' + response.data.origin.title + '》'
   }
 }

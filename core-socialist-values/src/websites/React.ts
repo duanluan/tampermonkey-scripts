@@ -1,4 +1,4 @@
-import Bar from "../common/Bar";
+import Bar from "../common/Bar"
 
 export default class React {
 
@@ -11,11 +11,12 @@ export default class React {
 
   static replace() {
     if (location.host === 'react.dev') {
-      Bar.replace({
-        barSelector: this.selectors.bar, isObserveBar: true, hideBarSelector: this.selectors.hideBar, isObserveHideBar: false, followUpObserveSelector: this.selectors.followUpObserveElement, hideBarCallback: () => {
-          $(this.selectors.excludeHeader).css('margin-top', '60px');
-        }
-      });
+      return
     }
+    Bar.replace({
+      barSelector: this.selectors.bar, isObserveBar: true, hideBarSelector: this.selectors.hideBar, isObserveHideBar: false, followUpObserveSelector: this.selectors.followUpObserveElement, hideBarCallback: () => {
+        $(this.selectors.excludeHeader).css('margin-top', '60px')
+      }
+    })
   }
 }

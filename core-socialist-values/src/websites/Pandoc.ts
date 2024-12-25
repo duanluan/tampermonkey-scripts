@@ -6,10 +6,11 @@ export default class Pandoc {
 
   static replace() {
     if (location.host === 'pandoc.org') {
-      const $headerBtn = $(this.selectors.headerBtn);
-      if ($headerBtn.length > 0) {
-        $headerBtn.remove();
-      }
+      return
+    }
+    const $headerBtn = $(this.selectors.headerBtn)
+    if ($headerBtn.length > 0) {
+      $headerBtn.remove()
     }
   }
 }
