@@ -308,7 +308,7 @@ _defineProperty(Options, "options", [{
 
 /***/ }),
 
-/***/ 607:
+/***/ 843:
 /***/ ((__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) => {
 
 
@@ -577,39 +577,38 @@ var Bar = /*#__PURE__*/function () {
         if (jinrishiciCallback) {
           jinrishiciCallback();
         }
-        return;
+      } else {
+        // 替换为社会主义核心价值观
+        $(selector).css({
+          'minHeight': '40px'
+        });
+        $(selector).html("\n        <div class=\"csv_bar\">\n          <ul class='csv_bar_ul'><li>\u5BCC\u5F3A</li><li>\u6C11\u4E3B</li><li>\u6587\u660E</li><li>\u548C\u8C10</li><li>\u81EA\u7531</li><li>\u5E73\u7B49</li><li>\u516C\u6B63</li><li>\u6CD5\u6CBB</li><li>\u7231\u56FD</li><li>\u656C\u4E1A</li><li>\u8BDA\u4FE1</li><li>\u53CB\u5584</li></ul><br>\n          <ul class='csv_bar_ul'><li>Prosperity</li><li>Democracy</li><li>Civility</li><li>Harmony</li><li>Freedom</li><li>Equality</li><li>Justice</li><li>Rule of law</li><li>Patriotism</li><li>Dedication</li><li>Integrity</li><li>Friendship</li>\n          </ul>\n        </div>");
+        // 避免出现多个导致样式添加失败
+        var $bar = $(this.replaceBarSelector.bar);
+        if ($bar.length == 2) {
+          $bar.eq(0).remove();
+        }
+        var barUlSelector = this.replaceBarSelector.barUl;
+        $(barUlSelector).css({
+          'display': 'inline-block',
+          'listStyle': 'none',
+          'margin': 0,
+          'padding': 0,
+          'width': 'auto'
+        });
+        $(barUlSelector + ' li').css({
+          'color': '#DE2910',
+          'fontWeight': 'bold',
+          'fontFamily': 'KaiTi',
+          'float': 'left',
+          'paddingRight': '10px',
+          'min-width': '80px',
+          'textAlign': 'center'
+        });
+        $(barUlSelector + ':first').css('verticalAlign', 'bottom');
+        $(barUlSelector + ':first li').css('fontSize', '18px');
+        $(barUlSelector + ':eq(1) li').css('fontSize', '13px');
       }
-
-      // 替换为社会主义核心价值观
-      $(selector).css({
-        'minHeight': '40px'
-      });
-      $(selector).html("\n        <div class=\"csv_bar\">\n          <ul class='csv_bar_ul'><li>\u5BCC\u5F3A</li><li>\u6C11\u4E3B</li><li>\u6587\u660E</li><li>\u548C\u8C10</li><li>\u81EA\u7531</li><li>\u5E73\u7B49</li><li>\u516C\u6B63</li><li>\u6CD5\u6CBB</li><li>\u7231\u56FD</li><li>\u656C\u4E1A</li><li>\u8BDA\u4FE1</li><li>\u53CB\u5584</li></ul><br>\n          <ul class='csv_bar_ul'><li>Prosperity</li><li>Democracy</li><li>Civility</li><li>Harmony</li><li>Freedom</li><li>Equality</li><li>Justice</li><li>Rule of law</li><li>Patriotism</li><li>Dedication</li><li>Integrity</li><li>Friendship</li>\n          </ul>\n        </div>");
-      // 避免出现多个导致样式添加失败
-      var $bar = $(this.replaceBarSelector.bar);
-      if ($bar.length == 2) {
-        $bar.eq(0).remove();
-      }
-      var barUlSelector = this.replaceBarSelector.barUl;
-      $(barUlSelector).css({
-        'display': 'inline-block',
-        'listStyle': 'none',
-        'margin': 0,
-        'padding': 0,
-        'width': 'auto'
-      });
-      $(barUlSelector + ' li').css({
-        'color': '#DE2910',
-        'fontWeight': 'bold',
-        'fontFamily': 'KaiTi',
-        'float': 'left',
-        'paddingRight': '10px',
-        'min-width': '80px',
-        'textAlign': 'center'
-      });
-      $(barUlSelector + ':first').css('verticalAlign', 'bottom');
-      $(barUlSelector + ':first li').css('fontSize', '18px');
-      $(barUlSelector + ':eq(1) li').css('fontSize', '13px');
       if (replaceBarCallback) {
         replaceBarCallback();
       }
@@ -650,8 +649,8 @@ var Bar = /*#__PURE__*/function () {
               }
               // // 存储 Token
               // if (jinrishiciOption.token !== response.data.token) {
-              //   jinrishiciOption.token = response.data.token;
-              //   Store.set(Options.Keys.jinrishici, JSON.stringify(jinrishiciOption));
+              //   jinrishiciOption.token = response.data.token
+              //   Store.set(Options.Keys.jinrishici, JSON.stringify(jinrishiciOption))
               // }
               return _context.abrupt("return", response.data.content + ' —— ' + response.data.origin.author + '《' + response.data.origin.title + '》');
             case 8:
@@ -690,7 +689,7 @@ Bar_defineProperty(Bar, "storeJinrishiciVal", false);
  */
 Bar_defineProperty(Bar, "jinrishiciContent", '');
 
-;// CONCATENATED MODULE: ./core-socialist-values/src/websites/codecept/Codecept.ts
+;// CONCATENATED MODULE: ./core-socialist-values/src/websites/Codecept.ts
 function Codecept_typeof(o) { "@babel/helpers - typeof"; return Codecept_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, Codecept_typeof(o); }
 function Codecept_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function Codecept_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, Codecept_toPropertyKey(descriptor.key), descriptor); } }
@@ -708,16 +707,17 @@ var Codecept = /*#__PURE__*/function () {
     value: function replace() {
       var _this = this;
       if (location.host === 'codecept.io') {
-        Bar.replace({
-          barSelector: this.selectors.bar,
-          isObserveBar: false,
-          hideBarSelector: this.selectors.hideBar,
-          isObserveHideBar: false,
-          jinrishiciCallback: function jinrishiciCallback() {
-            $(_this.selectors.bar).css('color', '#edf2f7');
-          }
-        });
+        return;
       }
+      Bar.replace({
+        barSelector: this.selectors.bar,
+        isObserveBar: false,
+        hideBarSelector: this.selectors.hideBar,
+        isObserveHideBar: false,
+        jinrishiciCallback: function jinrishiciCallback() {
+          $(_this.selectors.bar).css('color', '#edf2f7');
+        }
+      });
     }
   }]);
 }();
@@ -726,7 +726,7 @@ Codecept_defineProperty(Codecept, "selectors", {
   hideBar: '.sub-bar'
 });
 
-;// CONCATENATED MODULE: ./core-socialist-values/src/websites/github/Github.ts
+;// CONCATENATED MODULE: ./core-socialist-values/src/websites/Github.ts
 function Github_typeof(o) { "@babel/helpers - typeof"; return Github_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, Github_typeof(o); }
 function Github_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function Github_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, Github_toPropertyKey(descriptor.key), descriptor); } }
@@ -742,10 +742,11 @@ var Github = /*#__PURE__*/function () {
     key: "replace",
     value: function replace() {
       if (location.href === 'https://github.com/') {
-        var $notice = $(this.selectors.notice);
-        if ($notice.length > 0 && $notice.text().toLowerCase().indexOf('ukraine') != -1) {
-          $notice.remove();
-        }
+        return;
+      }
+      var $notice = $(this.selectors.notice);
+      if ($notice.length > 0 && $notice.text().toLowerCase().indexOf('ukraine') != -1) {
+        $notice.remove();
       }
     }
   }]);
@@ -754,45 +755,7 @@ Github_defineProperty(Github, "selectors", {
   notice: '.border.js-notice'
 });
 
-;// CONCATENATED MODULE: ./core-socialist-values/src/websites/nest/Nest.ts
-function Nest_typeof(o) { "@babel/helpers - typeof"; return Nest_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, Nest_typeof(o); }
-function Nest_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-function Nest_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, Nest_toPropertyKey(descriptor.key), descriptor); } }
-function Nest_createClass(Constructor, protoProps, staticProps) { if (protoProps) Nest_defineProperties(Constructor.prototype, protoProps); if (staticProps) Nest_defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
-function Nest_defineProperty(obj, key, value) { key = Nest_toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-function Nest_toPropertyKey(t) { var i = Nest_toPrimitive(t, "string"); return "symbol" == Nest_typeof(i) ? i : i + ""; }
-function Nest_toPrimitive(t, r) { if ("object" != Nest_typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != Nest_typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-
-var Nest_Codecept = /*#__PURE__*/function () {
-  function Codecept() {
-    Nest_classCallCheck(this, Codecept);
-  }
-  return Nest_createClass(Codecept, null, [{
-    key: "replace",
-    value: function replace() {
-      var _this = this;
-      if (location.host === 'docs.nestjs.com') {
-        Bar.replace({
-          barSelector: this.selectors.bar,
-          isObserveBar: false,
-          hideBarSelector: this.selectors.bar,
-          isObserveHideBar: false,
-          replaceBarCallback: function replaceBarCallback() {
-            $(_this.selectors.bar).css('padding', '0');
-          },
-          jinrishiciCallback: function jinrishiciCallback() {
-            $(_this.selectors.bar).css('color', '#fff');
-          }
-        });
-      }
-    }
-  }]);
-}();
-Nest_defineProperty(Nest_Codecept, "selectors", {
-  bar: '.top-bar'
-});
-
-;// CONCATENATED MODULE: ./core-socialist-values/src/websites/ember/Ember.ts
+;// CONCATENATED MODULE: ./core-socialist-values/src/websites/Ember.ts
 function Ember_typeof(o) { "@babel/helpers - typeof"; return Ember_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, Ember_typeof(o); }
 function Ember_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function Ember_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, Ember_toPropertyKey(descriptor.key), descriptor); } }
@@ -810,18 +773,19 @@ var Ember = /*#__PURE__*/function () {
     value: function replace() {
       var _this = this;
       if (location.host === 'emberjs.com') {
-        Bar.replace({
-          barSelector: this.selectors.bar,
-          isObserveBar: false,
-          jinrishiciCallback: function jinrishiciCallback() {
-            $(_this.selectors.bar).css('color', '#fff');
-          }
-        });
-        $(this.selectors.bar).css({
-          'backgroundColor': '#1c1e24',
-          'padding': 0
-        });
+        return;
       }
+      Bar.replace({
+        barSelector: this.selectors.bar,
+        isObserveBar: false,
+        jinrishiciCallback: function jinrishiciCallback() {
+          $(_this.selectors.bar).css('color', '#fff');
+        }
+      });
+      $(this.selectors.bar).css({
+        'backgroundColor': '#1c1e24',
+        'padding': 0
+      });
     }
   }]);
 }();
@@ -829,7 +793,7 @@ Ember_defineProperty(Ember, "selectors", {
   bar: '.callout-banner'
 });
 
-;// CONCATENATED MODULE: ./core-socialist-values/src/websites/jenkins/Jenkins.ts
+;// CONCATENATED MODULE: ./core-socialist-values/src/websites/Jenkins.ts
 function Jenkins_typeof(o) { "@babel/helpers - typeof"; return Jenkins_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, Jenkins_typeof(o); }
 function Jenkins_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function Jenkins_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, Jenkins_toPropertyKey(descriptor.key), descriptor); } }
@@ -845,18 +809,19 @@ var Angular = /*#__PURE__*/function () {
     key: "replace",
     value: function replace() {
       if (location.host === 'www.jenkins.io') {
-        // 替换图标
-        $(this.selectors.logo).replaceWith("<img src=\"/images/logos/jenkins/Jenkins.svg\">");
-
-        // 删除通知
-        $(this.selectors.pageTitle).nextAll("p").each(function (i, el) {
-          var $el = $(el);
-          if ($el.text().toLowerCase().indexOf('ukraine') != -1) {
-            $el.remove();
-          }
-        });
-        $(this.selectors.pageTitle).parent().append('<br><br><br>');
+        return;
       }
+      // 替换图标
+      $(this.selectors.logo).replaceWith("<img src=\"/images/logos/jenkins/Jenkins.svg\">");
+
+      // 删除通知
+      $(this.selectors.pageTitle).nextAll("p").each(function (i, el) {
+        var $el = $(el);
+        if ($el.text().toLowerCase().indexOf('ukraine') != -1) {
+          $el.remove();
+        }
+      });
+      $(this.selectors.pageTitle).parent().append('<br><br><br>');
     }
   }]);
 }();
@@ -865,7 +830,7 @@ Jenkins_defineProperty(Angular, "selectors", {
   pageTitle: '.page-title'
 });
 
-;// CONCATENATED MODULE: ./core-socialist-values/src/websites/sveltematerialui/SvelteMaterialUi.ts
+;// CONCATENATED MODULE: ./core-socialist-values/src/websites/SvelteMaterialUi.ts
 function SvelteMaterialUi_typeof(o) { "@babel/helpers - typeof"; return SvelteMaterialUi_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, SvelteMaterialUi_typeof(o); }
 function SvelteMaterialUi_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function SvelteMaterialUi_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, SvelteMaterialUi_toPropertyKey(descriptor.key), descriptor); } }
@@ -881,8 +846,9 @@ var SvelteMaterialUi = /*#__PURE__*/function () {
     key: "replace",
     value: function replace() {
       if (location.host === 'sveltematerialui.com') {
-        $(this.selectors.bar).attr('class', '');
+        return;
       }
+      $(this.selectors.bar).attr('class', '');
     }
   }]);
 }();
@@ -890,7 +856,7 @@ SvelteMaterialUi_defineProperty(SvelteMaterialUi, "selectors", {
   bar: '.ukraine'
 });
 
-;// CONCATENATED MODULE: ./core-socialist-values/src/websites/syncthing/Syncthing.ts
+;// CONCATENATED MODULE: ./core-socialist-values/src/websites/Syncthing.ts
 function Syncthing_typeof(o) { "@babel/helpers - typeof"; return Syncthing_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, Syncthing_typeof(o); }
 function Syncthing_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function Syncthing_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, Syncthing_toPropertyKey(descriptor.key), descriptor); } }
@@ -908,14 +874,15 @@ var Syncthing = /*#__PURE__*/function () {
     value: function replace() {
       var _this = this;
       if (location.host === 'syncthing.net') {
-        Bar.replace({
-          barSelector: this.selectors.bar,
-          isObserveBar: false,
-          replaceBarCallback: function replaceBarCallback() {
-            $(_this.selectors.bar).css('textAlign', 'center');
-          }
-        });
+        return;
       }
+      Bar.replace({
+        barSelector: this.selectors.bar,
+        isObserveBar: false,
+        replaceBarCallback: function replaceBarCallback() {
+          $(_this.selectors.bar).css('textAlign', 'center');
+        }
+      });
     }
   }]);
 }();
@@ -923,7 +890,7 @@ Syncthing_defineProperty(Syncthing, "selectors", {
   bar: '.alert'
 });
 
-;// CONCATENATED MODULE: ./core-socialist-values/src/websites/vim/Vim.ts
+;// CONCATENATED MODULE: ./core-socialist-values/src/websites/Vim.ts
 function Vim_typeof(o) { "@babel/helpers - typeof"; return Vim_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, Vim_typeof(o); }
 function Vim_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function Vim_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, Vim_toPropertyKey(descriptor.key), descriptor); } }
@@ -939,21 +906,22 @@ var Vim_SvelteMaterialUi = /*#__PURE__*/function () {
     key: "replace",
     value: function replace() {
       if (location.host === 'www.vim.org') {
-        for (var i = 0; i < 5; i++) {
-          // 删除蓝
-          var lightbg = $(this.selectors.removeEl1);
-          if (!lightbg) break;
-          lightbg.remove();
-
-          // 删除黄
-          lightbg = $(this.selectors.removeEl2);
-          if (!lightbg) break;
-          lightbg.remove();
-        }
-
-        // 空白填充背景色
-        $(this.selectors.barRootEl).css('background-color', $(this.selectors.backgroundColorEl).css('background-color'));
+        return;
       }
+      for (var i = 0; i < 5; i++) {
+        // 删除蓝
+        var lightbg = $(this.selectors.removeEl1);
+        if (!lightbg) break;
+        lightbg.remove();
+
+        // 删除黄
+        lightbg = $(this.selectors.removeEl2);
+        if (!lightbg) break;
+        lightbg.remove();
+      }
+
+      // 空白填充背景色
+      $(this.selectors.barRootEl).css('background-color', $(this.selectors.backgroundColorEl).css('background-color'));
     }
   }]);
 }();
@@ -964,7 +932,7 @@ Vim_defineProperty(Vim_SvelteMaterialUi, "selectors", {
   barRootEl: 'body > table:nth-child(1)'
 });
 
-;// CONCATENATED MODULE: ./core-socialist-values/src/websites/pandoc/Pandoc.ts
+;// CONCATENATED MODULE: ./core-socialist-values/src/websites/Pandoc.ts
 function Pandoc_typeof(o) { "@babel/helpers - typeof"; return Pandoc_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, Pandoc_typeof(o); }
 function Pandoc_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 function Pandoc_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, Pandoc_toPropertyKey(descriptor.key), descriptor); } }
@@ -980,10 +948,11 @@ var Pandoc = /*#__PURE__*/function () {
     key: "replace",
     value: function replace() {
       if (location.host === 'pandoc.org') {
-        var $headerBtn = $(this.selectors.headerBtn);
-        if ($headerBtn.length > 0) {
-          $headerBtn.remove();
-        }
+        return;
+      }
+      var $headerBtn = $(this.selectors.headerBtn);
+      if ($headerBtn.length > 0) {
+        $headerBtn.remove();
       }
     }
   }]);
@@ -992,17 +961,57 @@ Pandoc_defineProperty(Pandoc, "selectors", {
   headerBtn: '#ukraine'
 });
 
+;// CONCATENATED MODULE: ./core-socialist-values/src/websites/Namecheap.ts
+function Namecheap_typeof(o) { "@babel/helpers - typeof"; return Namecheap_typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, Namecheap_typeof(o); }
+function Namecheap_classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function Namecheap_defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, Namecheap_toPropertyKey(descriptor.key), descriptor); } }
+function Namecheap_createClass(Constructor, protoProps, staticProps) { if (protoProps) Namecheap_defineProperties(Constructor.prototype, protoProps); if (staticProps) Namecheap_defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+function Namecheap_defineProperty(obj, key, value) { key = Namecheap_toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+function Namecheap_toPropertyKey(t) { var i = Namecheap_toPrimitive(t, "string"); return "symbol" == Namecheap_typeof(i) ? i : i + ""; }
+function Namecheap_toPrimitive(t, r) { if ("object" != Namecheap_typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != Namecheap_typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+
+var Namecheap = /*#__PURE__*/function () {
+  function Namecheap() {
+    Namecheap_classCallCheck(this, Namecheap);
+  }
+  return Namecheap_createClass(Namecheap, null, [{
+    key: "replace",
+    value: function replace() {
+      var _this = this;
+      console.log(location.host);
+      if (location.host !== 'www.namecheap.com') {
+        return;
+      }
+      Bar.replace({
+        barSelector: this.selectors.footerBanner,
+        isObserveBar: false,
+        replaceBarCallback: function replaceBarCallback() {
+          $(_this.selectors.footerBanner).css({
+            padding: '15px 0',
+            textAlign: 'center',
+            fontWeight: 'bold'
+          });
+        }
+      });
+    }
+  }]);
+}();
+Namecheap_defineProperty(Namecheap, "selectors", {
+  footerBanner: '.gb-stand-with-ukraine-banner'
+});
+
 ;// CONCATENATED MODULE: ./core-socialist-values/src/main.ts
 // ==UserScript==
 // @name         技术远离政治
 // @namespace    http://tampermonkey.net/
-// @version      1.5.0
+// @version      1.6.0
 // @description  移除政治相关条幅或替换为社会主义核心价值观、今日诗词，替换政治相关 Logo 为原版 Logo，去除政治相关通知，让技术远离政治。
 // @author       duanluan
 // @copyright    2022, duanluan (https://github.com/duanluan)
 // @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
 // @homepage     https://greasyfork.org/zh-CN/scripts/440854
 // @supportURL   https://github.com/duanluan/tampermonkey-scripts/issues
+// @match        *://greasyfork.org/*
 // @match        *://junit.org/*
 // @match        *://codecept.io/*
 // @match        *://github.com/*
@@ -1013,7 +1022,7 @@ Pandoc_defineProperty(Pandoc, "selectors", {
 // @match        *://syncthing.net/*
 // @match        *://www.vim.org/*
 // @match        *://pandoc.org/*
-// @match        *://greasyfork.org/*
+// @match        *://www.namecheap.com/*
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -1044,20 +1053,21 @@ Pandoc_defineProperty(Pandoc, "selectors", {
   Options/* default */.A.registerAll();
   Options/* default */.A.loadInGreasyfork();
 
-  // React.replace();
-  // Angular.replace();
+  // React.replace()
+  // Angular.replace()
   Junit.replace();
   Codecept.replace();
   Github.replace();
-  Nest_Codecept.replace();
+  // Nest.replace()
   Ember.replace();
-  // Electron.replace();
+  // Electron.replace()
   Angular.replace();
-  // Svelte.replace();
+  // Svelte.replace()
   SvelteMaterialUi.replace();
   Syncthing.replace();
   Vim_SvelteMaterialUi.replace();
   Pandoc.replace();
+  Namecheap.replace();
 })();
 
 /***/ }),
@@ -1158,7 +1168,7 @@ var Store = /*#__PURE__*/function () {
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	__webpack_require__(708);
-/******/ 	var __webpack_exports__ = __webpack_require__(607);
+/******/ 	var __webpack_exports__ = __webpack_require__(843);
 /******/ 	
 /******/ })()
 ;
