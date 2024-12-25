@@ -150,30 +150,28 @@ export default class Bar {
       if (jinrishiciCallback) {
         jinrishiciCallback();
       }
-      return;
-    }
-
-
-    // 替换为社会主义核心价值观
-    $(selector).css({'minHeight': '40px'});
-    $(selector).html(`
+    } else {
+      // 替换为社会主义核心价值观
+      $(selector).css({'minHeight': '40px'})
+      $(selector).html(`
         <div class="csv_bar">
           <ul class='csv_bar_ul'><li>富强</li><li>民主</li><li>文明</li><li>和谐</li><li>自由</li><li>平等</li><li>公正</li><li>法治</li><li>爱国</li><li>敬业</li><li>诚信</li><li>友善</li></ul><br>
           <ul class='csv_bar_ul'><li>Prosperity</li><li>Democracy</li><li>Civility</li><li>Harmony</li><li>Freedom</li><li>Equality</li><li>Justice</li><li>Rule of law</li><li>Patriotism</li><li>Dedication</li><li>Integrity</li><li>Friendship</li>
           </ul>
         </div>`
-    );
-    // 避免出现多个导致样式添加失败
-    const $bar = $(this.replaceBarSelector.bar);
-    if ($bar.length == 2) {
-      $bar.eq(0).remove();
+      )
+      // 避免出现多个导致样式添加失败
+      const $bar = $(this.replaceBarSelector.bar)
+      if ($bar.length == 2) {
+        $bar.eq(0).remove()
+      }
+      const barUlSelector = this.replaceBarSelector.barUl
+      $(barUlSelector).css({'display': 'inline-block', 'listStyle': 'none', 'margin': 0, 'padding': 0, 'width': 'auto'})
+      $(barUlSelector + ' li').css({'color': '#DE2910', 'fontWeight': 'bold', 'fontFamily': 'KaiTi', 'float': 'left', 'paddingRight': '10px', 'min-width': '80px', 'textAlign': 'center'})
+      $(barUlSelector + ':first').css('verticalAlign', 'bottom')
+      $(barUlSelector + ':first li').css('fontSize', '18px')
+      $(barUlSelector + ':eq(1) li').css('fontSize', '13px')
     }
-    const barUlSelector = this.replaceBarSelector.barUl;
-    $(barUlSelector).css({'display': 'inline-block', 'listStyle': 'none', 'margin': 0, 'padding': 0, 'width': 'auto'});
-    $(barUlSelector + ' li').css({'color': '#DE2910', 'fontWeight': 'bold', 'fontFamily': 'KaiTi', 'float': 'left', 'paddingRight': '10px', 'min-width': '80px', 'textAlign': 'center'});
-    $(barUlSelector + ':first').css('verticalAlign', 'bottom');
-    $(barUlSelector + ':first li').css('fontSize', '18px');
-    $(barUlSelector + ':eq(1) li').css('fontSize', '13px');
 
     if (replaceBarCallback) {
       replaceBarCallback();
