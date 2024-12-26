@@ -311,14 +311,33 @@ _defineProperty(Options, "options", [{
 // EXTERNAL MODULE: ./utils/src/gm/Store.ts
 var Store = __webpack_require__(915);
 ;// CONCATENATED MODULE: ./discourse-pro/src/module/widescreenMode.ts
-function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
-function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
-function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
+/**
+ * 添加 history 的 pushState 和 replaceState 事件
+ *
+ * 参考：https://segmentfault.com/a/1190000017560688#item-4
+ */
+function addPushReplaceStateEvent() {
+  var _wr = function _wr(type) {
+    var orig = history[type];
+    return function () {
+      var rv = orig.apply(this, arguments);
+      var e = new Event(type);
+      // @ts-ignore
+      e.arguments = arguments;
+      window.dispatchEvent(e);
+      return rv;
+    };
+  };
+  history.pushState = _wr('pushState');
+  history.replaceState = _wr('replaceState');
+}
+
 /**
  * 加载宽屏模式
  * @param options
  */
 function loadWidescreenMode(options) {
+  addPushReplaceStateEvent();
   var headerWrap = options.headerWrap,
     mainOutletWrapper = options.mainOutletWrapper,
     mainOutlet = options.mainOutlet,
@@ -334,50 +353,83 @@ function loadWidescreenMode(options) {
   $mainOutletWrapper.css('max-width', '100%');
   // 主内容撑满
   $mainOutlet.css('width', '100%');
-  loadWidescreenModeByTopic(options);
-  // 监听话题内容变化
-  if (location.href.indexOf('/topic/') !== -1 && $postStream.length > 0) {
-    // 防抖定时器
-    var debounceTimer = null;
-    var observer = new MutationObserver(function (mutationsList) {
-      // 每次有新节点触发时，清除之前的定时器并重新计时
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
+
+  // console.debug('话题页首次加载宽屏模式 + 监听话题列表变化')
+  // 话题页首次加载宽屏模式 + 监听话题列表变化
+  loadWidescreenModeByTopicAndObserver(options, $postStream);
+
+  // 历史记录变化时话题页重新加载宽屏模式
+  window.addEventListener('popstate', function () {
+    // console.debug('历史记录变化时话题页重新加载宽屏模式')
+    popstateAndPushStateListener(postStream, options, $mainOutlet);
+  });
+  // 单页面 pushState 切换页面时话题页重新加载宽屏模式
+  window.addEventListener('pushState', function () {
+    // console.debug('单页面 pushState 切换页面时话题页重新加载宽屏模式')
+    popstateAndPushStateListener(postStream, options, $mainOutlet);
+  });
+  window.addEventListener('replaceState', function () {
+    // console.debug('单页面 replaceState 切换页面时话题页重新加载宽屏模式')
+    popstateAndPushStateListener(postStream, options, $mainOutlet);
+  });
+}
+
+/**
+ * popstate 和 pushState 事件监听
+ * @param postStreamSelector 话题内容选择器
+ * @param options 选项
+ * @param $mainOutlet 主内容
+ */
+function popstateAndPushStateListener(postStreamSelector, options, $mainOutlet) {
+  if (location.href.indexOf('/topic/') !== -1) {
+    // 等待 .post-stream 加载完成
+    var interval = setInterval(function () {
+      var $newPostStreamWrapper = $(postStreamSelector);
+      if ($newPostStreamWrapper.length > 0) {
+        clearInterval(interval);
+        loadWidescreenModeByTopicAndObserver(options, $(postStreamSelector));
       }
-      debounceTimer = window.setTimeout(function () {
-        var addedNodes = [];
-        var _iterator = _createForOfIteratorHelper(mutationsList),
-          _step;
-        try {
-          for (_iterator.s(); !(_step = _iterator.n()).done;) {
-            var mutation = _step.value;
-            if (mutation.type === 'childList') {
-              mutation.addedNodes.forEach(function (node) {
-                if (node instanceof HTMLElement && $(node).is('.topic-post')) {
-                  addedNodes.push(node); // 收集所有新增的 .topic-post 节点
-                }
-              });
-            }
-          }
-        } catch (err) {
-          _iterator.e(err);
-        } finally {
-          _iterator.f();
-        }
-        if (addedNodes.length > 0) {
-          // console.log('新增的 .topic-post 节点:', addedNodes);
-          loadWidescreenModeByTopic(options);
-        }
-        // 删除定时器
-        debounceTimer = null;
-      }, 1000);
-    });
-    observer.observe($postStream[0], {
-      childList: true,
-      // 监听直接子节点的变化
-      subtree: false // 不需要监听后代
-    });
+    }, 500);
   }
+}
+
+/**
+ * 话题页加载宽屏模式 + 监听话题内容变化
+ * @param options 选项
+ * @param $postStream 话题内容
+ */
+function loadWidescreenModeByTopicAndObserver(options, $postStream) {
+  // 监听话题列表变化
+  if (location.href.indexOf('/topic/') == -1) {
+    return;
+  }
+  loadWidescreenModeByTopic(options);
+  if ($postStream.data('hasObserver')) {
+    // console.debug('[discourse-pro-widescreenMode] 已存在话题内容变化监听器，跳过');
+    return;
+  }
+
+  // 防抖函数
+  var debounceTimeout;
+  var debounce = function debounce(func, delay) {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(func, delay);
+  };
+  var observer = new MutationObserver(function (mutationsList) {
+    debounce(function () {
+      loadWidescreenModeByTopic(options);
+    }, 1000);
+  });
+
+  // 是否已监听
+  $postStream.data('hasObserver', true);
+  // 此处监听 .posts-wrapper 下的所有节点而不是 .post-stream 下的子节点，因为 .post-stream 会在时间轴跳动后重新加载
+  observer.observe($postStream[0], {
+    // 监听子节点
+    childList: true,
+    // 不监听子节点下的节点
+    subtree: false
+  });
 }
 
 /**
@@ -401,22 +453,30 @@ function loadWidescreenModeByTopic(options) {
     $topicTimerInfo = $(topicTimerInfo),
     $topicFooterBtns = $(topicFooterBtns),
     $moreTopicsContainer = $(moreTopicsContainer);
-  if (location.href.indexOf('/topic/') != -1) {
-    var postStreamWidth = $postStream.width();
-    var topicAvatarWidth = $topicAvatar.width();
-    var topicWidth = postStreamWidth - 45;
-    // 话题内容撑满
-    $topicBody.css('width', topicWidth - topicAvatarWidth + 'px');
-    // 话题主内容后浏览量、链接、回复人等信息撑满
-    $topicMap.css('max-width', topicWidth + 'px');
-    // 最后一个回复后的底边框撑满
-    $loadingContainer.css('width', topicWidth + 'px');
-    $topicTimerInfo.css('max-width', topicWidth + 'px');
-    // 话题底部按钮撑满
-    $topicFooterBtns.css('max-width', topicWidth + 'px');
-    // 更多话题列表撑满
-    $moreTopicsContainer.css('max-width', topicWidth + 'px');
+  var postStreamWidth = $postStream.width();
+  var topicAvatarWidth = $topicAvatar.width();
+  var topicWidth = postStreamWidth - 45;
+  var topicBodyWidth = topicWidth - topicAvatarWidth + 'px';
+
+  // 如果第一个的宽度和最后一个的宽度不一样，说明话题列表变化了
+  var firstTopicBodyWidth = $($topicBody[0]).css('width');
+  var lastTopicBodyWidth = $($topicBody[$topicBody.length - 1]).css('width');
+  if (firstTopicBodyWidth == lastTopicBodyWidth && firstTopicBodyWidth == topicBodyWidth) {
+    // console.debug('[discourse-pro-widescreenMode] 话题页加载宽屏模式已加载过，跳过');
+    return;
   }
+
+  // 话题内容撑满
+  $topicBody.css('width', topicBodyWidth);
+  // 话题主内容后浏览量、链接、回复人等信息撑满
+  $topicMap.css('max-width', topicWidth + 'px');
+  // 最后一个回复后的底边框撑满
+  $loadingContainer.css('width', topicWidth + 'px');
+  $topicTimerInfo.css('max-width', topicWidth + 'px');
+  // 话题底部按钮撑满
+  $topicFooterBtns.css('max-width', topicWidth + 'px');
+  // 更多话题列表撑满
+  $moreTopicsContainer.css('max-width', topicWidth + 'px');
 }
 
 ;// CONCATENATED MODULE: ./discourse-pro/src/module/dragBar.ts
@@ -513,7 +573,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.2
+// @version      0.1.3
 // @description  增强 Discourse 论坛。
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
