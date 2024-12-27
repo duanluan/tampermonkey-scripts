@@ -441,6 +441,8 @@ function loadWidescreenModeByTopic(options) {
     topicAvatar = options.topicAvatar,
     topicBody = options.topicBody,
     topicMap = options.topicMap,
+    smallActionDesc = options.smallActionDesc,
+    topicPostVisitedLine = options.topicPostVisitedLine,
     loadingContainer = options.loadingContainer,
     topicTimerInfo = options.topicTimerInfo,
     topicFooterBtns = options.topicFooterBtns,
@@ -449,6 +451,8 @@ function loadWidescreenModeByTopic(options) {
     $topicAvatar = $(topicAvatar),
     $topicBody = $(topicBody),
     $topicMap = $(topicMap),
+    $smallActionDesc = $(smallActionDesc),
+    $topicPostVisitedLine = $(topicPostVisitedLine),
     $loadingContainer = $(loadingContainer),
     $topicTimerInfo = $(topicTimerInfo),
     $topicFooterBtns = $(topicFooterBtns),
@@ -473,6 +477,10 @@ function loadWidescreenModeByTopic(options) {
   // 最后一个回复后的底边框撑满
   $loadingContainer.css('width', topicWidth + 'px');
   $topicTimerInfo.css('max-width', topicWidth + 'px');
+  // 一段时间后的分隔线撑满
+  $smallActionDesc.css('width', topicWidth - topicAvatarWidth + 'px');
+  // 上次访问分隔线撑满
+  $topicPostVisitedLine.css('width', topicWidth + 'px');
   // 话题底部按钮撑满
   $topicFooterBtns.css('max-width', topicWidth + 'px');
   // 更多话题列表撑满
@@ -573,7 +581,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.3
+// @version      0.1.4
 // @description  增强 Discourse 论坛。
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -627,6 +635,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     topicBody: '.topic-body',
     // 话题主内容后浏览量、链接、回复人等信息
     topicMap: '.topic-map',
+    // 一段时间后的分隔线
+    smallActionDesc: '.small-action-desc',
+    // 上次访问分隔线
+    topicPostVisitedLine: '.topic-post-visited-line',
     // 最后一个回复后的底边框
     loadingContainer: '.loading-container',
     topicTimerInfo: '.topic-timer-info',

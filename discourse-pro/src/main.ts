@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.3
+// @version      0.1.4
 // @description  增强 Discourse 论坛。
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -59,6 +59,10 @@ import Store from "@utils/gm/Store";
     topicBody: '.topic-body',
     // 话题主内容后浏览量、链接、回复人等信息
     topicMap: '.topic-map',
+    // 一段时间后的分隔线
+    smallActionDesc: '.small-action-desc',
+    // 上次访问分隔线
+    topicPostVisitedLine: '.topic-post-visited-line',
     // 最后一个回复后的底边框
     loadingContainer: '.loading-container',
     topicTimerInfo: '.topic-timer-info',

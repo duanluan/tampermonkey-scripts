@@ -144,12 +144,14 @@ function loadWidescreenModeByTopicAndObserver(options, $postStream: JQuery<HTMLE
  */
 function loadWidescreenModeByTopic(options: any) {
   const {
-    postStream, topicAvatar, topicBody, topicMap, loadingContainer, topicTimerInfo, topicFooterBtns, moreTopicsContainer
+    postStream, topicAvatar, topicBody, topicMap, smallActionDesc, topicPostVisitedLine, loadingContainer, topicTimerInfo, topicFooterBtns, moreTopicsContainer
   } = options
   const $postStream = $(postStream)
     , $topicAvatar = $(topicAvatar)
     , $topicBody = $(topicBody)
     , $topicMap = $(topicMap)
+    , $smallActionDesc = $(smallActionDesc)
+    , $topicPostVisitedLine = $(topicPostVisitedLine)
     , $loadingContainer = $(loadingContainer)
     , $topicTimerInfo = $(topicTimerInfo)
     , $topicFooterBtns = $(topicFooterBtns)
@@ -175,6 +177,10 @@ function loadWidescreenModeByTopic(options: any) {
   // 最后一个回复后的底边框撑满
   $loadingContainer.css('width', topicWidth + 'px')
   $topicTimerInfo.css('max-width', topicWidth + 'px')
+  // 一段时间后的分隔线撑满
+  $smallActionDesc.css('width', (topicWidth - topicAvatarWidth) + 'px')
+  // 上次访问分隔线撑满
+  $topicPostVisitedLine.css('width', topicWidth + 'px')
   // 话题底部按钮撑满
   $topicFooterBtns.css('max-width', topicWidth + 'px')
   // 更多话题列表撑满
