@@ -1,16 +1,21 @@
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.4
-// @description  增强 Discourse 论坛。
+// @version      0.1.5
+// @description  增强 Discourse 论坛
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
 // @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
 // @homepage     https://greasyfork.org/zh-CN/scripts/520817
 // @supportURL   https://github.com/duanluan/tampermonkey-scripts/issues
 // @match        *://greasyfork.org/*
-// @match        *://linux.do/*
 // @match        *://meta.appinn.net/*
+// @match        *://linux.do/*
+// @match        *://answers.netlify.com/*
+// @match        *://community.cloudflare.com/*
+// @match        *://community.openai.com/*
+// @match        *://forums.docker.com/*
+// @match        *://discourse.webflow.com/*
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -50,6 +55,8 @@ import Store from "@utils/gm/Store";
     sidebar: '#d-sidebar',
     // 主内容
     mainOutlet: '#main-outlet',
+    // 话题内容和右侧内容
+    postsContainer: '.container.posts',
 
     // 话题内容父容器
     postStream: '.post-stream',

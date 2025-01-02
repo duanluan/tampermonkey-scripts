@@ -1,6 +1,7 @@
 interface WideScreenModeOptions {
   headerWrap: string
   mainOutletWrapper: string
+  sidebarWrapper: string
   mainOutlet: string
 
   postStream: string
@@ -41,14 +42,10 @@ function addPushReplaceStateEvent() {
 function loadWidescreenMode(options: WideScreenModeOptions) {
   addPushReplaceStateEvent()
 
-  const {
-    headerWrap, mainOutletWrapper, mainOutlet,
-    postStream,
-  } = options
+  const {headerWrap, mainOutletWrapper, mainOutlet} = options
   const $headerWrap = $(headerWrap)
     , $mainOutletWrapper = $(mainOutletWrapper)
     , $mainOutlet = $(mainOutlet)
-    , $postStream = $(postStream)
 
   // 顶部撑满
   $headerWrap.css('max-width', '100%')
@@ -59,38 +56,35 @@ function loadWidescreenMode(options: WideScreenModeOptions) {
 
   // console.debug('话题页首次加载宽屏模式 + 监听话题列表变化')
   // 话题页首次加载宽屏模式 + 监听话题列表变化
-  loadWidescreenModeByTopicAndObserver(options, $postStream)
+  loadWidescreenModeByTopicAndObserver(options)
 
   // 历史记录变化时话题页重新加载宽屏模式
   window.addEventListener('popstate', () => {
     // console.debug('历史记录变化时话题页重新加载宽屏模式')
-    popstateAndPushStateListener(postStream, options, $mainOutlet)
+    popstateAndPushStateListener(options)
   })
   // 单页面 pushState 切换页面时话题页重新加载宽屏模式
   window.addEventListener('pushState', () => {
     // console.debug('单页面 pushState 切换页面时话题页重新加载宽屏模式')
-    popstateAndPushStateListener(postStream, options, $mainOutlet)
+    popstateAndPushStateListener(options)
   })
   window.addEventListener('replaceState', () => {
     // console.debug('单页面 replaceState 切换页面时话题页重新加载宽屏模式')
-    popstateAndPushStateListener(postStream, options, $mainOutlet)
+    popstateAndPushStateListener(options)
   })
 }
 
 /**
  * popstate 和 pushState 事件监听
- * @param postStreamSelector 话题内容选择器
  * @param options 选项
- * @param $mainOutlet 主内容
  */
-function popstateAndPushStateListener(postStreamSelector: string, options: WideScreenModeOptions, $mainOutlet: JQuery<HTMLElement>) {
-  if (location.href.indexOf('/topic/') !== -1) {
+function popstateAndPushStateListener(options: WideScreenModeOptions) {
+  if (location.href.indexOf('/t/') !== -1) {
     // 等待 .post-stream 加载完成
     const interval = setInterval(() => {
-      const $newPostStreamWrapper = $(postStreamSelector)
-      if ($newPostStreamWrapper.length > 0) {
+      if ($(options.postStream).length > 0) {
         clearInterval(interval)
-        loadWidescreenModeByTopicAndObserver(options, $(postStreamSelector))
+        loadWidescreenModeByTopicAndObserver(options)
       }
     }, 500)
   }
@@ -99,15 +93,15 @@ function popstateAndPushStateListener(postStreamSelector: string, options: WideS
 /**
  * 话题页加载宽屏模式 + 监听话题内容变化
  * @param options 选项
- * @param $postStream 话题内容
  */
-function loadWidescreenModeByTopicAndObserver(options, $postStream: JQuery<HTMLElement>) {
+function loadWidescreenModeByTopicAndObserver(options) {
   // 监听话题列表变化
-  if (location.href.indexOf('/topic/') == -1) {
+  if (location.href.indexOf('/t/') == -1) {
     return;
   }
   loadWidescreenModeByTopic(options)
 
+  const $postStream = $(options.postStream)
   if ($postStream.data('hasObserver')) {
     // console.debug('[discourse-pro-widescreenMode] 已存在话题内容变化监听器，跳过');
     return;
@@ -135,7 +129,6 @@ function loadWidescreenModeByTopicAndObserver(options, $postStream: JQuery<HTMLE
     // 不监听子节点下的节点
     subtree: false,
   });
-
 }
 
 /**
@@ -144,9 +137,13 @@ function loadWidescreenModeByTopicAndObserver(options, $postStream: JQuery<HTMLE
  */
 function loadWidescreenModeByTopic(options: any) {
   const {
-    postStream, topicAvatar, topicBody, topicMap, smallActionDesc, topicPostVisitedLine, loadingContainer, topicTimerInfo, topicFooterBtns, moreTopicsContainer
+    mainOutlet, postsContainer, postStream,
+    topicAvatar, topicBody, topicMap, smallActionDesc, topicPostVisitedLine, loadingContainer, topicTimerInfo, topicFooterBtns, moreTopicsContainer
   } = options
-  const $postStream = $(postStream)
+  const $mainOutlet = $(mainOutlet)
+    , $postsContainer = $(postsContainer)
+    , $postStream = $(postStream)
+
     , $topicAvatar = $(topicAvatar)
     , $topicBody = $(topicBody)
     , $topicMap = $(topicMap)
@@ -156,6 +153,14 @@ function loadWidescreenModeByTopic(options: any) {
     , $topicTimerInfo = $(topicTimerInfo)
     , $topicFooterBtns = $(topicFooterBtns)
     , $moreTopicsContainer = $(moreTopicsContainer)
+
+  const $sidebarWrapper = $(options.sidebarWrapper)
+  // 无侧边栏
+  if ($sidebarWrapper.width() == 0) {
+    $postsContainer.css('grid-template-columns', '75% 25%')
+    // 没有侧边栏左侧增加边距
+    $mainOutlet.css('margin-left', '30px')
+  }
 
   const postStreamWidth = $postStream.width()
   const topicAvatarWidth = $topicAvatar.width()

@@ -3,6 +3,7 @@ import {loadWidescreenModeByTopic} from "./widescreenMode";
 
 interface DragBarOptions {
   mainOutletWrapper: string
+  mainOutlet: string
   sidebarWrapper: string
   sidebar: string
   headerSidebarToggleBtn: string
@@ -14,11 +15,12 @@ interface DragBarOptions {
 
 export function loadDragBar(options: DragBarOptions) {
   const {
-    mainOutletWrapper, sidebarWrapper, sidebar, headerSidebarToggleBtn,
+    mainOutletWrapper, mainOutlet, sidebarWrapper, sidebar, headerSidebarToggleBtn,
     sidebarWidthKey, minSidebarWidth, maxSidebarWidth
   } = options
 
   const $mainOutletWrapper = $(mainOutletWrapper)
+    , $mainOutlet = $(mainOutlet)
     , $sidebarWrapper = $(sidebarWrapper)
     , $sidebar = $(sidebar)
     , $headerSidebarToggleBtn = $(headerSidebarToggleBtn)
@@ -91,8 +93,13 @@ export function loadDragBar(options: DragBarOptions) {
   $headerSidebarToggleBtn.on('click', () => {
     sidebarExist = !sidebarExist
 
-    $mainOutletWrapper.css(
-      'grid-template-columns', `${sidebarExist ? Store.get(sidebarWidthKey) + 'px' : '0'} minmax(0, 1fr)`
-    )
+    $mainOutletWrapper.css('grid-template-columns', `${sidebarExist ? Store.get(sidebarWidthKey) + 'px' : '0'} minmax(0, 1fr)`)
+    // 同 loadWidescreenModeByTopic 中在侧边栏缩起后加左外边距
+    $mainOutlet.css('margin-left', !sidebarExist ? '30px' : 0)
+
+    // 延迟执行确保侧边栏已经展开或收起
+    setTimeout(() => {
+      loadWidescreenModeByTopic(options);
+    }, 300);
   })
 }

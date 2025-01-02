@@ -340,12 +340,10 @@ function loadWidescreenMode(options) {
   addPushReplaceStateEvent();
   var headerWrap = options.headerWrap,
     mainOutletWrapper = options.mainOutletWrapper,
-    mainOutlet = options.mainOutlet,
-    postStream = options.postStream;
+    mainOutlet = options.mainOutlet;
   var $headerWrap = $(headerWrap),
     $mainOutletWrapper = $(mainOutletWrapper),
-    $mainOutlet = $(mainOutlet),
-    $postStream = $(postStream);
+    $mainOutlet = $(mainOutlet);
 
   // 顶部撑满
   $headerWrap.css('max-width', '100%');
@@ -356,38 +354,35 @@ function loadWidescreenMode(options) {
 
   // console.debug('话题页首次加载宽屏模式 + 监听话题列表变化')
   // 话题页首次加载宽屏模式 + 监听话题列表变化
-  loadWidescreenModeByTopicAndObserver(options, $postStream);
+  loadWidescreenModeByTopicAndObserver(options);
 
   // 历史记录变化时话题页重新加载宽屏模式
   window.addEventListener('popstate', function () {
     // console.debug('历史记录变化时话题页重新加载宽屏模式')
-    popstateAndPushStateListener(postStream, options, $mainOutlet);
+    popstateAndPushStateListener(options);
   });
   // 单页面 pushState 切换页面时话题页重新加载宽屏模式
   window.addEventListener('pushState', function () {
     // console.debug('单页面 pushState 切换页面时话题页重新加载宽屏模式')
-    popstateAndPushStateListener(postStream, options, $mainOutlet);
+    popstateAndPushStateListener(options);
   });
   window.addEventListener('replaceState', function () {
     // console.debug('单页面 replaceState 切换页面时话题页重新加载宽屏模式')
-    popstateAndPushStateListener(postStream, options, $mainOutlet);
+    popstateAndPushStateListener(options);
   });
 }
 
 /**
  * popstate 和 pushState 事件监听
- * @param postStreamSelector 话题内容选择器
  * @param options 选项
- * @param $mainOutlet 主内容
  */
-function popstateAndPushStateListener(postStreamSelector, options, $mainOutlet) {
-  if (location.href.indexOf('/topic/') !== -1) {
+function popstateAndPushStateListener(options) {
+  if (location.href.indexOf('/t/') !== -1) {
     // 等待 .post-stream 加载完成
     var interval = setInterval(function () {
-      var $newPostStreamWrapper = $(postStreamSelector);
-      if ($newPostStreamWrapper.length > 0) {
+      if ($(options.postStream).length > 0) {
         clearInterval(interval);
-        loadWidescreenModeByTopicAndObserver(options, $(postStreamSelector));
+        loadWidescreenModeByTopicAndObserver(options);
       }
     }, 500);
   }
@@ -396,14 +391,14 @@ function popstateAndPushStateListener(postStreamSelector, options, $mainOutlet) 
 /**
  * 话题页加载宽屏模式 + 监听话题内容变化
  * @param options 选项
- * @param $postStream 话题内容
  */
-function loadWidescreenModeByTopicAndObserver(options, $postStream) {
+function loadWidescreenModeByTopicAndObserver(options) {
   // 监听话题列表变化
-  if (location.href.indexOf('/topic/') == -1) {
+  if (location.href.indexOf('/t/') == -1) {
     return;
   }
   loadWidescreenModeByTopic(options);
+  var $postStream = $(options.postStream);
   if ($postStream.data('hasObserver')) {
     // console.debug('[discourse-pro-widescreenMode] 已存在话题内容变化监听器，跳过');
     return;
@@ -437,7 +432,9 @@ function loadWidescreenModeByTopicAndObserver(options, $postStream) {
  * @param options
  */
 function loadWidescreenModeByTopic(options) {
-  var postStream = options.postStream,
+  var mainOutlet = options.mainOutlet,
+    postsContainer = options.postsContainer,
+    postStream = options.postStream,
     topicAvatar = options.topicAvatar,
     topicBody = options.topicBody,
     topicMap = options.topicMap,
@@ -447,7 +444,9 @@ function loadWidescreenModeByTopic(options) {
     topicTimerInfo = options.topicTimerInfo,
     topicFooterBtns = options.topicFooterBtns,
     moreTopicsContainer = options.moreTopicsContainer;
-  var $postStream = $(postStream),
+  var $mainOutlet = $(mainOutlet),
+    $postsContainer = $(postsContainer),
+    $postStream = $(postStream),
     $topicAvatar = $(topicAvatar),
     $topicBody = $(topicBody),
     $topicMap = $(topicMap),
@@ -457,6 +456,13 @@ function loadWidescreenModeByTopic(options) {
     $topicTimerInfo = $(topicTimerInfo),
     $topicFooterBtns = $(topicFooterBtns),
     $moreTopicsContainer = $(moreTopicsContainer);
+  var $sidebarWrapper = $(options.sidebarWrapper);
+  // 无侧边栏
+  if ($sidebarWrapper.width() == 0) {
+    $postsContainer.css('grid-template-columns', '75% 25%');
+    // 没有侧边栏左侧增加边距
+    $mainOutlet.css('margin-left', '30px');
+  }
   var postStreamWidth = $postStream.width();
   var topicAvatarWidth = $topicAvatar.width();
   var topicWidth = postStreamWidth - 45;
@@ -492,6 +498,7 @@ function loadWidescreenModeByTopic(options) {
 
 function loadDragBar(options) {
   var mainOutletWrapper = options.mainOutletWrapper,
+    mainOutlet = options.mainOutlet,
     sidebarWrapper = options.sidebarWrapper,
     sidebar = options.sidebar,
     headerSidebarToggleBtn = options.headerSidebarToggleBtn,
@@ -499,6 +506,7 @@ function loadDragBar(options) {
     minSidebarWidth = options.minSidebarWidth,
     maxSidebarWidth = options.maxSidebarWidth;
   var $mainOutletWrapper = $(mainOutletWrapper),
+    $mainOutlet = $(mainOutlet),
     $sidebarWrapper = $(sidebarWrapper),
     $sidebar = $(sidebar),
     $headerSidebarToggleBtn = $(headerSidebarToggleBtn);
@@ -567,6 +575,13 @@ function loadDragBar(options) {
   $headerSidebarToggleBtn.on('click', function () {
     sidebarExist = !sidebarExist;
     $mainOutletWrapper.css('grid-template-columns', "".concat(sidebarExist ? Store/* default */.A.get(sidebarWidthKey) + 'px' : '0', " minmax(0, 1fr)"));
+    // 同 loadWidescreenModeByTopic 中在侧边栏缩起后加左外边距
+    $mainOutlet.css('margin-left', !sidebarExist ? '30px' : 0);
+
+    // 延迟执行确保侧边栏已经展开或收起
+    setTimeout(function () {
+      loadWidescreenModeByTopic(options);
+    }, 300);
   });
 }
 // EXTERNAL MODULE: ./discourse-pro/src/Options.ts + 2 modules
@@ -581,16 +596,21 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.4
-// @description  增强 Discourse 论坛。
+// @version      0.1.5
+// @description  增强 Discourse 论坛
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
 // @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
 // @homepage     https://greasyfork.org/zh-CN/scripts/520817
 // @supportURL   https://github.com/duanluan/tampermonkey-scripts/issues
 // @match        *://greasyfork.org/*
-// @match        *://linux.do/*
 // @match        *://meta.appinn.net/*
+// @match        *://linux.do/*
+// @match        *://answers.netlify.com/*
+// @match        *://community.cloudflare.com/*
+// @match        *://community.openai.com/*
+// @match        *://forums.docker.com/*
+// @match        *://discourse.webflow.com/*
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -627,6 +647,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     sidebar: '#d-sidebar',
     // 主内容
     mainOutlet: '#main-outlet',
+    // 话题内容和右侧内容
+    postsContainer: '.container.posts',
     // 话题内容父容器
     postStream: '.post-stream',
     // 话题头像
