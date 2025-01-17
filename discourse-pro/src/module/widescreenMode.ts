@@ -138,7 +138,7 @@ function loadWidescreenModeByTopicAndObserver(options) {
 function loadWidescreenModeByTopic(options: any) {
   const {
     mainOutlet, postsContainer, postStream,
-    topicAvatar, topicBody, topicMap, smallActionDesc, topicPostVisitedLine, loadingContainer, topicTimerInfo, topicFooterBtns, moreTopicsContainer
+    topicAvatar, topicBody, topicMap, smallActionDesc, topicPostVisitedLine, postNoticeNewUser, loadingContainer, topicTimerInfo, topicFooterBtns, moreTopicsContainer
   } = options
   const $mainOutlet = $(mainOutlet)
     , $postsContainer = $(postsContainer)
@@ -149,6 +149,7 @@ function loadWidescreenModeByTopic(options: any) {
     , $topicMap = $(topicMap)
     , $smallActionDesc = $(smallActionDesc)
     , $topicPostVisitedLine = $(topicPostVisitedLine)
+    , $postNoticeNewUser = $(postNoticeNewUser)
     , $loadingContainer = $(loadingContainer)
     , $topicTimerInfo = $(topicTimerInfo)
     , $topicFooterBtns = $(topicFooterBtns)
@@ -186,6 +187,8 @@ function loadWidescreenModeByTopic(options: any) {
   $smallActionDesc.css('width', (topicWidth - topicAvatarWidth) + 'px')
   // 上次访问分隔线撑满
   $topicPostVisitedLine.css('width', topicWidth + 'px')
+  // 首次发帖撑满
+  $postNoticeNewUser.css('max-width', topicWidth + 'px')
   // 话题底部按钮撑满
   $topicFooterBtns.css('max-width', topicWidth + 'px')
   // 更多话题列表撑满

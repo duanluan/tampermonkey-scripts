@@ -440,6 +440,7 @@ function loadWidescreenModeByTopic(options) {
     topicMap = options.topicMap,
     smallActionDesc = options.smallActionDesc,
     topicPostVisitedLine = options.topicPostVisitedLine,
+    postNoticeNewUser = options.postNoticeNewUser,
     loadingContainer = options.loadingContainer,
     topicTimerInfo = options.topicTimerInfo,
     topicFooterBtns = options.topicFooterBtns,
@@ -452,6 +453,7 @@ function loadWidescreenModeByTopic(options) {
     $topicMap = $(topicMap),
     $smallActionDesc = $(smallActionDesc),
     $topicPostVisitedLine = $(topicPostVisitedLine),
+    $postNoticeNewUser = $(postNoticeNewUser),
     $loadingContainer = $(loadingContainer),
     $topicTimerInfo = $(topicTimerInfo),
     $topicFooterBtns = $(topicFooterBtns),
@@ -487,6 +489,8 @@ function loadWidescreenModeByTopic(options) {
   $smallActionDesc.css('width', topicWidth - topicAvatarWidth + 'px');
   // 上次访问分隔线撑满
   $topicPostVisitedLine.css('width', topicWidth + 'px');
+  // 首次发帖撑满
+  $postNoticeNewUser.css('max-width', topicWidth + 'px');
   // 话题底部按钮撑满
   $topicFooterBtns.css('max-width', topicWidth + 'px');
   // 更多话题列表撑满
@@ -596,7 +600,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.5
+// @version      0.1.6
 // @description  增强 Discourse 论坛
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -661,6 +665,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     smallActionDesc: '.small-action-desc',
     // 上次访问分隔线
     topicPostVisitedLine: '.topic-post-visited-line',
+    // 首次发帖
+    postNoticeNewUser: '.post-notice.new-user',
     // 最后一个回复后的底边框
     loadingContainer: '.loading-container',
     topicTimerInfo: '.topic-timer-info',
