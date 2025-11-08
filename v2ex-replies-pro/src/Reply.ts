@@ -111,7 +111,11 @@ export default class Reply {
         const $cell = $atLink.parents('.cell')
         $cell.addClass(selector.clickedReply.substring(1))
         // 跳转到那条回复
-        $('html,body').animate({scrollTop: $cell.offset().top - $(window).height() / 2}, 500);
+        const targetY = $cell.offset().top - $(window).height() / 2;
+        window.scrollTo({
+          top: targetY,
+          behavior: 'smooth'
+        });
 
         const username = $atLink.text()
         if (Reply.winbox) {
@@ -141,7 +145,16 @@ export default class Reply {
         const $cell1 = $(`#${$cell.attr('id')}_1`)
         $cell1.addClass(selector.clickedReply.substring(1))
         // 跳转到那条回复
-        $(selector.taSayBody).animate({scrollTop: $cell1.offset().top - $(selector.taSayBody).offset().top - $(selector.taSayBody).height() / 2}, 500);
+        const $scrollContainer = $(selector.taSayBody);
+        const scrollContainer = $scrollContainer[0]; // 获取 DOM 元素
+        if (scrollContainer) {
+          // 计算目标 scrollTop 值
+          const targetScrollTop = $cell1.offset().top - $scrollContainer.offset().top - ($scrollContainer.height() / 2);
+          scrollContainer.scrollTo({
+            top: targetScrollTop,
+            behavior: 'smooth'
+          });
+        }
       })
     }
     layer.msg('回复增强成功', {icon: 1/*, offset: 'rb'*/})
