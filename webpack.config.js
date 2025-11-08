@@ -2,11 +2,12 @@ const glob = require('glob');
 const path = require("path");
 // const TerserPlugin = require("terser-webpack-plugin");
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 const baseConfig = {
-  mode: 'development',
-  // mode: 'production',
-  // 使用 source map：https://webpack.docschina.org/guides/development/#using-source-maps
-  devtool: 'source-map',
+  mode: isDev ? 'development' : 'production',
+  // 使用 eval-source-map 在油猴脚本 file://@require 时方便调试：https://webpack.docschina.org/guides/development/#using-source-maps
+  devtool: isDev ? 'eval-source-map' : 'source-map',
   module: {
     rules: [
       // 转译 TS：https://webpack.docschina.org/loaders/babel-loader、https://www.babeljs.cn/docs/babel-preset-typescript
