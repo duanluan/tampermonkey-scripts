@@ -53,20 +53,11 @@ const baseConfig = {
 module.exports = [
   {
     ...baseConfig,
-    entry: glob.sync('./amazon-kindle-douban-score/src/*.ts'),
-    output: {
-      path: path.resolve(__dirname, 'amazon-kindle-douban-score/dist'),
-      filename: 'amazon-kindle-douban-score.user.js',
-      // 清理 /dist 文件夹：https://webpack.docschina.org/guides/output-management/#cleaning-up-the-dist-folder
-      clean: true
-    }
-  },
-  {
-    ...baseConfig,
     entry: glob.sync('./core-socialist-values/src/*.ts'),
     output: {
       path: path.resolve(__dirname, 'core-socialist-values/dist'),
       filename: 'core-socialist-values.user.js',
+      // 清理 /dist 文件夹：https://webpack.docschina.org/guides/output-management/#cleaning-up-the-dist-folder
       clean: true
     }
   },
