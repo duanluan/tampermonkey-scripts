@@ -543,18 +543,37 @@ var CommonOptions = /*#__PURE__*/function () {
     }
 
     /**
+     * 注册字符串/按钮类型的选项 (无状态)
+     *
+     * @param option 选项
+     */
+  }, {
+    key: "registerStrOption",
+    value: function registerStrOption(option) {
+      MenuCmd.register(option.label, function () {
+        if (typeof option.callback === 'function') {
+          option.callback();
+        }
+      });
+    }
+
+    /**
      * 注册所有选项
      *
      * @param options 选项
      * @param moreOptionsUrl 更多设置页面 URL
+     * @param useStore 是否使用存储（默认 true）
      */
   }, {
     key: "registerAll",
     value: function registerAll(options, moreOptionsUrl) {
-      // 注册“更多设置”选项，点击后打开新页面
-      MenuCmd.register('更多设置', function () {
-        window.open(moreOptionsUrl, '_blank');
-      });
+      var useStore = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+      if (moreOptionsUrl) {
+        // 注册“更多设置”选项，点击后打开新页面到更多设置页面
+        MenuCmd.register('更多设置', function () {
+          window.open(moreOptionsUrl, '_blank');
+        });
+      }
       var _iterator = _createForOfIteratorHelper(options),
         _step;
       try {
@@ -563,13 +582,26 @@ var CommonOptions = /*#__PURE__*/function () {
           // TODO 【调试】不保留选项的值，每次都从 Store 中获取
           // Store.set(option.name, null);
 
-          var storeOption = Store/* default */.A.get(option.name) ? JSON.parse(Store/* default */.A.get(option.name)) : null;
-          // 如果选项不存在 || 版本不一致 时重置选项
-          if (storeOption === null || !storeOption['version'] || storeOption['version'] < option.version) {
-            Store/* default */.A.set(option.name, JSON.stringify(option));
-            storeOption = option;
+          // 声明最终用于注册的选项变量
+          var finalOption = option;
+
+          // useStore 为 true 时，才从 Store 读取或更新
+          if (useStore) {
+            var storeOption = Store/* default */.A.get(option.name) ? JSON.parse(Store/* default */.A.get(option.name)) : null;
+            // 如果选项不存在 || 版本不一致 时重置选项
+            if (storeOption === null || !storeOption['version'] || storeOption['version'] < option.version) {
+              Store/* default */.A.set(option.name, JSON.stringify(option));
+              storeOption = option;
+            }
+            finalOption = storeOption;
           }
-          this.registerBoolOption(storeOption);
+
+          // 根据类型分发注册方法
+          if (typeof finalOption.value === 'boolean') {
+            this.registerBoolOption(finalOption);
+          } else {
+            this.registerStrOption(finalOption);
+          }
         }
       } catch (err) {
         _iterator.e(err);
@@ -790,9 +822,9 @@ _defineProperty(Options, "options", [{
 /******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
-/******/ 	__webpack_require__(163);
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __webpack_require__(440);
+/******/ 	__webpack_require__(440);
+/******/ 	var __webpack_exports__ = __webpack_require__(163);
 /******/ 	
 /******/ })()
 ;

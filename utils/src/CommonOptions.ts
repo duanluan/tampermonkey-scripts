@@ -36,28 +36,57 @@ export default class CommonOptions {
   }
 
   /**
+   * 注册字符串/按钮类型的选项 (无状态)
+   *
+   * @param option 选项
+   */
+  static registerStrOption(option: any) {
+    MenuCmd.register(option.label, () => {
+      if (typeof option.callback === 'function') {
+        option.callback();
+      }
+    });
+  }
+
+  /**
    * 注册所有选项
    *
    * @param options 选项
    * @param moreOptionsUrl 更多设置页面 URL
+   * @param useStore 是否使用存储（默认 true）
    */
-  static registerAll(options: any[], moreOptionsUrl: string) {
-    // 注册“更多设置”选项，点击后打开新页面
-    MenuCmd.register('更多设置', () => {
-      window.open(moreOptionsUrl, '_blank');
-    });
+  static registerAll(options: any[], moreOptionsUrl?: string, useStore: boolean = true) {
+    if (moreOptionsUrl) {
+      // 注册“更多设置”选项，点击后打开新页面到更多设置页面
+      MenuCmd.register('更多设置', () => {
+        window.open(moreOptionsUrl, '_blank');
+      });
+    }
 
     for (const option of options) {
       // TODO 【调试】不保留选项的值，每次都从 Store 中获取
       // Store.set(option.name, null);
 
-      let storeOption = Store.get(option.name) ? JSON.parse(Store.get(option.name)) : null;
-      // 如果选项不存在 || 版本不一致 时重置选项
-      if (storeOption === null || !storeOption['version'] || storeOption['version'] < option.version) {
-        Store.set(option.name, JSON.stringify(option));
-        storeOption = option;
+      // 声明最终用于注册的选项变量
+      let finalOption = option;
+
+      // useStore 为 true 时，才从 Store 读取或更新
+      if (useStore) {
+        let storeOption = Store.get(option.name) ? JSON.parse(Store.get(option.name)) : null;
+        // 如果选项不存在 || 版本不一致 时重置选项
+        if (storeOption === null || !storeOption['version'] || storeOption['version'] < option.version) {
+          Store.set(option.name, JSON.stringify(option));
+          storeOption = option;
+        }
+        finalOption = storeOption;
       }
-      this.registerBoolOption(storeOption);
+
+      // 根据类型分发注册方法
+      if (typeof finalOption.value === 'boolean') {
+        this.registerBoolOption(finalOption);
+      } else {
+        this.registerStrOption(finalOption);
+      }
     }
   }
 
