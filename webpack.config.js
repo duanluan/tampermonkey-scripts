@@ -80,6 +80,15 @@ module.exports = (env, argv) => {
         filename: 'discourse-pro.user.js',
         clean: true
       }
+    },
+    {
+      ...baseConfig,
+      entry: glob.sync('./163-mail-pro/src/*.ts'),
+      output: {
+        path: path.resolve(__dirname, '163-mail-pro/dist'),
+        filename: '163-mail-pro.user.js',
+        clean: true
+      }
     }
   ];
 }
