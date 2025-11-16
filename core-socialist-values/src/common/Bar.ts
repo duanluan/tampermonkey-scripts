@@ -42,7 +42,7 @@ export default class Bar {
    * }
    */
   static replace(options: { barSelector: string, isObserveBar: boolean, followUpObserveSelector?: string, hideBarSelector?: string, isObserveHideBar?: boolean, replaceBarCallback?: Function, jinrishiciCallback?: Function, hideBarCallback?: Function }) {
-    if (!$(options.barSelector).text().match(/ukraine|乌克兰|black|黑人/i)) {
+    if (!$(options.barSelector).text().match(/ukraine|乌克兰|black|黑人|trans rights|human rights/i)) {
       return
     }
     // 一般隐藏条幅和替换条幅相同
