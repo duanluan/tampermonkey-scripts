@@ -7,7 +7,7 @@ export default class Syncthing {
   }
 
   static replace() {
-    if (location.host === 'syncthing.net') {
+    if (location.host !== 'syncthing.net') {
       return
     }
     Bar.replace({

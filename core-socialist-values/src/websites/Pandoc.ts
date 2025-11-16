@@ -5,7 +5,7 @@ export default class Pandoc {
   }
 
   static replace() {
-    if (location.host === 'pandoc.org') {
+    if (location.host !== 'pandoc.org') {
       return
     }
     const $headerBtn = $(this.selectors.headerBtn)

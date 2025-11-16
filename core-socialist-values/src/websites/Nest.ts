@@ -7,7 +7,7 @@ export default class Codecept {
   }
 
   static replace() {
-    if (location.host === 'docs.nestjs.com') {
+    if (location.host !== 'docs.nestjs.com') {
       return
     }
     Bar.replace({

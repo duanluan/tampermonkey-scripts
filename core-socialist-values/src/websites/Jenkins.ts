@@ -6,7 +6,7 @@ export default class Angular {
   }
 
   static replace() {
-    if (location.host === 'www.jenkins.io') {
+    if (location.host !== 'www.jenkins.io') {
       return
     }
     // 替换图标

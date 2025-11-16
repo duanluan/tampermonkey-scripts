@@ -10,7 +10,7 @@ export default class React {
   }
 
   static replace() {
-    if (location.host === 'react.dev') {
+    if (location.host !== 'react.dev') {
       return
     }
     Bar.replace({

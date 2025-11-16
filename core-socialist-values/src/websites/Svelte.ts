@@ -13,7 +13,7 @@ export default class Svelte {
   private static svelteLogoStyle = 'background-image: url(https://svelte.dev/svelte-logo-horizontal.svg)'
 
   static replace() {
-    if (location.host === 'svelte.dev') {
+    if (location.host !== 'svelte.dev') {
       return
     }
     const $navSpot = $(this.selectors.navSpot)

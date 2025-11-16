@@ -5,7 +5,7 @@ export default class Github {
   }
 
   static replace() {
-    if (location.href === 'https://github.com/') {
+    if (location.href !== 'https://github.com/') {
       return
     }
     const $notice = $(this.selectors.notice)

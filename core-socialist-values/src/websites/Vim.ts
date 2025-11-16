@@ -8,7 +8,7 @@ export default class SvelteMaterialUi {
   }
 
   static replace() {
-    if (location.host === 'www.vim.org') {
+    if (location.host !== 'www.vim.org') {
       return
     }
     for (let i = 0; i < 5; i++) {

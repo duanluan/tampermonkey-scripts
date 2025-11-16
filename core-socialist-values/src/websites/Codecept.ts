@@ -8,7 +8,7 @@ export default class Codecept {
   }
 
   static replace() {
-    if (location.host === 'codecept.io') {
+    if (location.host !== 'codecept.io') {
       return
     }
     Bar.replace({

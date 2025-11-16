@@ -7,7 +7,7 @@ export default class Electron {
   }
 
   static replace() {
-    if (location.host === 'www.electronjs.org') {
+    if (location.host !== 'www.electronjs.org') {
       return
     }
     Bar.replace({

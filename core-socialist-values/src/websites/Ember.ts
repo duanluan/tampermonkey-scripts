@@ -7,7 +7,7 @@ export default class Ember {
   }
 
   static replace() {
-    if (location.host === 'emberjs.com') {
+    if (location.host !== 'emberjs.com') {
       return
     }
     Bar.replace({

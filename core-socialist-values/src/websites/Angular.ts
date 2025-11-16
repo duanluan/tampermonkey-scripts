@@ -6,7 +6,7 @@ export default class Angular {
   }
 
   static replace() {
-    if (location.host === 'angular.io') {
+    if (location.host !== 'angular.io') {
       return
     }
     // 不存在是否关闭通知的本地存储时
