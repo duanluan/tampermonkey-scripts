@@ -17,13 +17,13 @@
 
 * ~~[React](https://react.dev/)：条幅~~
 * ~~[Angular](https://angular.io/)：通知~~
-* [Junit](https://junit.org/junit5/)：Logo
+* ~~[Junit](https://junit.org/junit5/)：Logo~~
 * [CodeceptJS](https://codecept.io/)：条幅
 * [GitHub](https://github.com/)：通知
 * ~~[NestJS](https://docs.nestjs.com/)：条幅~~
 * [Ember](https://emberjs.com/)：条幅
 * ~~[Electron](https://www.electronjs.org/)：条幅~~
-* [Jenkins](https://www.jenkins.io/)：Logo、摘要
+* ~~[Jenkins](https://www.jenkins.io/)：Logo、摘要~~
 * ~~[Svelte](https://svelte.dev/)：Logo、底部条幅~~
 * [Svelte Material UI](https://sveltematerialui.com/)：条幅（隐藏）
 * [Syncthing](https://syncthing.net/)：条幅
