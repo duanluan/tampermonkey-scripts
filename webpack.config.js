@@ -89,6 +89,15 @@ module.exports = (env, argv) => {
         filename: '163-mail-pro.user.js',
         clean: true
       }
+    },
+    {
+      ...baseConfig,
+      entry: glob.sync('./gemini-pro/src/*.ts'),
+      output: {
+        path: path.resolve(__dirname, 'gemini-pro/dist'),
+        filename: 'gemini-pro.user.js',
+        clean: true
+      }
     }
   ];
 }
