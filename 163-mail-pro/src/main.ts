@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.0.1
+// @version      0.0.2
 // @description  增强 163 网易邮箱。
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
