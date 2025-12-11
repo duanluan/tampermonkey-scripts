@@ -53,6 +53,12 @@ var Store = /*#__PURE__*/function () {
 
 /* harmony import */ var _Options__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(797);
 /* harmony import */ var _utils_gm_Store__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(307);
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
@@ -144,16 +150,14 @@ var Store = /*#__PURE__*/function () {
   };
   var configKey = 'config';
 
-  // 读取配置
+  // 读取配置，补全缺失字段
   var savedConfigStr = _utils_gm_Store__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .A.get(configKey);
-  var config = savedConfigStr ? JSON.parse(savedConfigStr) : defaultConfig;
+  var config = savedConfigStr ? _objectSpread(_objectSpread({}, defaultConfig), JSON.parse(savedConfigStr)) : defaultConfig;
 
   /**
    * 应用配置（根据配置显示或隐藏元素）
    */
   var applyConfig = function applyConfig() {
-    // toggle(false) 等同于 hide(), toggle(true) 等同于 show()
-    // 如果配置为 hide (true)，则 toggle(false) 隐藏
     $(selector.contactsTab).toggle(!config.hideContactsTab);
     $(selector.aiToolboxTab).toggle(!config.hideAiToolboxTab);
     $(selector.enableVipNavItem).toggle(!config.hideEnableVipNavItem);
@@ -170,7 +174,24 @@ var Store = /*#__PURE__*/function () {
   };
   applyConfig();
 
-  // 定义点击设置时的回调函数
+  /**
+   * 监听 DOM 变化，确保动态插入的元素也被隐藏
+   */
+  var observeDomChanges = function observeDomChanges() {
+    var target = document.body;
+    if (!target) return;
+    var observer = new MutationObserver(function () {
+      applyConfig();
+    });
+    observer.observe(target, {
+      childList: true,
+      subtree: true
+    });
+  };
+
+  /**
+   * 定义点击设置时的回调函数
+   */
   var onSettingsClick = function onSettingsClick() {
     layer.open({
       type: 1,
@@ -184,16 +205,23 @@ var Store = /*#__PURE__*/function () {
 
       // 监听复选框变更
       layui.form.on('checkbox(item-switch)', function (data) {
-        // 更新配置对象
         var name = data.elem.name;
         config[name] = data.elem.checked;
-
-        // 保存并应用
         _utils_gm_Store__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .A.set(configKey, JSON.stringify(config));
         applyConfig();
       });
     });
   };
+
+  // DOM 就绪后开始监听
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      applyConfig();
+      observeDomChanges();
+    });
+  } else {
+    observeDomChanges();
+  }
 
   // 注册选项并传入回调
   _Options__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.registerAll(onSettingsClick);
@@ -515,9 +543,9 @@ _defineProperty(Options, "options", [{
 /******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
+/******/ 	__webpack_require__(603);
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	__webpack_require__(797);
-/******/ 	var __webpack_exports__ = __webpack_require__(603);
+/******/ 	var __webpack_exports__ = __webpack_require__(797);
 /******/ 	
 /******/ })()
 ;

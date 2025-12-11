@@ -96,16 +96,16 @@ import Store from "@utils/gm/Store";
     // 隐藏搜索栏 AI 搜
     hideSearchInputAiIcon: true,
     // 隐藏 AI 助理入口
-    hideSmartAssistantOperating:true,
+    hideSmartAssistantOperating: true,
     hidesmartAssistantBtn: true,
     // 隐藏开通超级会员 Tip
     hideWarnTips: true,
   };
   const configKey = 'config';
 
-  // 读取配置
+  // 读取配置，补全缺失字段
   let savedConfigStr = Store.get(configKey);
-  let config = savedConfigStr ? JSON.parse(savedConfigStr) : defaultConfig;
+  let config = savedConfigStr ? { ...defaultConfig, ...JSON.parse(savedConfigStr) } : defaultConfig;
 
   /**
    * 应用配置（根据配置显示或隐藏元素）
@@ -131,7 +131,24 @@ import Store from "@utils/gm/Store";
   };
   applyConfig();
 
-  // 定义点击设置时的回调函数
+  /**
+   * 监听 DOM 变化，确保动态插入的元素也被隐藏
+   */
+  const observeDomChanges = () => {
+    const target = document.body;
+    if (!target) return;
+    const observer = new MutationObserver(() => {
+      applyConfig();
+    });
+    observer.observe(target, {
+      childList: true,
+      subtree: true,
+    });
+  };
+
+  /**
+   * 定义点击设置时的回调函数
+   */
   const onSettingsClick = () => {
     layer.open({
       type: 1,
@@ -184,6 +201,16 @@ import Store from "@utils/gm/Store";
         applyConfig();
       });
     });
+  }
+
+  // DOM 就绪后开始监听
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      applyConfig();
+      observeDomChanges();
+    });
+  } else {
+    observeDomChanges();
   }
 
   // 注册选项并传入回调
