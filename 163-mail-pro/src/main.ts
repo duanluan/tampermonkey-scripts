@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.0.2
+// @version      0.1.0
 // @description  增强 163 网易邮箱。
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -71,6 +71,24 @@ import Store from "@utils/gm/Store";
     smartAssistantBtn: '.APP-smartAssistant-btn',
     // 开通超级会员 Tip
     warnTips: '[id$="_dvWarnTips"]',
+
+    // --- 其他工具栏目 ---
+    // 整个其他工具栏目（包含标题和列表）
+    otherToolsBox: '#dvNavFoot',
+    // 邮件追踪
+    trackSettingLink: '#trackSettingLink',
+    // 简历优化
+    resumeOpt: '#resumeOpt',
+    // 智能面试顾问
+    resumeInt: '#resumeInt',
+    // 求职信息订阅
+    resumeSub: '#resumeSub',
+    // PDF转换工具 (无 ID，使用特有 Class .Fx0 定位)
+    pdfConvertTool: '.Fx0',
+    // 发票助手
+    invoiceAssistant: '#navInvoiceAssistant',
+    // 企业邮箱
+    domainMail: '#navDomainMailLink',
   }
 
   // 默认配置（默认选中=隐藏）
@@ -100,6 +118,24 @@ import Store from "@utils/gm/Store";
     hidesmartAssistantBtn: true,
     // 隐藏开通超级会员 Tip
     hideWarnTips: true,
+
+    // --- 其他工具栏目 ---
+    // 隐藏整个其他工具栏目
+    hideOtherToolsBox: true,
+    // 隐藏邮件追踪
+    hideTrackSettingLink: true,
+    // 隐藏简历优化
+    hideResumeOpt: true,
+    // 隐藏智能面试顾问
+    hideResumeInt: true,
+    // 隐藏求职信息订阅
+    hideResumeSub: true,
+    // 隐藏 PDF 转换工具
+    hidePdfConvertTool: true,
+    // 隐藏发票助手
+    hideInvoiceAssistant: true,
+    // 隐藏企业邮箱
+    hideDomainMail: true,
   };
   const configKey = 'config';
 
@@ -126,8 +162,39 @@ import Store from "@utils/gm/Store";
     $(selector.searchInputAiIcon).toggle(!config.hideSearchInputAiIcon);
     $(selector.smartAssistantOperating).toggle(!config.hideSmartAssistantOperating);
     $(selector.smartAssistantBtn).toggle(!config.hidesmartAssistantBtn);
-    // [已修改] 根据配置显示/隐藏警告提示
     $(selector.warnTips).toggle(!config.hideWarnTips);
+
+    // --- 其他工具栏目 ---
+    // [修正逻辑] 如果要隐藏整个栏目，直接强力隐藏并跳过子项处理，避免脚本冲突
+    if (config.hideOtherToolsBox) {
+      $(selector.otherToolsBox).attr('style', 'display: none !important');
+    } else {
+      // 如果需要显示，先清除强制隐藏样式
+      const $box = $(selector.otherToolsBox);
+      // 只有当存在强制隐藏样式时才清除，避免覆盖原生的其他样式
+      if (($box.attr('style') || '').includes('none !important')) {
+        $box.css('display', '');
+      }
+
+      // 仅在栏目显示时，处理内部子项的显隐
+      const toggleItem = (sel, isHidden) => {
+        const $el = $(sel);
+        const $parent = $el.closest('.nui-tree-item-label');
+        if ($parent.length > 0) {
+          $parent.toggle(!isHidden);
+        } else {
+          $el.toggle(!isHidden);
+        }
+      };
+
+      toggleItem(selector.trackSettingLink, config.hideTrackSettingLink);
+      toggleItem(selector.resumeOpt, config.hideResumeOpt);
+      toggleItem(selector.resumeInt, config.hideResumeInt);
+      toggleItem(selector.resumeSub, config.hideResumeSub);
+      toggleItem(selector.pdfConvertTool, config.hidePdfConvertTool);
+      $(selector.invoiceAssistant).toggle(!config.hideInvoiceAssistant);
+      $(selector.domainMail).toggle(!config.hideDomainMail);
+    }
   };
   applyConfig();
 
@@ -152,8 +219,12 @@ import Store from "@utils/gm/Store";
   const onSettingsClick = () => {
     layer.open({
       type: 1,
-      area: ['500px', '600px'],
+      area: ['550px', '700px'],
       content: `
+      <style>
+        .layui-form-label { width: 100px !important; }
+        .layui-input-block { margin-left: 130px !important; }
+      </style>
       <form class="layui-form" style="padding: 20px;" action="">
         <div class="layui-form-item">
           <label class="layui-form-label">隐藏 Tab：</label>
@@ -174,9 +245,23 @@ import Store from "@utils/gm/Store";
           </div>
         </div>
         <div class="layui-form-item">
-          <label class="layui-form-label">隐藏其他：</label>
+          <label class="layui-form-label">隐藏其他工具：</label>
           <div class="layui-input-block">
-            <input type="checkbox" title="一键生成 PPT AI 搜索与问答，自然语言检索邮件" name="hideSmartAssistantOperating" lay-filter="item-switch" ${config.hideSmartAssistantOperating ? 'checked' : ''}/>
+            <input type="checkbox" title="整个栏目" name="hideOtherToolsBox" lay-filter="item-switch" ${config.hideOtherToolsBox ? 'checked' : ''}/>
+            <hr style="margin: 5px 0;">
+            <input type="checkbox" title="邮件追踪" name="hideTrackSettingLink" lay-filter="item-switch" ${config.hideTrackSettingLink ? 'checked' : ''}/>
+            <input type="checkbox" title="简历优化" name="hideResumeOpt" lay-filter="item-switch" ${config.hideResumeOpt ? 'checked' : ''}/>
+            <input type="checkbox" title="智能面试顾问" name="hideResumeInt" lay-filter="item-switch" ${config.hideResumeInt ? 'checked' : ''}/>
+            <input type="checkbox" title="求职信息订阅" name="hideResumeSub" lay-filter="item-switch" ${config.hideResumeSub ? 'checked' : ''}/>
+            <input type="checkbox" title="PDF转换工具" name="hidePdfConvertTool" lay-filter="item-switch" ${config.hidePdfConvertTool ? 'checked' : ''}/>
+            <input type="checkbox" title="发票助手" name="hideInvoiceAssistant" lay-filter="item-switch" ${config.hideInvoiceAssistant ? 'checked' : ''}/>
+            <input type="checkbox" title="企业邮箱" name="hideDomainMail" lay-filter="item-switch" ${config.hideDomainMail ? 'checked' : ''}/>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">隐藏杂项：</label>
+          <div class="layui-input-block">
+            <input type="checkbox" title="一键生成 PPT..." name="hideSmartAssistantOperating" lay-filter="item-switch" ${config.hideSmartAssistantOperating ? 'checked' : ''}/>
             <input type="checkbox" title="搜索栏 AI 搜" name="hideSearchInputAiIcon" lay-filter="item-switch" ${config.hideSearchInputAiIcon ? 'checked' : ''}/>
             <input type="checkbox" title="AI 助理" name="hidesmartAssistantBtn" lay-filter="item-switch" ${config.hidesmartAssistantBtn ? 'checked' : ''}/>
             <input type="checkbox" title="开通邮箱“超级会员”……" name="hideWarnTips" lay-filter="item-switch" ${config.hideWarnTips ? 'checked' : ''}/>
