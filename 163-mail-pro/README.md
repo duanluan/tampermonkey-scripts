@@ -1,36 +1,64 @@
-# 简介
+# 163 Mail Pro
 
-隐藏元素：
+> 🚀 **专注邮件，拒绝打扰。**
+> 为 163 网易邮箱提供更清爽、可定制的使用体验。
 
-- Tab 栏
+<img src="https://github.com/user-attachments/assets/674fe19e-2aff-4115-934d-3140b7104035" alt="163 Mail Pro Preview" width="100%" />
+
+---
+
+## 📖 简介
+
+**163 Mail Pro** 是一款用于增强 163 网易邮箱体验的油猴脚本。
+
+原版邮箱界面中充斥着各类广告、推广链接以及非核心功能（如 AI 助手、会员推广等）。本脚本旨在通过**移除视觉干扰**，还原邮箱最纯粹的收发信功能。
+
+## ⚙️ 使用说明
+
+1. 安装脚本后，刷新 163 邮箱页面。
+2. 点击浏览器扩展栏中的油猴图标，找到“163 Mail Pro”脚本并选择“设置”，或者点击导航栏中的“163 Mail Pro”。
+3. 在弹出的设置面板中勾选你需要隐藏的模块，即时生效。
+
+## 🛠️ 支持隐藏的模块
+
+您可以按需隐藏以下所有元素：
+
+### 🧭 导航与布局
+- **Tab 栏**：
   - 首页
   - 通讯录
   - AI 工具箱
-- Navigation Bar（导航栏）
+- **导航栏（Navigation Bar）**：
   - 开通超级会员无限容量
   - 手机 APP
   - 下载桌面端
   - 参与调研
   - 自助查询
   - 会员中心
-- 其他工具
-  - 整个栏目（隐藏整个“其他工具”块）
+
+### 🧰 侧边栏
+- **其他工具**（支持隐藏整个栏目，或单独隐藏子项）：
   - 邮件追踪
   - 简历优化
   - 智能面试顾问
   - 求职信息订阅
   - PDF 转换工具
   - 发票助手
-  - 企业邮箱
-- 其他
+  - 企业邮箱入口
+
+### 🧹 其他杂项
+- AI 推广
   - 一键生成 PPT AI 搜索与问答，自然语言检索邮件
   - 搜索栏 AI 搜
-  - AI 助理入口
-  - 开通邮箱“超级会员”……
+  - AI 助理
+- 开通邮箱“超级会员”……
 
+## 🔗 资源与下载
 
-# 资源
+- **Github**: [查看项目](https://github.com/duanluan/tampermonkey-scripts/tree/main/163-mail-pro)
+- **Greasy Fork**: [安装脚本](https://greasyfork.org/zh-CN/scripts/555894)
+- **OpenUserJS**: [安装脚本](https://openuserjs.org/scripts/duanluan/163_Mail_Pro)
 
-- Github：[https://github.com/duanluan/tampermonkey-scripts/tree/main/163-mail-pro](https://github.com/duanluan/tampermonkey-scripts/tree/main/163-mail-pro)
-- Greasy Fork：[https://greasyfork.org/zh-CN/scripts/555894](https://greasyfork.org/zh-CN/scripts/555894)
-- OpenUserJS：[https://openuserjs.org/scripts/duanluan/163_Mail_Pro](https://openuserjs.org/scripts/duanluan/163_Mail_Pro)
+---
+
+**喜欢这个脚本？**欢迎在 [GitHub](https://github.com/duanluan/tampermonkey-scripts) 点个 ⭐ Star 或在 [Greasy Fork](https://greasyfork.org/zh-CN/scripts/555894) 留下好评！

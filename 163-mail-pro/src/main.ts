@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.0
+// @version      0.2.0
 // @description  增强 163 网易邮箱。
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -44,6 +44,9 @@ import Store from "@utils/gm/Store";
   </style>`);
 
   const selector = {
+    // 顶部导航栏容器
+    topNav: '#_mail_component_1_1',
+
     // 首页 tab
     indexTab: '#_mail_tabitem_0_82',
     // 通讯录 tab
@@ -93,6 +96,8 @@ import Store from "@utils/gm/Store";
 
   // 默认配置（默认选中=隐藏）
   const defaultConfig = {
+    // 隐藏首页 Tab
+    hideIndexTab: false,
     // 隐藏通讯录 Tab
     hideContactsTab: true,
     // 隐藏 AI 工具箱 Tab
@@ -121,9 +126,9 @@ import Store from "@utils/gm/Store";
 
     // --- 其他工具栏目 ---
     // 隐藏整个其他工具栏目
-    hideOtherToolsBox: true,
+    hideOtherToolsBox: false,
     // 隐藏邮件追踪
-    hideTrackSettingLink: true,
+    hideTrackSettingLink: false,
     // 隐藏简历优化
     hideResumeOpt: true,
     // 隐藏智能面试顾问
@@ -133,7 +138,7 @@ import Store from "@utils/gm/Store";
     // 隐藏 PDF 转换工具
     hidePdfConvertTool: true,
     // 隐藏发票助手
-    hideInvoiceAssistant: true,
+    hideInvoiceAssistant: false,
     // 隐藏企业邮箱
     hideDomainMail: true,
   };
@@ -149,6 +154,7 @@ import Store from "@utils/gm/Store";
   const applyConfig = () => {
     // toggle(false) 等同于 hide(), toggle(true) 等同于 show()
     // 如果配置为 hide (true)，则 toggle(false) 隐藏
+    $(selector.indexTab).toggle(!config.hideIndexTab);
     $(selector.contactsTab).toggle(!config.hideContactsTab);
     $(selector.aiToolboxTab).toggle(!config.hideAiToolboxTab);
 
@@ -199,27 +205,13 @@ import Store from "@utils/gm/Store";
   applyConfig();
 
   /**
-   * 监听 DOM 变化，确保动态插入的元素也被隐藏
-   */
-  const observeDomChanges = () => {
-    const target = document.body;
-    if (!target) return;
-    const observer = new MutationObserver(() => {
-      applyConfig();
-    });
-    observer.observe(target, {
-      childList: true,
-      subtree: true,
-    });
-  };
-
-  /**
    * 定义点击设置时的回调函数
    */
   const onSettingsClick = () => {
     layer.open({
       type: 1,
       area: ['550px', '700px'],
+      title: '163 Mail Pro 设置',
       content: `
       <style>
         .layui-form-label { width: 100px !important; }
@@ -229,6 +221,7 @@ import Store from "@utils/gm/Store";
         <div class="layui-form-item">
           <label class="layui-form-label">隐藏 Tab：</label>
           <div class="layui-input-block">
+            <input type="checkbox" title="首页" name="hideIndexTab" lay-filter="item-switch" ${config.hideIndexTab ? 'checked' : ''}/>
             <input type="checkbox" title="通讯录" name="hideContactsTab" lay-filter="item-switch" ${config.hideContactsTab ? 'checked' : ''}/>
             <input type="checkbox" title="AI 工具箱" name="hideAiToolboxTab" lay-filter="item-switch" ${config.hideAiToolboxTab ? 'checked' : ''}/>
           </div>
@@ -288,14 +281,55 @@ import Store from "@utils/gm/Store";
     });
   }
 
+  /**
+   * 注入自定义设置入口 (163 Mail Pro)
+   */
+  const injectCustomEntry = () => {
+    const $nav = $(selector.topNav);
+    const btnId = 'id-163-mail-pro-btn';
+
+    // 如果导航栏不存在或按钮已存在，则不处理
+    if ($nav.length === 0 || document.getElementById(btnId)) return;
+
+    // 创建分隔符 (保持 UI 一致性)
+    const $sep = $('<li class="js-component-component rZ0 pn1">| </li>');
+    // 创建入口按钮
+    const $btn = $(`<li id="${btnId}" class="js-component-component rZ0"><a href="javascript:;" class="js-component-component sh0 nui-txt-link" style="font-weight: bold;">163 Mail Pro</a></li>`);
+
+    $btn.on('click', (e) => {
+      e.preventDefault();
+      onSettingsClick();
+    });
+
+    $nav.append($sep).append($btn);
+  };
+
+  /**
+   * 监听 DOM 变化，确保动态插入的元素也被隐藏，并保持自定义入口存在
+   */
+  const observeDomChanges = () => {
+    const target = document.body;
+    if (!target) return;
+    const observer = new MutationObserver(() => {
+      applyConfig();
+      injectCustomEntry();
+    });
+    observer.observe(target, {
+      childList: true,
+      subtree: true,
+    });
+  };
+
   // DOM 就绪后开始监听
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
       applyConfig();
+      injectCustomEntry();
       observeDomChanges();
     });
   } else {
     observeDomChanges();
+    injectCustomEntry();
   }
 
   // 注册选项并传入回调

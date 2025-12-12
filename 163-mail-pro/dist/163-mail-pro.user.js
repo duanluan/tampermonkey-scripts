@@ -62,7 +62,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.0
+// @version      0.2.0
 // @description  增强 163 网易邮箱。
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -95,6 +95,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   // layer 图标未知原因失效，手动添加样式
   $(document.head).append("<style>\n    .layui-layer-ico{background:url('https://cdn.jsdelivr.net/npm/layer-src@3.5.1/dist/theme/default/icon.png') no-repeat}\n    .layui-layer-ico1{background-position:-30px 0}\n    .layui-layer-ico2{background-position:-60px 0}\n    .layui-layer-ico3{background-position:-90px 0}\n    .layui-layer-ico4{background-position:-120px 0}\n    .layui-layer-ico5{background-position:-150px 0}\n    .layui-layer-ico6{background-position:-180px 0}\n  </style>");
   var selector = {
+    // 顶部导航栏容器
+    topNav: '#_mail_component_1_1',
     // 首页 tab
     indexTab: '#_mail_tabitem_0_82',
     // 通讯录 tab
@@ -141,6 +143,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
   // 默认配置（默认选中=隐藏）
   var defaultConfig = {
+    // 隐藏首页 Tab
+    hideIndexTab: false,
     // 隐藏通讯录 Tab
     hideContactsTab: true,
     // 隐藏 AI 工具箱 Tab
@@ -166,9 +170,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     hideWarnTips: true,
     // --- 其他工具栏目 ---
     // 隐藏整个其他工具栏目
-    hideOtherToolsBox: true,
+    hideOtherToolsBox: false,
     // 隐藏邮件追踪
-    hideTrackSettingLink: true,
+    hideTrackSettingLink: false,
     // 隐藏简历优化
     hideResumeOpt: true,
     // 隐藏智能面试顾问
@@ -178,7 +182,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     // 隐藏 PDF 转换工具
     hidePdfConvertTool: true,
     // 隐藏发票助手
-    hideInvoiceAssistant: true,
+    hideInvoiceAssistant: false,
     // 隐藏企业邮箱
     hideDomainMail: true
   };
@@ -194,6 +198,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   var applyConfig = function applyConfig() {
     // toggle(false) 等同于 hide(), toggle(true) 等同于 show()
     // 如果配置为 hide (true)，则 toggle(false) 隐藏
+    $(selector.indexTab).toggle(!config.hideIndexTab);
     $(selector.contactsTab).toggle(!config.hideContactsTab);
     $(selector.aiToolboxTab).toggle(!config.hideAiToolboxTab);
     $(selector.enableVipNavItem).toggle(!config.hideEnableVipNavItem);
@@ -241,28 +246,14 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   applyConfig();
 
   /**
-   * 监听 DOM 变化，确保动态插入的元素也被隐藏
-   */
-  var observeDomChanges = function observeDomChanges() {
-    var target = document.body;
-    if (!target) return;
-    var observer = new MutationObserver(function () {
-      applyConfig();
-    });
-    observer.observe(target, {
-      childList: true,
-      subtree: true
-    });
-  };
-
-  /**
    * 定义点击设置时的回调函数
    */
   var onSettingsClick = function onSettingsClick() {
     layer.open({
       type: 1,
       area: ['550px', '700px'],
-      content: "\n      <style>\n        .layui-form-label { width: 100px !important; }\n        .layui-input-block { margin-left: 130px !important; }\n      </style>\n      <form class=\"layui-form\" style=\"padding: 20px;\" action=\"\">\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF Tab\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u901A\u8BAF\u5F55\" name=\"hideContactsTab\" lay-filter=\"item-switch\" ".concat(config.hideContactsTab ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"AI \u5DE5\u5177\u7BB1\" name=\"hideAiToolboxTab\" lay-filter=\"item-switch\" ").concat(config.hideAiToolboxTab ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF Nav\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u5F00\u901A\u8D85\u7EA7\u4F1A\u5458\" name=\"hideEnableVipNavItem\" lay-filter=\"item-switch\" ").concat(config.hideEnableVipNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u624B\u673A APP\" name=\"hideDownAppNavItem\" lay-filter=\"item-switch\" ").concat(config.hideDownAppNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4E0B\u8F7D\u684C\u9762\u7AEF\" name=\"hideDownDesktopNavItem\" lay-filter=\"item-switch\" ").concat(config.hideDownDesktopNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u53C2\u4E0E\u8C03\u7814\" name=\"hideFeedbackSurveyNavItem\" lay-filter=\"item-switch\" ").concat(config.hideFeedbackSurveyNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u81EA\u52A9\u67E5\u8BE2\" name=\"hideSelfQueryNavItem\" lay-filter=\"item-switch\" ").concat(config.hideSelfQueryNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4F1A\u5458\u4E2D\u5FC3\" name=\"hideMemberCenterNavItem\" lay-filter=\"item-switch\" ").concat(config.hideMemberCenterNavItem ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF\u5176\u4ED6\u5DE5\u5177\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u6574\u4E2A\u680F\u76EE\" name=\"hideOtherToolsBox\" lay-filter=\"item-switch\" ").concat(config.hideOtherToolsBox ? 'checked' : '', "/>\n            <hr style=\"margin: 5px 0;\">\n            <input type=\"checkbox\" title=\"\u90AE\u4EF6\u8FFD\u8E2A\" name=\"hideTrackSettingLink\" lay-filter=\"item-switch\" ").concat(config.hideTrackSettingLink ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u7B80\u5386\u4F18\u5316\" name=\"hideResumeOpt\" lay-filter=\"item-switch\" ").concat(config.hideResumeOpt ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u667A\u80FD\u9762\u8BD5\u987E\u95EE\" name=\"hideResumeInt\" lay-filter=\"item-switch\" ").concat(config.hideResumeInt ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u6C42\u804C\u4FE1\u606F\u8BA2\u9605\" name=\"hideResumeSub\" lay-filter=\"item-switch\" ").concat(config.hideResumeSub ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"PDF\u8F6C\u6362\u5DE5\u5177\" name=\"hidePdfConvertTool\" lay-filter=\"item-switch\" ").concat(config.hidePdfConvertTool ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u53D1\u7968\u52A9\u624B\" name=\"hideInvoiceAssistant\" lay-filter=\"item-switch\" ").concat(config.hideInvoiceAssistant ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4F01\u4E1A\u90AE\u7BB1\" name=\"hideDomainMail\" lay-filter=\"item-switch\" ").concat(config.hideDomainMail ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF\u6742\u9879\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u4E00\u952E\u751F\u6210 PPT...\" name=\"hideSmartAssistantOperating\" lay-filter=\"item-switch\" ").concat(config.hideSmartAssistantOperating ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u641C\u7D22\u680F AI \u641C\" name=\"hideSearchInputAiIcon\" lay-filter=\"item-switch\" ").concat(config.hideSearchInputAiIcon ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"AI \u52A9\u7406\" name=\"hidesmartAssistantBtn\" lay-filter=\"item-switch\" ").concat(config.hidesmartAssistantBtn ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u5F00\u901A\u90AE\u7BB1\u201C\u8D85\u7EA7\u4F1A\u5458\u201D\u2026\u2026\" name=\"hideWarnTips\" lay-filter=\"item-switch\" ").concat(config.hideWarnTips ? 'checked' : '', "/>\n          </div>\n        </div>\n      </form>\n    ")
+      title: '163 Mail Pro 设置',
+      content: "\n      <style>\n        .layui-form-label { width: 100px !important; }\n        .layui-input-block { margin-left: 130px !important; }\n      </style>\n      <form class=\"layui-form\" style=\"padding: 20px;\" action=\"\">\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF Tab\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u9996\u9875\" name=\"hideIndexTab\" lay-filter=\"item-switch\" ".concat(config.hideIndexTab ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u901A\u8BAF\u5F55\" name=\"hideContactsTab\" lay-filter=\"item-switch\" ").concat(config.hideContactsTab ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"AI \u5DE5\u5177\u7BB1\" name=\"hideAiToolboxTab\" lay-filter=\"item-switch\" ").concat(config.hideAiToolboxTab ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF Nav\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u5F00\u901A\u8D85\u7EA7\u4F1A\u5458\" name=\"hideEnableVipNavItem\" lay-filter=\"item-switch\" ").concat(config.hideEnableVipNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u624B\u673A APP\" name=\"hideDownAppNavItem\" lay-filter=\"item-switch\" ").concat(config.hideDownAppNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4E0B\u8F7D\u684C\u9762\u7AEF\" name=\"hideDownDesktopNavItem\" lay-filter=\"item-switch\" ").concat(config.hideDownDesktopNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u53C2\u4E0E\u8C03\u7814\" name=\"hideFeedbackSurveyNavItem\" lay-filter=\"item-switch\" ").concat(config.hideFeedbackSurveyNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u81EA\u52A9\u67E5\u8BE2\" name=\"hideSelfQueryNavItem\" lay-filter=\"item-switch\" ").concat(config.hideSelfQueryNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4F1A\u5458\u4E2D\u5FC3\" name=\"hideMemberCenterNavItem\" lay-filter=\"item-switch\" ").concat(config.hideMemberCenterNavItem ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF\u5176\u4ED6\u5DE5\u5177\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u6574\u4E2A\u680F\u76EE\" name=\"hideOtherToolsBox\" lay-filter=\"item-switch\" ").concat(config.hideOtherToolsBox ? 'checked' : '', "/>\n            <hr style=\"margin: 5px 0;\">\n            <input type=\"checkbox\" title=\"\u90AE\u4EF6\u8FFD\u8E2A\" name=\"hideTrackSettingLink\" lay-filter=\"item-switch\" ").concat(config.hideTrackSettingLink ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u7B80\u5386\u4F18\u5316\" name=\"hideResumeOpt\" lay-filter=\"item-switch\" ").concat(config.hideResumeOpt ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u667A\u80FD\u9762\u8BD5\u987E\u95EE\" name=\"hideResumeInt\" lay-filter=\"item-switch\" ").concat(config.hideResumeInt ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u6C42\u804C\u4FE1\u606F\u8BA2\u9605\" name=\"hideResumeSub\" lay-filter=\"item-switch\" ").concat(config.hideResumeSub ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"PDF\u8F6C\u6362\u5DE5\u5177\" name=\"hidePdfConvertTool\" lay-filter=\"item-switch\" ").concat(config.hidePdfConvertTool ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u53D1\u7968\u52A9\u624B\" name=\"hideInvoiceAssistant\" lay-filter=\"item-switch\" ").concat(config.hideInvoiceAssistant ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4F01\u4E1A\u90AE\u7BB1\" name=\"hideDomainMail\" lay-filter=\"item-switch\" ").concat(config.hideDomainMail ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF\u6742\u9879\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u4E00\u952E\u751F\u6210 PPT...\" name=\"hideSmartAssistantOperating\" lay-filter=\"item-switch\" ").concat(config.hideSmartAssistantOperating ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u641C\u7D22\u680F AI \u641C\" name=\"hideSearchInputAiIcon\" lay-filter=\"item-switch\" ").concat(config.hideSearchInputAiIcon ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"AI \u52A9\u7406\" name=\"hidesmartAssistantBtn\" lay-filter=\"item-switch\" ").concat(config.hidesmartAssistantBtn ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u5F00\u901A\u90AE\u7BB1\u201C\u8D85\u7EA7\u4F1A\u5458\u201D\u2026\u2026\" name=\"hideWarnTips\" lay-filter=\"item-switch\" ").concat(config.hideWarnTips ? 'checked' : '', "/>\n          </div>\n        </div>\n      </form>\n    ")
     });
 
     // layer.open 中 radio、checkbox、select 需要 render 才能显示
@@ -282,14 +273,53 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     });
   };
 
+  /**
+   * 注入自定义设置入口 (163 Mail Pro)
+   */
+  var injectCustomEntry = function injectCustomEntry() {
+    var $nav = $(selector.topNav);
+    var btnId = 'id-163-mail-pro-btn';
+
+    // 如果导航栏不存在或按钮已存在，则不处理
+    if ($nav.length === 0 || document.getElementById(btnId)) return;
+
+    // 创建分隔符 (保持 UI 一致性)
+    var $sep = $('<li class="js-component-component rZ0 pn1">| </li>');
+    // 创建入口按钮
+    var $btn = $("<li id=\"".concat(btnId, "\" class=\"js-component-component rZ0\"><a href=\"javascript:;\" class=\"js-component-component sh0 nui-txt-link\" style=\"font-weight: bold;\">163 Mail Pro</a></li>"));
+    $btn.on('click', function (e) {
+      e.preventDefault();
+      onSettingsClick();
+    });
+    $nav.append($sep).append($btn);
+  };
+
+  /**
+   * 监听 DOM 变化，确保动态插入的元素也被隐藏，并保持自定义入口存在
+   */
+  var observeDomChanges = function observeDomChanges() {
+    var target = document.body;
+    if (!target) return;
+    var observer = new MutationObserver(function () {
+      applyConfig();
+      injectCustomEntry();
+    });
+    observer.observe(target, {
+      childList: true,
+      subtree: true
+    });
+  };
+
   // DOM 就绪后开始监听
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
       applyConfig();
+      injectCustomEntry();
       observeDomChanges();
     });
   } else {
     observeDomChanges();
+    injectCustomEntry();
   }
 
   // 注册选项并传入回调
