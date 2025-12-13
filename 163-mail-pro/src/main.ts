@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.2.0
+// @version      0.3.0
 // @description  增强 163 网易邮箱。
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -92,6 +92,10 @@ import Store from "@utils/gm/Store";
     invoiceAssistant: '#navInvoiceAssistant',
     // 企业邮箱
     domainMail: '#navDomainMailLink',
+
+    // --- 自动化操作对象 ---
+    // 链接警告中的“普通打开”按钮
+    normalOpenBtn: 'button[data-stat="sb_warning_open"]',
   }
 
   // 默认配置（默认选中=隐藏）
@@ -141,6 +145,10 @@ import Store from "@utils/gm/Store";
     hideInvoiceAssistant: false,
     // 隐藏企业邮箱
     hideDomainMail: true,
+
+    // --- 功能增强 ---
+    // 始终“普通打开”链接
+    autoClickNormalOpen: false,
   };
   const configKey = 'config';
 
@@ -202,7 +210,24 @@ import Store from "@utils/gm/Store";
       $(selector.domainMail).toggle(!config.hideDomainMail);
     }
   };
+
+  /**
+   * 自动执行的操作 (如点击按钮)
+   */
+  const autoRun = () => {
+    // 始终“普通打开”链接
+    if (config.autoClickNormalOpen) {
+      const $btn = $(selector.normalOpenBtn);
+      // 如果按钮存在，则点击
+      if ($btn.length > 0) {
+        // 使用原生 click 以确保兼容性，避免 jQuery 事件冒泡问题
+        $btn[0].click();
+      }
+    }
+  };
+
   applyConfig();
+  autoRun();
 
   /**
    * 定义点击设置时的回调函数
@@ -260,6 +285,12 @@ import Store from "@utils/gm/Store";
             <input type="checkbox" title="开通邮箱“超级会员”……" name="hideWarnTips" lay-filter="item-switch" ${config.hideWarnTips ? 'checked' : ''}/>
           </div>
         </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label">功能增强：</label>
+          <div class="layui-input-block">
+            <input type="checkbox" title="始终“普通打开”链接" name="autoClickNormalOpen" lay-filter="item-switch" ${config.autoClickNormalOpen ? 'checked' : ''}/>
+          </div>
+        </div>
       </form>
     `
     })
@@ -277,6 +308,10 @@ import Store from "@utils/gm/Store";
         // 保存并应用
         Store.set(configKey, JSON.stringify(config));
         applyConfig();
+        // 如果开启了自动点击，立即尝试一次
+        if (name === 'autoClickNormalOpen' && config.autoClickNormalOpen) {
+          autoRun();
+        }
       });
     });
   }
@@ -313,6 +348,7 @@ import Store from "@utils/gm/Store";
     const observer = new MutationObserver(() => {
       applyConfig();
       injectCustomEntry();
+      autoRun();
     });
     observer.observe(target, {
       childList: true,
@@ -325,11 +361,13 @@ import Store from "@utils/gm/Store";
     document.addEventListener('DOMContentLoaded', () => {
       applyConfig();
       injectCustomEntry();
+      autoRun();
       observeDomChanges();
     });
   } else {
     observeDomChanges();
     injectCustomEntry();
+    autoRun();
   }
 
   // 注册选项并传入回调

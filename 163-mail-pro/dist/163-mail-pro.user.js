@@ -62,7 +62,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.2.0
+// @version      0.3.0
 // @description  增强 163 网易邮箱。
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -138,7 +138,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     // 发票助手
     invoiceAssistant: '#navInvoiceAssistant',
     // 企业邮箱
-    domainMail: '#navDomainMailLink'
+    domainMail: '#navDomainMailLink',
+    // --- 自动化操作对象 ---
+    // 链接警告中的“普通打开”按钮
+    normalOpenBtn: 'button[data-stat="sb_warning_open"]'
   };
 
   // 默认配置（默认选中=隐藏）
@@ -184,7 +187,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     // 隐藏发票助手
     hideInvoiceAssistant: false,
     // 隐藏企业邮箱
-    hideDomainMail: true
+    hideDomainMail: true,
+    // --- 功能增强 ---
+    // 始终“普通打开”链接
+    autoClickNormalOpen: false
   };
   var configKey = 'config';
 
@@ -243,7 +249,23 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       $(selector.domainMail).toggle(!config.hideDomainMail);
     }
   };
+
+  /**
+   * 自动执行的操作 (如点击按钮)
+   */
+  var autoRun = function autoRun() {
+    // 始终“普通打开”链接
+    if (config.autoClickNormalOpen) {
+      var $btn = $(selector.normalOpenBtn);
+      // 如果按钮存在，则点击
+      if ($btn.length > 0) {
+        // 使用原生 click 以确保兼容性，避免 jQuery 事件冒泡问题
+        $btn[0].click();
+      }
+    }
+  };
   applyConfig();
+  autoRun();
 
   /**
    * 定义点击设置时的回调函数
@@ -253,7 +275,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
       type: 1,
       area: ['550px', '700px'],
       title: '163 Mail Pro 设置',
-      content: "\n      <style>\n        .layui-form-label { width: 100px !important; }\n        .layui-input-block { margin-left: 130px !important; }\n      </style>\n      <form class=\"layui-form\" style=\"padding: 20px;\" action=\"\">\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF Tab\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u9996\u9875\" name=\"hideIndexTab\" lay-filter=\"item-switch\" ".concat(config.hideIndexTab ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u901A\u8BAF\u5F55\" name=\"hideContactsTab\" lay-filter=\"item-switch\" ").concat(config.hideContactsTab ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"AI \u5DE5\u5177\u7BB1\" name=\"hideAiToolboxTab\" lay-filter=\"item-switch\" ").concat(config.hideAiToolboxTab ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF Nav\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u5F00\u901A\u8D85\u7EA7\u4F1A\u5458\" name=\"hideEnableVipNavItem\" lay-filter=\"item-switch\" ").concat(config.hideEnableVipNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u624B\u673A APP\" name=\"hideDownAppNavItem\" lay-filter=\"item-switch\" ").concat(config.hideDownAppNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4E0B\u8F7D\u684C\u9762\u7AEF\" name=\"hideDownDesktopNavItem\" lay-filter=\"item-switch\" ").concat(config.hideDownDesktopNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u53C2\u4E0E\u8C03\u7814\" name=\"hideFeedbackSurveyNavItem\" lay-filter=\"item-switch\" ").concat(config.hideFeedbackSurveyNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u81EA\u52A9\u67E5\u8BE2\" name=\"hideSelfQueryNavItem\" lay-filter=\"item-switch\" ").concat(config.hideSelfQueryNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4F1A\u5458\u4E2D\u5FC3\" name=\"hideMemberCenterNavItem\" lay-filter=\"item-switch\" ").concat(config.hideMemberCenterNavItem ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF\u5176\u4ED6\u5DE5\u5177\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u6574\u4E2A\u680F\u76EE\" name=\"hideOtherToolsBox\" lay-filter=\"item-switch\" ").concat(config.hideOtherToolsBox ? 'checked' : '', "/>\n            <hr style=\"margin: 5px 0;\">\n            <input type=\"checkbox\" title=\"\u90AE\u4EF6\u8FFD\u8E2A\" name=\"hideTrackSettingLink\" lay-filter=\"item-switch\" ").concat(config.hideTrackSettingLink ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u7B80\u5386\u4F18\u5316\" name=\"hideResumeOpt\" lay-filter=\"item-switch\" ").concat(config.hideResumeOpt ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u667A\u80FD\u9762\u8BD5\u987E\u95EE\" name=\"hideResumeInt\" lay-filter=\"item-switch\" ").concat(config.hideResumeInt ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u6C42\u804C\u4FE1\u606F\u8BA2\u9605\" name=\"hideResumeSub\" lay-filter=\"item-switch\" ").concat(config.hideResumeSub ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"PDF\u8F6C\u6362\u5DE5\u5177\" name=\"hidePdfConvertTool\" lay-filter=\"item-switch\" ").concat(config.hidePdfConvertTool ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u53D1\u7968\u52A9\u624B\" name=\"hideInvoiceAssistant\" lay-filter=\"item-switch\" ").concat(config.hideInvoiceAssistant ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4F01\u4E1A\u90AE\u7BB1\" name=\"hideDomainMail\" lay-filter=\"item-switch\" ").concat(config.hideDomainMail ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF\u6742\u9879\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u4E00\u952E\u751F\u6210 PPT...\" name=\"hideSmartAssistantOperating\" lay-filter=\"item-switch\" ").concat(config.hideSmartAssistantOperating ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u641C\u7D22\u680F AI \u641C\" name=\"hideSearchInputAiIcon\" lay-filter=\"item-switch\" ").concat(config.hideSearchInputAiIcon ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"AI \u52A9\u7406\" name=\"hidesmartAssistantBtn\" lay-filter=\"item-switch\" ").concat(config.hidesmartAssistantBtn ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u5F00\u901A\u90AE\u7BB1\u201C\u8D85\u7EA7\u4F1A\u5458\u201D\u2026\u2026\" name=\"hideWarnTips\" lay-filter=\"item-switch\" ").concat(config.hideWarnTips ? 'checked' : '', "/>\n          </div>\n        </div>\n      </form>\n    ")
+      content: "\n      <style>\n        .layui-form-label { width: 100px !important; }\n        .layui-input-block { margin-left: 130px !important; }\n      </style>\n      <form class=\"layui-form\" style=\"padding: 20px;\" action=\"\">\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF Tab\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u9996\u9875\" name=\"hideIndexTab\" lay-filter=\"item-switch\" ".concat(config.hideIndexTab ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u901A\u8BAF\u5F55\" name=\"hideContactsTab\" lay-filter=\"item-switch\" ").concat(config.hideContactsTab ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"AI \u5DE5\u5177\u7BB1\" name=\"hideAiToolboxTab\" lay-filter=\"item-switch\" ").concat(config.hideAiToolboxTab ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF Nav\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u5F00\u901A\u8D85\u7EA7\u4F1A\u5458\" name=\"hideEnableVipNavItem\" lay-filter=\"item-switch\" ").concat(config.hideEnableVipNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u624B\u673A APP\" name=\"hideDownAppNavItem\" lay-filter=\"item-switch\" ").concat(config.hideDownAppNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4E0B\u8F7D\u684C\u9762\u7AEF\" name=\"hideDownDesktopNavItem\" lay-filter=\"item-switch\" ").concat(config.hideDownDesktopNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u53C2\u4E0E\u8C03\u7814\" name=\"hideFeedbackSurveyNavItem\" lay-filter=\"item-switch\" ").concat(config.hideFeedbackSurveyNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u81EA\u52A9\u67E5\u8BE2\" name=\"hideSelfQueryNavItem\" lay-filter=\"item-switch\" ").concat(config.hideSelfQueryNavItem ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4F1A\u5458\u4E2D\u5FC3\" name=\"hideMemberCenterNavItem\" lay-filter=\"item-switch\" ").concat(config.hideMemberCenterNavItem ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF\u5176\u4ED6\u5DE5\u5177\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u6574\u4E2A\u680F\u76EE\" name=\"hideOtherToolsBox\" lay-filter=\"item-switch\" ").concat(config.hideOtherToolsBox ? 'checked' : '', "/>\n            <hr style=\"margin: 5px 0;\">\n            <input type=\"checkbox\" title=\"\u90AE\u4EF6\u8FFD\u8E2A\" name=\"hideTrackSettingLink\" lay-filter=\"item-switch\" ").concat(config.hideTrackSettingLink ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u7B80\u5386\u4F18\u5316\" name=\"hideResumeOpt\" lay-filter=\"item-switch\" ").concat(config.hideResumeOpt ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u667A\u80FD\u9762\u8BD5\u987E\u95EE\" name=\"hideResumeInt\" lay-filter=\"item-switch\" ").concat(config.hideResumeInt ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u6C42\u804C\u4FE1\u606F\u8BA2\u9605\" name=\"hideResumeSub\" lay-filter=\"item-switch\" ").concat(config.hideResumeSub ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"PDF\u8F6C\u6362\u5DE5\u5177\" name=\"hidePdfConvertTool\" lay-filter=\"item-switch\" ").concat(config.hidePdfConvertTool ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u53D1\u7968\u52A9\u624B\" name=\"hideInvoiceAssistant\" lay-filter=\"item-switch\" ").concat(config.hideInvoiceAssistant ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u4F01\u4E1A\u90AE\u7BB1\" name=\"hideDomainMail\" lay-filter=\"item-switch\" ").concat(config.hideDomainMail ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF\u6742\u9879\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u4E00\u952E\u751F\u6210 PPT...\" name=\"hideSmartAssistantOperating\" lay-filter=\"item-switch\" ").concat(config.hideSmartAssistantOperating ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u641C\u7D22\u680F AI \u641C\" name=\"hideSearchInputAiIcon\" lay-filter=\"item-switch\" ").concat(config.hideSearchInputAiIcon ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"AI \u52A9\u7406\" name=\"hidesmartAssistantBtn\" lay-filter=\"item-switch\" ").concat(config.hidesmartAssistantBtn ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u5F00\u901A\u90AE\u7BB1\u201C\u8D85\u7EA7\u4F1A\u5458\u201D\u2026\u2026\" name=\"hideWarnTips\" lay-filter=\"item-switch\" ").concat(config.hideWarnTips ? 'checked' : '', "/>\n          </div>\n        </div>\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u529F\u80FD\u589E\u5F3A\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u59CB\u7EC8\u201C\u666E\u901A\u6253\u5F00\u201D\u94FE\u63A5\" name=\"autoClickNormalOpen\" lay-filter=\"item-switch\" ").concat(config.autoClickNormalOpen ? 'checked' : '', "/>\n          </div>\n        </div>\n      </form>\n    ")
     });
 
     // layer.open 中 radio、checkbox、select 需要 render 才能显示
@@ -269,6 +291,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         // 保存并应用
         _utils_gm_Store__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .A.set(configKey, JSON.stringify(config));
         applyConfig();
+        // 如果开启了自动点击，立即尝试一次
+        if (name === 'autoClickNormalOpen' && config.autoClickNormalOpen) {
+          autoRun();
+        }
       });
     });
   };
@@ -303,6 +329,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     var observer = new MutationObserver(function () {
       applyConfig();
       injectCustomEntry();
+      autoRun();
     });
     observer.observe(target, {
       childList: true,
@@ -315,11 +342,13 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     document.addEventListener('DOMContentLoaded', function () {
       applyConfig();
       injectCustomEntry();
+      autoRun();
       observeDomChanges();
     });
   } else {
     observeDomChanges();
     injectCustomEntry();
+    autoRun();
   }
 
   // 注册选项并传入回调
