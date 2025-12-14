@@ -14,8 +14,8 @@
 
 | 功能 | ✅ 主题 ID | 🔲 主题 ID | ❌ 主题 ID |
 | --- | --- | --- | --- |
-| 侧边栏拖拽条 | 1、6 | | 2 |
-| 宽屏模式 | 1、6、11、17 | 3、30、47 | 2 |
+| 侧边栏拖拽条 | 1、6、14 | | 2 |
+| 宽屏模式 | 1、6、11、14、17 | 3、30、47 | 2 |
 
 # 主题站点
 
@@ -26,6 +26,7 @@
 | 3 | [Let's Encrypt Community Support](https://community.letsencrypt.org/) |
 | 6 | [OpenAI Developer Forum](https://community.openai.com/)<br/>[Forum \| Webflow](https://discourse.webflow.com/) |
 | 11 | [Cloudflare Community](https://community.cloudflare.com/)<br/>[Docker Community Forums](https://forums.docker.com/) |
+| 14 | [IDC Flare](https://idcflare.com/) |
 | 17 | [Netlify Support Forums](https://answers.netlify.com/) |
 | 30 | [Spiceworks Community](https://community.spiceworks.com/) |
 | 47 | [The freeCodeCamp Forum](https://forum.freecodecamp.org/) |

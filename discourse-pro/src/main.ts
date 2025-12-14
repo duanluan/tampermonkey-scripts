@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.7
+// @version      0.1.8
 // @description  增强 Discourse 论坛
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -16,6 +16,7 @@
 // @match        *://community.openai.com/*
 // @match        *://forums.docker.com/*
 // @match        *://discourse.webflow.com/*
+// @match        *://idcflare.com/*
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
 // @grant        GM_getValue
 // @grant        GM_setValue
