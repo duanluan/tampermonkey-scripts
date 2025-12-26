@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gemini Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.0.1
+// @version      0.1.0
 // @description  增强 Gemini 对话界面
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -29,10 +29,11 @@ import Options from "../../gemini-pro/src/Options";
 (() => {
   'use strict';
 
-  // 加载 CSS
+  // 加载 Layui CSS
   GM_addStyle(GM_getResourceText('layui_css'));
-  // layer 图标未知原因失效，手动添加样式
-  $(document.head).append(`<style>
+
+  // 注入自定义样式
+  GM_addStyle(`
     .layui-layer-ico{background:url('https://cdn.jsdelivr.net/npm/layer-src@3.5.1/dist/theme/default/icon.png') no-repeat}
     .layui-layer-ico1{background-position:-30px 0}
     .layui-layer-ico2{background-position:-60px 0}
@@ -40,13 +41,30 @@ import Options from "../../gemini-pro/src/Options";
     .layui-layer-ico4{background-position:-120px 0}
     .layui-layer-ico5{background-position:-150px 0}
     .layui-layer-ico6{background-position:-180px 0}
-  </style>`);
+    
+    /* * 完美对齐修正：
+     * 1. 强制图标容器使用 Flex 布局并垂直居中
+     * 2. 确保 SVG 颜色继承文字颜色 
+     */
+    #gemini-pro-settings-entry .mdc-list-item__start {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      height: 24px; /* 强制高度与 SVG 一致 */
+    }
+
+    #gemini-pro-settings-entry svg {
+      fill: currentColor;
+    }
+  `);
 
   const selector = {
     // 我的内容入口按钮
     myContentEntryBtn: 'side-nav-entry-button',
     // 我的内容图片预览
     myContentPreview: 'my-stuff-recents-preview',
+    // 原生"设置和帮助"按钮 (用于克隆和定位)
+    originalSettingsBtn: 'side-nav-action-button[data-test-id="settings-and-help-button"]'
   }
 
   const defaultConfig = {
@@ -60,42 +78,45 @@ import Options from "../../gemini-pro/src/Options";
   let config = savedConfigStr ? JSON.parse(savedConfigStr) : defaultConfig;
 
   /**
-   * 应用配置（根据配置显示或隐藏元素）
+   * 应用配置
    */
   const applyConfig = () => {
-    // toggle(false) 等同于 hide(), toggle(true) 等同于 show()
-    // 如果配置为 hide (true)，则 toggle(false) 隐藏
     $(selector.myContentEntryBtn).toggle(!config.hideMyContentEntryBtn);
     $(selector.myContentPreview).toggle(!config.hideMyContentPreview);
   };
+
   applyConfig();
 
-  // Gemini 是 SPA，元素是动态加载的，必须监听 DOM 变化才能在刷新后生效
+  // 监听 DOM 变化
   const observer = new MutationObserver((mutations) => {
-    // 当 DOM 发生变化时，重新应用配置
-    // 这里可以加防抖，但在简单显隐逻辑中直接调用通常性能损耗可忽略
     applyConfig();
+    renderSidebarEntry();
   });
 
-  // 开始监听 body 的子元素变化
   observer.observe(document.body, {
     childList: true,
     subtree: true
   });
 
-  // 定义点击设置时的回调函数
+  // 设置面板回调
   const onSettingsClick = () => {
     layer.open({
       type: 1,
       area: ['500px', '400px'],
       title: 'Gemini Pro 设置',
+      shadeClose: true,
       content: `
       <form class="layui-form" style="padding: 20px;" action="">
         <div class="layui-form-item">
-          <label class="layui-form-label">隐藏侧边栏：</label>
-          <div class="layui-input-block">
+          <label class="layui-form-label" style="width: 120px;">隐藏侧边栏入口：</label>
+          <div class="layui-input-block" style="margin-left: 150px;">
             <input type="checkbox" title="我的内容" name="hideMyContentEntryBtn" lay-filter="item-switch" ${config.hideMyContentEntryBtn ? 'checked' : ''}/>
-            <input type="checkbox" title="我的内容图片预览" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label" style="width: 120px;">隐藏图片预览：</label>
+          <div class="layui-input-block" style="margin-left: 150px;">
+            <input type="checkbox" title="最近图片" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
           </div>
         </div>
       </form>
@@ -105,20 +126,62 @@ import Options from "../../gemini-pro/src/Options";
     // layer.open 中 radio、checkbox、select 需要 render 才能显示
     layui.use('form', () => {
       layui.form.render();
-
-      // 监听复选框变更
       layui.form.on('checkbox(item-switch)', (data: any) => {
-        // 更新配置对象
         const name = data.elem.name;
         config[name] = data.elem.checked;
-
-        // 保存并应用
         Store.set(STORE_CONF_KEY, JSON.stringify(config));
         applyConfig();
       });
     });
   }
 
-  // 注册选项并传入回调
-  Options.registerAll(onSettingsClick)
+  /**
+   * 渲染侧边栏设置入口按钮 (使用克隆方案)
+   */
+  const renderSidebarEntry = () => {
+    const btnId = 'gemini-pro-settings-entry';
+
+    // 1. 检查是否已存在
+    if ($(`#${btnId}`).length > 0) return;
+
+    // 2. 找到"本体"：原生的设置按钮
+    const $originalBtn = $(selector.originalSettingsBtn);
+    if ($originalBtn.length === 0) return;
+
+    // 3. 克隆它
+    const $newBtn = $originalBtn.clone();
+
+    // 4. 修改克隆后的元素属性
+    $newBtn.attr('id', btnId);
+    $newBtn.attr('data-test-id', 'gemini-pro-entry');
+
+    // 5. 替换图标
+    // 找到内部的 icon 容器
+    const $iconContainer = $newBtn.find('.mat-mdc-list-item-icon, [data-test-id="side-nav-action-button-icon"]').first();
+    // 清空原有 mat-icon，插入我们的 SVG
+    $iconContainer.empty().html(`
+      <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+        <path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z"/>
+      </svg>
+    `);
+
+    // 6. 替换文字
+    const $textContainer = $newBtn.find('[data-test-id="side-nav-action-button-content"], .mdc-list-item__primary-text').first();
+    $textContainer.text('Gemini Pro');
+
+    // 7. 处理点击事件
+    const $interactiveBtn = $newBtn.find('button');
+    $interactiveBtn.off();
+    $interactiveBtn.on('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onSettingsClick();
+    });
+
+    // 8. 插入到原生按钮的上方
+    $originalBtn.before($newBtn);
+  };
+
+  Options.registerAll(onSettingsClick);
+  renderSidebarEntry();
 })();
