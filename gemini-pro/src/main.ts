@@ -42,10 +42,7 @@ import Options from "../../gemini-pro/src/Options";
     .layui-layer-ico5{background-position:-150px 0}
     .layui-layer-ico6{background-position:-180px 0}
     
-    /* * 完美对齐修正：
-     * 1. 强制图标容器使用 Flex 布局并垂直居中
-     * 2. 确保 SVG 颜色继承文字颜色 
-     */
+    /* 侧边栏入口样式优化 */
     #gemini-pro-settings-entry .mdc-list-item__start {
       display: flex !important;
       align-items: center !important;
@@ -56,6 +53,39 @@ import Options from "../../gemini-pro/src/Options";
     #gemini-pro-settings-entry svg {
       fill: currentColor;
     }
+
+    /* === 核心功能：极简输入框样式 === */
+    
+    /* 1. 清除顶部渐变遮罩 (Input Gradient)：覆盖所有可能的实现方式：背景图、伪元素、背景色 */
+    body.gemini-pro-no-input-shadow .input-gradient,
+    body.gemini-pro-no-input-shadow .input-gradient::before,
+    body.gemini-pro-no-input-shadow .input-gradient::after {
+      background: none !important;
+      background-image: none !important;
+      mask: none !important;
+      -webkit-mask: none !important;
+      box-shadow: none !important;
+    }
+
+    /* 2. 清除输入框本体的投影 (Box Shadow)：穿透多层容器，确保阴影被移除 
+    */
+    body.gemini-pro-no-input-shadow input-area-v2,
+    body.gemini-pro-no-input-shadow .input-box-shadow,
+    body.gemini-pro-no-input-shadow .input-area-container,
+    body.gemini-pro-no-input-shadow .text-input-field {
+      box-shadow: none !important;
+    }
+
+    /* 3. 给输入框加一个极淡的边框，防止去阴影后和背景融为一体看不清轮廓 */
+    body.gemini-pro-no-input-shadow input-area-v2 {
+      border: 1px solid rgba(0,0,0, 0.1) !important;
+    }
+    /* 深色模式适配边框 */
+    @media (prefers-color-scheme: dark) {
+      body.gemini-pro-no-input-shadow input-area-v2 {
+        border: 1px solid rgba(255,255,255, 0.1) !important;
+      }
+    }
   `);
 
   const selector = {
@@ -63,13 +93,17 @@ import Options from "../../gemini-pro/src/Options";
     myContentEntryBtn: 'side-nav-entry-button',
     // 我的内容图片预览
     myContentPreview: 'my-stuff-recents-preview',
-    // 原生"设置和帮助"按钮 (用于克隆和定位)
-    originalSettingsBtn: 'side-nav-action-button[data-test-id="settings-and-help-button"]'
+    // 原生"设置和帮助"按钮（用于克隆和定位）
+    originalSettingsBtn: 'side-nav-action-button[data-test-id="settings-and-help-button"]',
+    // 底部免责声明
+    disclaimer: 'hallucination-disclaimer'
   }
 
   const defaultConfig = {
     hideMyContentEntryBtn: false,
     hideMyContentPreview: false,
+    hideDisclaimer: false,
+    hideInputShadow: false,
   }
   const STORE_CONF_KEY = 'config';
 
@@ -81,8 +115,14 @@ import Options from "../../gemini-pro/src/Options";
    * 应用配置
    */
   const applyConfig = () => {
+    // 显隐类配置
     $(selector.myContentEntryBtn).toggle(!config.hideMyContentEntryBtn);
     $(selector.myContentPreview).toggle(!config.hideMyContentPreview);
+    $(selector.disclaimer).toggle(!config.hideDisclaimer);
+
+    // 样式类配置：通过 toggleClass 给 body 加标记
+    // 这种方式比直接用 JS 改 CSS 更稳定，且能自动处理 SPA 页面重绘
+    $('body').toggleClass('gemini-pro-no-input-shadow', config.hideInputShadow);
   };
 
   applyConfig();
@@ -117,6 +157,18 @@ import Options from "../../gemini-pro/src/Options";
           <label class="layui-form-label" style="width: 120px;">隐藏图片预览：</label>
           <div class="layui-input-block" style="margin-left: 150px;">
             <input type="checkbox" title="最近图片" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label" style="width: 120px;">隐藏免责声明：</label>
+          <div class="layui-input-block" style="margin-left: 150px;">
+            <input type="checkbox" title="底部提示" name="hideDisclaimer" lay-filter="item-switch" ${config.hideDisclaimer ? 'checked' : ''}/>
+          </div>
+        </div>
+        <div class="layui-form-item">
+          <label class="layui-form-label" style="width: 120px;">界面极简：</label>
+          <div class="layui-input-block" style="margin-left: 150px;">
+            <input type="checkbox" title="去输入框阴影" name="hideInputShadow" lay-filter="item-switch" ${config.hideInputShadow ? 'checked' : ''}/>
           </div>
         </div>
       </form>
