@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.3.0
+// @version      0.3.1
 // @description  增强 163 网易邮箱。
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -72,6 +72,14 @@ import Store from "@utils/gm/Store";
     // AI 助理入口
     smartAssistantOperating: '.APP-smartAssistant-operating',
     smartAssistantBtn: '.APP-smartAssistant-btn',
+    // 邮件列表 AI 总结图标 (特定类名)
+    mailListAiSummaryIcon: '.nui-ico-letterai',
+    // 邮件内容 AI 总结推广 (特定 ID 后缀)
+    mailContentAiSummaryGuide: '[id$="_dvReadSAGuide"]',
+    // 邮件内容 广告/占位容器 (特定 ID 后缀)
+    mailContentAdContainer: '[id$="_dvReadYad"]',
+    // 用户名左侧 Plus 图标
+    userPlusIcon: '.nui-ico-newplusSmall',
     // 开通超级会员 Tip
     warnTips: '[id$="_dvWarnTips"]',
 
@@ -125,6 +133,12 @@ import Store from "@utils/gm/Store";
     // 隐藏 AI 助理入口
     hideSmartAssistantOperating: true,
     hidesmartAssistantBtn: true,
+    // 隐藏邮件列表 AI 总结图标
+    hideMailListAiSummaryIcon: true,
+    // 隐藏邮件内容 AI 总结推广 (同时包含 Yad 占位符)
+    hideMailContentAiSummaryGuide: true,
+    // 隐藏用户名左侧 Plus 图标
+    hideUserPlusIcon: true,
     // 隐藏开通超级会员 Tip
     hideWarnTips: true,
 
@@ -176,7 +190,48 @@ import Store from "@utils/gm/Store";
     $(selector.searchInputAiIcon).toggle(!config.hideSearchInputAiIcon);
     $(selector.smartAssistantOperating).toggle(!config.hideSmartAssistantOperating);
     $(selector.smartAssistantBtn).toggle(!config.hidesmartAssistantBtn);
+
+    // 这里的开关同时控制 Guide 和 Yad 两个元素
+    $(selector.mailContentAiSummaryGuide).toggle(!config.hideMailContentAiSummaryGuide);
+    $(selector.mailContentAdContainer).toggle(!config.hideMailContentAiSummaryGuide);
+
+    $(selector.userPlusIcon).toggle(!config.hideUserPlusIcon);
     $(selector.warnTips).toggle(!config.hideWarnTips);
+
+    // --- 特殊处理：顽固的 AI 元素 ---
+    // 列表图标通常是 hover 显示，内容推广条可能是动态插入
+    // 解决方案：构建全局 CSS 注入，强制隐藏
+    const aiHideStyleId = 'style-hide-ai-elements';
+    const $existingStyle = $('#' + aiHideStyleId);
+
+    // 收集需要强制 CSS 隐藏的选择器
+    let hideSelectors = [];
+    if (config.hideMailListAiSummaryIcon) {
+      hideSelectors.push(selector.mailListAiSummaryIcon);
+    }
+    if (config.hideMailContentAiSummaryGuide) {
+      hideSelectors.push(selector.mailContentAiSummaryGuide);
+      hideSelectors.push(selector.mailContentAdContainer); // 将 Yad 也加入强制隐藏列表
+    }
+
+    if (hideSelectors.length > 0) {
+      const cssContent = hideSelectors.join(', ') + ' { display: none !important; }';
+      if ($existingStyle.length === 0) {
+        $(document.head).append(`<style id="${aiHideStyleId}">${cssContent}</style>`);
+      } else {
+        // 如果内容有变（例如用户切换了开关），更新它
+        if ($existingStyle.html() !== cssContent) {
+          $existingStyle.html(cssContent);
+        }
+      }
+    } else {
+      // 如果没有需要强制隐藏的，移除样式标签
+      $existingStyle.remove();
+      // 并尝试恢复行内样式显示（防止 toggle 残留）
+      $(selector.mailListAiSummaryIcon).css('display', '');
+      $(selector.mailContentAiSummaryGuide).css('display', '');
+      $(selector.mailContentAdContainer).css('display', '');
+    }
 
     // --- 其他工具栏目 ---
     // [修正逻辑] 如果要隐藏整个栏目，直接强力隐藏并跳过子项处理，避免脚本冲突
@@ -283,6 +338,9 @@ import Store from "@utils/gm/Store";
             <input type="checkbox" title="搜索栏 AI 搜" name="hideSearchInputAiIcon" lay-filter="item-switch" ${config.hideSearchInputAiIcon ? 'checked' : ''}/>
             <input type="checkbox" title="AI 助理" name="hidesmartAssistantBtn" lay-filter="item-switch" ${config.hidesmartAssistantBtn ? 'checked' : ''}/>
             <input type="checkbox" title="开通邮箱“超级会员”……" name="hideWarnTips" lay-filter="item-switch" ${config.hideWarnTips ? 'checked' : ''}/>
+            <input type="checkbox" title="邮件列表项 AI 总结图标" name="hideMailListAiSummaryIcon" lay-filter="item-switch" ${config.hideMailListAiSummaryIcon ? 'checked' : ''}/>
+            <input type="checkbox" title="邮件详情推广提示条" name="hideMailContentAiSummaryGuide" lay-filter="item-switch" ${config.hideMailContentAiSummaryGuide ? 'checked' : ''}/>
+            <input type="checkbox" title="用户名 Plus 图标" name="hideUserPlusIcon" lay-filter="item-switch" ${config.hideUserPlusIcon ? 'checked' : ''}/>
           </div>
         </div>
         <div class="layui-form-item">
