@@ -79,7 +79,7 @@ import Options from "../../gemini-pro/src/Options";
       pointer-events: none; /* 让事件穿透图标直接打在 div 上 */
     }
 
-    /* 深色模式适配 */
+    /* 深色模式适配 - 悬浮按钮 */
     @media (prefers-color-scheme: dark) {
       #gemini-pro-fab {
         background-color: #1e1f20;
@@ -89,6 +89,62 @@ import Options from "../../gemini-pro/src/Options";
       #gemini-pro-fab:hover {
         background-color: #2d2e2f;
       }
+    }
+
+    /* === Layui 弹窗深色模式适配 (通过 Skin 类名控制) === */
+    /* 弹窗整体容器 */
+    html body .layui-layer-gemini-dark.layui-layer-page, 
+    html body .layui-layer-gemini-dark.layui-layer-iframe,
+    html body .layui-layer-gemini-dark.layui-layer-dialog {
+      background-color: #1e1f20 !important;
+      color: #ffffff !important;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
+      border: 1px solid #444 !important;
+    }
+
+    /* 暴力修正：强制弹窗内所有后代元素字体均为纯白 */
+    html body .layui-layer-gemini-dark * {
+      color: #ffffff !important;
+    }
+
+    /* 标题栏 */
+    html body .layui-layer-gemini-dark .layui-layer-title {
+      background-color: #2d2e2f !important;
+      color: #ffffff !important;
+      border-bottom: 1px solid #444 !important;
+    }
+
+    /* 内容区域 */
+    html body .layui-layer-gemini-dark .layui-layer-content {
+      color: #ffffff !important;
+    }
+
+    /* 表单控件文字 (如 Checkbox 后面的文字、Label) */
+    html body .layui-layer-gemini-dark .layui-form-label,
+    html body .layui-layer-gemini-dark .layui-form-checkbox span {
+      color: #ffffff !important;
+    }
+    
+    /* 复选框 hover 状态 */
+    html body .layui-layer-gemini-dark .layui-form-checkbox:hover span {
+      color: #fff !important;
+    }
+
+    /* 关闭按钮 (X) 反转颜色以适应深色背景 */
+    html body .layui-layer-gemini-dark .layui-layer-setwin a {
+      filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    
+    /* 按钮 (如果有) */
+    html body .layui-layer-gemini-dark .layui-layer-btn a {
+      background: #2d2e2f !important;
+      border-color: #444 !important;
+      color: #ffffff !important;
+    }
+    html body .layui-layer-gemini-dark .layui-layer-btn .layui-layer-btn0 {
+      background: #0b57d0 !important; /* 保持确认按钮为蓝色主题 */
+      border-color: #0b57d0 !important;
+      color: #fff !important;
     }
 
     /* === 核心功能：极简输入框样式 === */
@@ -104,8 +160,7 @@ import Options from "../../gemini-pro/src/Options";
       box-shadow: none !important;
     }
 
-    /* 2. 清除输入框本体的投影 (Box Shadow)：穿透多层容器，确保阴影被移除 
-    */
+    /* 2. 清除输入框本体的投影 (Box Shadow)：穿透多层容器，确保阴影被移除 */
     body.gemini-pro-no-input-shadow input-area-v2,
     body.gemini-pro-no-input-shadow .input-box-shadow,
     body.gemini-pro-no-input-shadow .input-area-container,
@@ -113,11 +168,10 @@ import Options from "../../gemini-pro/src/Options";
       box-shadow: none !important;
     }
 
-    /* 3. 给输入框加一个极淡的边框，防止去阴影后和背景融为一体看不清轮廓 */
+    /* 3. (可选) 给输入框加一个极淡的边框，防止去阴影后和背景融为一体看不清轮廓 */
     body.gemini-pro-no-input-shadow input-area-v2 {
       border: 1px solid rgba(0,0,0, 0.1) !important;
     }
-    /* 深色模式适配边框 */
     @media (prefers-color-scheme: dark) {
       body.gemini-pro-no-input-shadow input-area-v2 {
         border: 1px solid rgba(255,255,255, 0.1) !important;
@@ -149,39 +203,64 @@ import Options from "../../gemini-pro/src/Options";
   let config = savedConfigStr ? JSON.parse(savedConfigStr) : defaultConfig;
 
   /**
-   * 应用配置
+   * 应用配置（根据配置显示或隐藏元素）
    */
   const applyConfig = () => {
-    // 显隐类配置
     $(selector.myContentEntryBtn).toggle(!config.hideMyContentEntryBtn);
     $(selector.myContentPreview).toggle(!config.hideMyContentPreview);
     $(selector.disclaimer).toggle(!config.hideDisclaimer);
-
     // 样式类配置：通过 toggleClass 给 body 加标记
-    // 这种方式比直接用 JS 改 CSS 更稳定，且能自动处理 SPA 页面重绘
     $('body').toggleClass('gemini-pro-no-input-shadow', config.hideInputShadow);
   };
 
+  // 初始应用
   applyConfig();
 
-  // 监听 DOM 变化
+  // Gemini 是 SPA，元素是动态加载的，必须监听 DOM 变化才能在刷新后生效
   const observer = new MutationObserver((mutations) => {
     applyConfig();
+    // 确保悬浮按钮始终在最上层
     ensureFab();
   });
 
+  // 开始监听 body 的子元素变化
   observer.observe(document.body, {
     childList: true,
     subtree: true
   });
 
-  // 设置面板回调
+  // 辅助函数：检测是否应该使用深色模式
+  const isDarkMode = () => {
+    // 1. 优先检测 Gemini 网页背景颜色（最准确，覆盖所有情况）
+    // 如果背景颜色亮度较低，则认为是深色模式
+    try {
+      const bgColor = window.getComputedStyle(document.body).backgroundColor;
+      // 提取 rgb 值
+      const rgb = bgColor.match(/\d+/g);
+      if (rgb) {
+        // 计算亮度 (YIQ 公式)
+        const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
+        return brightness < 128; // 亮度小于 128 视为深色
+      }
+    } catch (e) {
+      console.warn('Gemini Pro: Failed to detect theme via background color', e);
+    }
+
+    // 2. 降级检测：操作系统设置
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  };
+
+  // 定义点击设置时的回调函数
   const onSettingsClick = () => {
+    // 动态决定是否应用深色皮肤
+    const skinClass = isDarkMode() ? 'layui-layer-gemini-dark' : '';
+
     layer.open({
       type: 1,
       area: ['500px', '400px'],
       title: 'Gemini Pro 设置',
-      shadeClose: true,
+      shadeClose: true, // 点击遮罩关闭
+      skin: skinClass, // 动态注入深色模式皮肤类
       content: `
       <form class="layui-form" style="padding: 20px;" action="">
         <div class="layui-form-item">
@@ -215,9 +294,14 @@ import Options from "../../gemini-pro/src/Options";
     // layer.open 中 radio、checkbox、select 需要 render 才能显示
     layui.use('form', () => {
       layui.form.render();
+
+      // 监听复选框变更
       layui.form.on('checkbox(item-switch)', (data: any) => {
+        // 更新配置对象
         const name = data.elem.name;
         config[name] = data.elem.checked;
+
+        // 保存并应用
         Store.set(STORE_CONF_KEY, JSON.stringify(config));
         applyConfig();
       });
@@ -336,9 +420,13 @@ import Options from "../../gemini-pro/src/Options";
     // 初始化拖拽逻辑 (内部包含点击处理)
     initDraggable($fab);
 
+    // 添加到 Body
     $('body').append($fab);
   };
 
+  // 1. 注册 Tampermonkey 菜单选项 (保留作为备用入口)
   Options.registerAll(onSettingsClick);
+
+  // 2. 渲染页面 UI 入口
   ensureFab();
 })();
