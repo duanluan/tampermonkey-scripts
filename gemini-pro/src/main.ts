@@ -58,7 +58,7 @@ import Options from "../../gemini-pro/src/Options";
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background-color 0.2s, transform 0.1s; /* 移除 box-shadow 和位置的 transition 以免拖拽延迟 */
+      transition: background-color 0.2s; /* 移除 transform 动画以消除拖拽时的滞后感 */
       color: #444746;
       user-select: none; /* 防止拖拽时选中内部图标 */
     }
@@ -246,8 +246,8 @@ import Options from "../../gemini-pro/src/Options";
       content: `
       <form class="layui-form" style="padding: 20px;" action="">
         <div class="layui-form-item">
-          <label class="layui-form-label" style="width: 100px;">隐藏：</label>
-          <div class="layui-input-block" style="margin-left: 130px;">
+          <label class="layui-form-label" style="width: 60px;">隐藏：</label>
+          <div class="layui-input-block" style="margin-left: 90px;">
             <input type="checkbox" title="侧边栏-我的内容" name="hideMyContentEntryBtn" lay-filter="item-switch" ${config.hideMyContentEntryBtn ? 'checked' : ''}/>
             <input type="checkbox" title="侧边栏-我的内容图片" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
             <input type="checkbox" title="底部免责声明" name="hideDisclaimer" lay-filter="item-switch" ${config.hideDisclaimer ? 'checked' : ''}/>
@@ -276,7 +276,7 @@ import Options from "../../gemini-pro/src/Options";
   }
 
   /**
-   * 初始化拖拽功能
+   * 初始化拖拽功能 (增加边界限制)
    */
   const initDraggable = ($el: JQuery) => {
     let isDragging = false;
@@ -319,10 +319,28 @@ import Options from "../../gemini-pro/src/Options";
         hasMoved = true;
       }
 
+      // 计算新坐标
+      let newLeft = startLeft + deltaX;
+      let newTop = startTop + deltaY;
+
+      // 边界限制：获取窗口宽高和元素宽高
+      const winWidth = $(window).width() || 0;
+      const winHeight = $(window).height() || 0;
+      const elWidth = $el.outerWidth() || 48;
+      const elHeight = $el.outerHeight() || 48;
+
+      // 限制左/右边界
+      if (newLeft < 0) newLeft = 0;
+      if (newLeft + elWidth > winWidth) newLeft = winWidth - elWidth;
+
+      // 限制上/下边界
+      if (newTop < 0) newTop = 0;
+      if (newTop + elHeight > winHeight) newTop = winHeight - elHeight;
+
       // 更新位置
       $el.css({
-        left: startLeft + deltaX + 'px',
-        top: startTop + deltaY + 'px',
+        left: newLeft + 'px',
+        top: newTop + 'px',
         bottom: 'auto',
         right: 'auto'
       });
@@ -374,11 +392,25 @@ import Options from "../../gemini-pro/src/Options";
       </div>
     `);
 
-    // 如果配置中有保存的位置，应用之
+    // 如果配置中有保存的位置，应用之 (带越界修正)
     if (config.fabPos && config.fabPos.top && config.fabPos.left) {
+      let top = parseInt(config.fabPos.top);
+      let left = parseInt(config.fabPos.left);
+
+      const winWidth = $(window).width() || window.innerWidth;
+      const winHeight = $(window).height() || window.innerHeight;
+      const elSize = 48; // 按钮尺寸
+
+      // 修正逻辑：如果保存的位置超出了当前屏幕范围，强制拉回边缘
+      // 检查是否在屏幕外
+      if (top < 0) top = 0;
+      if (left < 0) left = 0;
+      if (top + elSize > winHeight) top = winHeight - elSize - 24; // 减去一些 padding 防止贴死
+      if (left + elSize > winWidth) left = winWidth - elSize - 24;
+
       $fab.css({
-        top: config.fabPos.top,
-        left: config.fabPos.left,
+        top: top + 'px',
+        left: left + 'px',
         bottom: 'auto',
         right: 'auto'
       });
