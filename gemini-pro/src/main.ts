@@ -149,7 +149,7 @@ import Options from "../../gemini-pro/src/Options";
 
     /* === 核心功能：极简输入框样式 === */
     
-    /* 1. 清除顶部渐变遮罩 (Input Gradient)：覆盖所有可能的实现方式：背景图、伪元素、背景色 */
+    /* 清除顶部的虚化遮罩，这是导致长截图出现阴影接缝的根源 */
     body.gemini-pro-no-input-shadow .input-gradient,
     body.gemini-pro-no-input-shadow .input-gradient::before,
     body.gemini-pro-no-input-shadow .input-gradient::after {
@@ -158,24 +158,6 @@ import Options from "../../gemini-pro/src/Options";
       mask: none !important;
       -webkit-mask: none !important;
       box-shadow: none !important;
-    }
-
-    /* 2. 清除输入框本体的投影 (Box Shadow)：穿透多层容器，确保阴影被移除 */
-    body.gemini-pro-no-input-shadow input-area-v2,
-    body.gemini-pro-no-input-shadow .input-box-shadow,
-    body.gemini-pro-no-input-shadow .input-area-container,
-    body.gemini-pro-no-input-shadow .text-input-field {
-      box-shadow: none !important;
-    }
-
-    /* 3. (可选) 给输入框加一个极淡的边框，防止去阴影后和背景融为一体看不清轮廓 */
-    body.gemini-pro-no-input-shadow input-area-v2 {
-      border: 1px solid rgba(0,0,0, 0.1) !important;
-    }
-    @media (prefers-color-scheme: dark) {
-      body.gemini-pro-no-input-shadow input-area-v2 {
-        border: 1px solid rgba(255,255,255, 0.1) !important;
-      }
     }
   `);
 
@@ -264,27 +246,12 @@ import Options from "../../gemini-pro/src/Options";
       content: `
       <form class="layui-form" style="padding: 20px;" action="">
         <div class="layui-form-item">
-          <label class="layui-form-label" style="width: 120px;">隐藏侧边栏入口：</label>
-          <div class="layui-input-block" style="margin-left: 150px;">
-            <input type="checkbox" title="我的内容" name="hideMyContentEntryBtn" lay-filter="item-switch" ${config.hideMyContentEntryBtn ? 'checked' : ''}/>
-          </div>
-        </div>
-        <div class="layui-form-item">
-          <label class="layui-form-label" style="width: 120px;">隐藏图片预览：</label>
-          <div class="layui-input-block" style="margin-left: 150px;">
-            <input type="checkbox" title="最近图片" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
-          </div>
-        </div>
-        <div class="layui-form-item">
-          <label class="layui-form-label" style="width: 120px;">隐藏免责声明：</label>
-          <div class="layui-input-block" style="margin-left: 150px;">
-            <input type="checkbox" title="底部提示" name="hideDisclaimer" lay-filter="item-switch" ${config.hideDisclaimer ? 'checked' : ''}/>
-          </div>
-        </div>
-        <div class="layui-form-item">
-          <label class="layui-form-label" style="width: 120px;">界面极简：</label>
-          <div class="layui-input-block" style="margin-left: 150px;">
-            <input type="checkbox" title="去输入框阴影" name="hideInputShadow" lay-filter="item-switch" ${config.hideInputShadow ? 'checked' : ''}/>
+          <label class="layui-form-label" style="width: 100px;">隐藏：</label>
+          <div class="layui-input-block" style="margin-left: 130px;">
+            <input type="checkbox" title="侧边栏-我的内容" name="hideMyContentEntryBtn" lay-filter="item-switch" ${config.hideMyContentEntryBtn ? 'checked' : ''}/>
+            <input type="checkbox" title="侧边栏-我的内容图片" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
+            <input type="checkbox" title="底部免责声明" name="hideDisclaimer" lay-filter="item-switch" ${config.hideDisclaimer ? 'checked' : ''}/>
+            <input type="checkbox" title="聊天输入框上边渐变" name="hideInputShadow" lay-filter="item-switch" ${config.hideInputShadow ? 'checked' : ''}/>
           </div>
         </div>
       </form>
