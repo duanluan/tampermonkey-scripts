@@ -42,16 +42,53 @@ import Options from "../../gemini-pro/src/Options";
     .layui-layer-ico5{background-position:-150px 0}
     .layui-layer-ico6{background-position:-180px 0}
     
-    /* 侧边栏入口样式优化 */
-    #gemini-pro-settings-entry .mdc-list-item__start {
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      height: 24px; /* 强制高度与 SVG 一致 */
+    /* === 设置入口：悬浮按钮 === */
+    #gemini-pro-fab {
+      position: fixed;
+      /* 默认位置在右下角，具体的 top/left 会由 JS 覆盖 */
+      bottom: 24px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background-color: #fff;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      z-index: 9999;
+      cursor: grab; /* 提示可拖拽 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s, transform 0.1s; /* 移除 box-shadow 和位置的 transition 以免拖拽延迟 */
+      color: #444746;
+      user-select: none; /* 防止拖拽时选中内部图标 */
     }
 
-    #gemini-pro-settings-entry svg {
+    #gemini-pro-fab:active {
+      cursor: grabbing;
+      transform: scale(0.95);
+    }
+
+    #gemini-pro-fab:hover {
+      background-color: #f0f4f9;
+    }
+
+    #gemini-pro-fab svg {
       fill: currentColor;
+      width: 24px;
+      height: 24px;
+      pointer-events: none; /* 让事件穿透图标直接打在 div 上 */
+    }
+
+    /* 深色模式适配 */
+    @media (prefers-color-scheme: dark) {
+      #gemini-pro-fab {
+        background-color: #1e1f20;
+        color: #e3e3e3;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      }
+      #gemini-pro-fab:hover {
+        background-color: #2d2e2f;
+      }
     }
 
     /* === 核心功能：极简输入框样式 === */
@@ -93,8 +130,6 @@ import Options from "../../gemini-pro/src/Options";
     myContentEntryBtn: 'side-nav-entry-button',
     // 我的内容图片预览
     myContentPreview: 'my-stuff-recents-preview',
-    // 原生"设置和帮助"按钮（用于克隆和定位）
-    originalSettingsBtn: 'side-nav-action-button[data-test-id="settings-and-help-button"]',
     // 底部免责声明
     disclaimer: 'hallucination-disclaimer'
   }
@@ -104,6 +139,8 @@ import Options from "../../gemini-pro/src/Options";
     hideMyContentPreview: false,
     hideDisclaimer: false,
     hideInputShadow: false,
+    // 新增：记录悬浮按钮位置
+    fabPos: { top: '', left: '' }
   }
   const STORE_CONF_KEY = 'config';
 
@@ -130,7 +167,7 @@ import Options from "../../gemini-pro/src/Options";
   // 监听 DOM 变化
   const observer = new MutationObserver((mutations) => {
     applyConfig();
-    renderSidebarEntry();
+    ensureFab();
   });
 
   observer.observe(document.body, {
@@ -188,52 +225,120 @@ import Options from "../../gemini-pro/src/Options";
   }
 
   /**
-   * 渲染侧边栏设置入口按钮 (使用克隆方案)
+   * 初始化拖拽功能
    */
-  const renderSidebarEntry = () => {
-    const btnId = 'gemini-pro-settings-entry';
+  const initDraggable = ($el: JQuery) => {
+    let isDragging = false;
+    let hasMoved = false; // 用于区分点击和拖拽
+    let startX = 0, startY = 0;
+    let startLeft = 0, startTop = 0;
 
-    // 1. 检查是否已存在
-    if ($(`#${btnId}`).length > 0) return;
+    $el.on('mousedown', (e) => {
+      // 只有左键可以拖拽
+      if (e.button !== 0) return;
 
-    // 2. 找到"本体"：原生的设置按钮
-    const $originalBtn = $(selector.originalSettingsBtn);
-    if ($originalBtn.length === 0) return;
+      isDragging = true;
+      hasMoved = false;
 
-    // 3. 克隆它
-    const $newBtn = $originalBtn.clone();
+      // 记录鼠标初始位置
+      startX = e.clientX;
+      startY = e.clientY;
 
-    // 4. 修改克隆后的元素属性
-    $newBtn.attr('id', btnId);
-    $newBtn.attr('data-test-id', 'gemini-pro-entry');
+      // 记录元素初始位置 (获取当前的 computed style)
+      const rect = $el[0].getBoundingClientRect();
+      startLeft = rect.left;
+      startTop = rect.top;
 
-    // 5. 替换图标
-    // 找到内部的 icon 容器
-    const $iconContainer = $newBtn.find('.mat-mdc-list-item-icon, [data-test-id="side-nav-action-button-icon"]').first();
-    // 清空原有 mat-icon，插入我们的 SVG
-    $iconContainer.empty().html(`
-      <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
-        <path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z"/>
-      </svg>
-    `);
-
-    // 6. 替换文字
-    const $textContainer = $newBtn.find('[data-test-id="side-nav-action-button-content"], .mdc-list-item__primary-text').first();
-    $textContainer.text('Gemini Pro');
-
-    // 7. 处理点击事件
-    const $interactiveBtn = $newBtn.find('button');
-    $interactiveBtn.off();
-    $interactiveBtn.on('click', (e) => {
+      // 阻止文字选中
       e.preventDefault();
-      e.stopPropagation();
-      onSettingsClick();
+
+      // 改变光标
+      $el.css('cursor', 'grabbing');
     });
 
-    // 8. 插入到原生按钮的上方
-    $originalBtn.before($newBtn);
+    // 绑定到 document 以防止鼠标移出元素过快
+    $(document).on('mousemove', (e) => {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - startX;
+      const deltaY = e.clientY - startY;
+
+      // 如果移动距离超过 2px，则视为拖拽操作 (防止手抖)
+      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+        hasMoved = true;
+      }
+
+      // 更新位置
+      $el.css({
+        left: startLeft + deltaX + 'px',
+        top: startTop + deltaY + 'px',
+        bottom: 'auto',
+        right: 'auto'
+      });
+    });
+
+    $(document).on('mouseup', (e) => {
+      if (!isDragging) return;
+
+      isDragging = false;
+      $el.css('cursor', 'grab');
+
+      // 如果发生了实质性移动，保存位置
+      if (hasMoved) {
+        const rect = $el[0].getBoundingClientRect();
+        config.fabPos = {
+          top: rect.top + 'px',
+          left: rect.left + 'px'
+        };
+        Store.set(STORE_CONF_KEY, JSON.stringify(config));
+      }
+    });
+
+    // 拦截点击事件
+    // 如果刚刚发生了拖拽 (hasMoved 为 true)，则阻止点击打开设置
+    $el.on('click', (e) => {
+      if (hasMoved) {
+        e.preventDefault();
+        e.stopPropagation();
+        hasMoved = false; // 重置
+      } else {
+        onSettingsClick();
+      }
+    });
+  };
+
+  /**
+   * 渲染/确保右下角悬浮按钮存在
+   */
+  const ensureFab = () => {
+    const btnId = 'gemini-pro-fab';
+    if ($(`#${btnId}`).length > 0) return;
+
+    // 创建悬浮按钮
+    const $fab = $(`
+      <div id="${btnId}" title="Gemini Pro 设置">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+          <path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z"/>
+        </svg>
+      </div>
+    `);
+
+    // 如果配置中有保存的位置，应用之
+    if (config.fabPos && config.fabPos.top && config.fabPos.left) {
+      $fab.css({
+        top: config.fabPos.top,
+        left: config.fabPos.left,
+        bottom: 'auto',
+        right: 'auto'
+      });
+    }
+
+    // 初始化拖拽逻辑 (内部包含点击处理)
+    initDraggable($fab);
+
+    $('body').append($fab);
   };
 
   Options.registerAll(onSettingsClick);
-  renderSidebarEntry();
+  ensureFab();
 })();
