@@ -8,6 +8,7 @@
 // @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
 // @homepage     https://greasyfork.org/zh-CN/scripts/558517
 // @match        https://gemini.google.com/*
+// @require      https://update.greasyfork.org/scripts/433051/Trusted%20Types%20Helper.js
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
 // @resource     layui_css https://cdn.jsdelivr.net/npm/layui-tampermonkey@2.9.9-rc.3/css/layui.css
 // @require      https://cdn.jsdelivr.net/npm/layui-tampermonkey@2.9.9-rc.3/layui.js
@@ -41,7 +42,7 @@ import Options from "../../gemini-pro/src/Options";
     .layui-layer-ico4{background-position:-120px 0}
     .layui-layer-ico5{background-position:-150px 0}
     .layui-layer-ico6{background-position:-180px 0}
-    
+
     /* === 设置入口：悬浮按钮 === */
     #gemini-pro-fab {
       position: fixed;
@@ -54,13 +55,15 @@ import Options from "../../gemini-pro/src/Options";
       background-color: #fff;
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
       z-index: 9999;
-      cursor: grab; /* 提示可拖拽 */
+      /* 可拖拽 */
+      cursor: grab;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background-color 0.2s; /* 移除 transform 动画以消除拖拽时的滞后感 */
+      transition: background-color 0.2s;
       color: #444746;
-      user-select: none; /* 防止拖拽时选中内部图标 */
+      /* 防止拖拽时选中内部图标 */
+      user-select: none;
     }
 
     #gemini-pro-fab:active {
@@ -76,78 +79,9 @@ import Options from "../../gemini-pro/src/Options";
       fill: currentColor;
       width: 24px;
       height: 24px;
-      pointer-events: none; /* 让事件穿透图标直接打在 div 上 */
+      /* 让事件穿透图标直接打在 div 上 */
+      pointer-events: none;
     }
-
-    /* 深色模式适配 - 悬浮按钮 */
-    @media (prefers-color-scheme: dark) {
-      #gemini-pro-fab {
-        background-color: #1e1f20;
-        color: #e3e3e3;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-      }
-      #gemini-pro-fab:hover {
-        background-color: #2d2e2f;
-      }
-    }
-
-    /* === Layui 弹窗深色模式适配 (通过 Skin 类名控制) === */
-    /* 弹窗整体容器 */
-    html body .layui-layer-gemini-dark.layui-layer-page, 
-    html body .layui-layer-gemini-dark.layui-layer-iframe,
-    html body .layui-layer-gemini-dark.layui-layer-dialog {
-      background-color: #1e1f20 !important;
-      color: #ffffff !important;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.6) !important;
-      border: 1px solid #444 !important;
-    }
-
-    /* 暴力修正：强制弹窗内所有后代元素字体均为纯白 */
-    html body .layui-layer-gemini-dark * {
-      color: #ffffff !important;
-    }
-
-    /* 标题栏 */
-    html body .layui-layer-gemini-dark .layui-layer-title {
-      background-color: #2d2e2f !important;
-      color: #ffffff !important;
-      border-bottom: 1px solid #444 !important;
-    }
-
-    /* 内容区域 */
-    html body .layui-layer-gemini-dark .layui-layer-content {
-      color: #ffffff !important;
-    }
-
-    /* 表单控件文字 (如 Checkbox 后面的文字、Label) */
-    html body .layui-layer-gemini-dark .layui-form-label,
-    html body .layui-layer-gemini-dark .layui-form-checkbox span {
-      color: #ffffff !important;
-    }
-    
-    /* 复选框 hover 状态 */
-    html body .layui-layer-gemini-dark .layui-form-checkbox:hover span {
-      color: #fff !important;
-    }
-
-    /* 关闭按钮 (X) 反转颜色以适应深色背景 */
-    html body .layui-layer-gemini-dark .layui-layer-setwin a {
-      filter: invert(1) grayscale(100%) brightness(200%);
-    }
-    
-    /* 按钮 (如果有) */
-    html body .layui-layer-gemini-dark .layui-layer-btn a {
-      background: #2d2e2f !important;
-      border-color: #444 !important;
-      color: #ffffff !important;
-    }
-    html body .layui-layer-gemini-dark .layui-layer-btn .layui-layer-btn0 {
-      background: #0b57d0 !important; /* 保持确认按钮为蓝色主题 */
-      border-color: #0b57d0 !important;
-      color: #fff !important;
-    }
-
-    /* === 核心功能：极简输入框样式 === */
     
     /* 清除顶部的虚化遮罩，这是导致长截图出现阴影接缝的根源 */
     body.gemini-pro-no-input-shadow .input-gradient,
@@ -175,101 +109,232 @@ import Options from "../../gemini-pro/src/Options";
     hideMyContentPreview: false,
     hideDisclaimer: false,
     hideInputShadow: false,
-    // 新增：记录悬浮按钮位置
-    fabPos: { top: '', left: '' }
+    // 记录悬浮按钮位置
+    fabPos: { top: '', left: '' },
+    // 默认边距
+    page: {
+      chatLeftPadding: '10%',
+      chatRightPadding: '10%'
+    }
   }
   const STORE_CONF_KEY = 'config';
 
   // 读取配置
   let savedConfigStr = Store.get(STORE_CONF_KEY);
   let config = savedConfigStr ? JSON.parse(savedConfigStr) : defaultConfig;
+  config.page = { ...defaultConfig.page, ...(config.page || {}) };
 
   /**
-   * 应用配置（根据配置显示或隐藏元素）
+   * 辅助函数：确保 CSS 值带有单位 (默认 px)
+   */
+  const toCssVal = (val) => {
+    if (!val) return '0px';
+    val = String(val).trim();
+    // 纯数字补 px
+    if (/^\d+$/.test(val)) return val + 'px';
+    return val;
+  };
+
+  /**
+   * 应用页面宽度样式 (核心修复版)
+   */
+  const applyPageStyle = () => {
+    const styleId = 'gemini-pro-page-style';
+    let $style = $(`#${styleId}`);
+    if ($style.length === 0) {
+      $style = $(`<style id="${styleId}"></style>`);
+      $('head').append($style);
+    }
+
+    let leftRaw = config.page.chatLeftPadding;
+    let rightRaw = config.page.chatRightPadding;
+
+    // 计算并限制总边距不超过 80%
+    const winWidth = $(window).width() || window.innerWidth || 0;
+    // 定义最大总边距 (80%)
+    const maxTotalPadding = winWidth * 0.8;
+
+    // 内部辅助：统一转像素
+    const parseToPx = (val) => {
+      if (!val) return 0;
+      val = String(val).trim();
+      // 如果是百分比
+      if (val.endsWith('%')) {
+        return (parseFloat(val) / 100) * winWidth;
+      }
+      // 否则视为数字或 px
+      return parseFloat(val) || 0;
+    };
+
+    let leftPx = parseToPx(leftRaw);
+    let rightPx = parseToPx(rightRaw);
+    const totalPx = leftPx + rightPx;
+
+    // 判断是否超过阈值 (需确保 width > 0 避免除以 0)
+    if (winWidth > 0 && totalPx > maxTotalPadding) {
+      // 计算缩放系数
+      const scale = maxTotalPadding / totalPx;
+
+      // 按比例缩放左右边距
+      leftPx = leftPx * scale;
+      rightPx = rightPx * scale;
+
+      // 覆盖原始值为计算后的 px 字符串
+      leftRaw = leftPx + 'px';
+      rightRaw = rightPx + 'px';
+      console.warn(`Gemini Pro: Chat padding exceeded limit, adjusted to ${leftRaw} (left) and ${rightRaw} (right)`);
+    } else {
+      // 未超限，使用常规格式化 (补全单位)
+      leftRaw = toCssVal(leftRaw);
+      rightRaw = toCssVal(rightRaw);
+    }
+
+    const chatLeftPadding = leftRaw;
+    const chatRightPadding = rightRaw;
+
+    // 将显隐逻辑直接转换为 CSS 规则
+    const displayNone = 'display: none !important;';
+
+    $style.text(`
+      /* 显隐控制 */
+      ${selector.myContentEntryBtn} {
+        ${config.hideMyContentEntryBtn ? displayNone : ''}
+      }
+      ${selector.myContentPreview} {
+        ${config.hideMyContentPreview ? displayNone : ''}
+      }
+      ${selector.disclaimer} {
+        ${config.hideDisclaimer ? displayNone : ''}
+      }
+      
+      /* 聊天对话容器 */
+      #chat-history > .chat-history {
+        padding: 16px ${chatRightPadding} 20px ${chatLeftPadding} !important;
+      }
+      /* 聊天对话 Gem 信息 */
+      #chat-history > .chat-history > .bot-info-card-container {
+        padding: 0 !important;
+      }
+      /* 解决修改 Gem 信息 padding 后不居中问题 */
+      bot-info-card > .bot-info-card-container {
+        align-items: center !important;
+      }
+      
+      /* 用户说 */
+      user-query {
+        max-width: 100% !important;
+      }
+      user-query-content > .user-query-container {
+        max-width: 50% !important;
+      }
+      /* AI 说 */
+      .conversation-container {
+        max-width: 100% !important;
+      }
+      
+      /* 聊天输入边距 */
+      input-container {
+        padding: 0 ${chatRightPadding} 0 ${chatLeftPadding} !important;
+      }
+      /* 聊天输入最大宽度 */
+      .input-area-container {
+        max-width: 100% !important;
+      }
+    `);
+  };
+
+  /**
+   * 应用配置
    */
   const applyConfig = () => {
-    $(selector.myContentEntryBtn).toggle(!config.hideMyContentEntryBtn);
-    $(selector.myContentPreview).toggle(!config.hideMyContentPreview);
-    $(selector.disclaimer).toggle(!config.hideDisclaimer);
     // 样式类配置：通过 toggleClass 给 body 加标记
     $('body').toggleClass('gemini-pro-no-input-shadow', config.hideInputShadow);
+    applyPageStyle();
   };
 
   // 初始应用
   applyConfig();
 
-  // Gemini 是 SPA，元素是动态加载的，必须监听 DOM 变化才能在刷新后生效
-  const observer = new MutationObserver((mutations) => {
-    applyConfig();
-    // 确保悬浮按钮始终在最上层
-    ensureFab();
+  // 监听窗口大小变化，动态重新计算边距限制
+  // (避免大屏幕下设置的 px 值在小屏幕上占满全屏)
+  $(window).on('resize', () => {
+    applyPageStyle();
   });
-
-  // 开始监听 body 的子元素变化
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
-  });
-
-  // 辅助函数：检测是否应该使用深色模式
-  const isDarkMode = () => {
-    // 1. 优先检测 Gemini 网页背景颜色（最准确，覆盖所有情况）
-    // 如果背景颜色亮度较低，则认为是深色模式
-    try {
-      const bgColor = window.getComputedStyle(document.body).backgroundColor;
-      // 提取 rgb 值
-      const rgb = bgColor.match(/\d+/g);
-      if (rgb) {
-        // 计算亮度 (YIQ 公式)
-        const brightness = (parseInt(rgb[0]) * 299 + parseInt(rgb[1]) * 587 + parseInt(rgb[2]) * 114) / 1000;
-        return brightness < 128; // 亮度小于 128 视为深色
-      }
-    } catch (e) {
-      console.warn('Gemini Pro: Failed to detect theme via background color', e);
-    }
-
-    // 2. 降级检测：操作系统设置
-    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  };
 
   // 定义点击设置时的回调函数
   const onSettingsClick = () => {
-    // 动态决定是否应用深色皮肤
-    const skinClass = isDarkMode() ? 'layui-layer-gemini-dark' : '';
-
     layer.open({
       type: 1,
-      area: ['500px', '400px'],
+      area: ['500px', '450px'],
       title: 'Gemini Pro 设置',
-      shadeClose: true, // 点击遮罩关闭
-      skin: skinClass, // 动态注入深色模式皮肤类
+      // 点击遮罩关闭
+      shadeClose: true,
       content: `
-      <form class="layui-form" style="padding: 20px;" action="">
-        <div class="layui-form-item">
-          <label class="layui-form-label" style="width: 60px;">隐藏：</label>
-          <div class="layui-input-block" style="margin-left: 90px;">
-            <input type="checkbox" title="侧边栏-我的内容" name="hideMyContentEntryBtn" lay-filter="item-switch" ${config.hideMyContentEntryBtn ? 'checked' : ''}/>
-            <input type="checkbox" title="侧边栏-我的内容图片" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
-            <input type="checkbox" title="底部免责声明" name="hideDisclaimer" lay-filter="item-switch" ${config.hideDisclaimer ? 'checked' : ''}/>
-            <input type="checkbox" title="聊天输入框上边渐变" name="hideInputShadow" lay-filter="item-switch" ${config.hideInputShadow ? 'checked' : ''}/>
+        <div class="layui-tab layui-tab-brief" lay-filter="gemini-settings-tab" style="margin: 0;">
+          <ul class="layui-tab-title">
+            <li class="layui-this">常规设置</li>
+            <li>页面调整</li>
+          </ul>
+          <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+              <form class="layui-form" style="padding: 10px;" action="">
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 60px;">隐藏：</label>
+                  <div class="layui-input-block" style="margin-left: 90px;">
+                    <input type="checkbox" title="侧边栏-我的内容" name="hideMyContentEntryBtn" lay-filter="item-switch" ${config.hideMyContentEntryBtn ? 'checked' : ''}/>
+                    <input type="checkbox" title="侧边栏-我的内容图片" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
+                    <input type="checkbox" title="底部免责声明" name="hideDisclaimer" lay-filter="item-switch" ${config.hideDisclaimer ? 'checked' : ''}/>
+                    <input type="checkbox" title="聊天输入框上方渐变" name="hideInputShadow" lay-filter="item-switch" ${config.hideInputShadow ? 'checked' : ''}/>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div class="layui-tab-item">
+              <form class="layui-form" lay-filter="page-form" style="padding: 10px;">
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 80px;">聊天左边距</label>
+                  <div class="layui-input-block" style="margin-left: 110px;">
+                    <input type="text" name="chatLeftPadding" value="${config.page.chatLeftPadding}" placeholder="如 50px 或 10%" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 80px;">聊天右边距</label>
+                  <div class="layui-input-block" style="margin-left: 110px;">
+                    <input type="text" name="chatRightPadding" value="${config.page.chatRightPadding}" placeholder="如 50px 或 10%" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+                <div style="padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;">
+                  <p>1. 支持单位：px (像素) 或 % (百分比)。</p>
+                  <p>2. 如果只填数字，默认为 px。</p>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
-      </form>
-    `
+      `
     })
 
     // layer.open 中 radio、checkbox、select 需要 render 才能显示
-    layui.use('form', () => {
-      layui.form.render();
-
+    layui.use(['form', 'element'], () => {
+      const form = layui.form;
+      form.render();
       // 监听复选框变更
-      layui.form.on('checkbox(item-switch)', (data: any) => {
+      form.on('checkbox(item-switch)', (data: any) => {
         // 更新配置对象
-        const name = data.elem.name;
-        config[name] = data.elem.checked;
-
-        // 保存并应用
+        config[data.elem.name] = data.elem.checked;
+        // 保存配置
         Store.set(STORE_CONF_KEY, JSON.stringify(config));
+        applyConfig();
+      });
+
+      // 动态监听输入框变化
+      $('input[name="chatLeftPadding"], input[name="chatRightPadding"]').on('input', function() {
+        // 获取当前输入框的 name 和 value，更新内存中的配置
+        config.page[$(this).attr('name')] =  $(this).val();
+        // 持久化保存
+        Store.set(STORE_CONF_KEY, JSON.stringify(config));
+        // 实时应用样式
         applyConfig();
       });
     });
@@ -280,7 +345,8 @@ import Options from "../../gemini-pro/src/Options";
    */
   const initDraggable = ($el: JQuery) => {
     let isDragging = false;
-    let hasMoved = false; // 用于区分点击和拖拽
+    // 用于区分点击和拖拽
+    let hasMoved = false;
     let startX = 0, startY = 0;
     let startLeft = 0, startTop = 0;
 
@@ -369,7 +435,7 @@ import Options from "../../gemini-pro/src/Options";
       if (hasMoved) {
         e.preventDefault();
         e.stopPropagation();
-        hasMoved = false; // 重置
+        hasMoved = false;
       } else {
         onSettingsClick();
       }
@@ -396,24 +462,16 @@ import Options from "../../gemini-pro/src/Options";
     if (config.fabPos && config.fabPos.top && config.fabPos.left) {
       let top = parseInt(config.fabPos.top);
       let left = parseInt(config.fabPos.left);
-
       const winWidth = $(window).width() || window.innerWidth;
       const winHeight = $(window).height() || window.innerHeight;
-      const elSize = 48; // 按钮尺寸
-
-      // 修正逻辑：如果保存的位置超出了当前屏幕范围，强制拉回边缘
+      // 按钮尺寸
+      const elSize = 48;
       // 检查是否在屏幕外
       if (top < 0) top = 0;
       if (left < 0) left = 0;
-      if (top + elSize > winHeight) top = winHeight - elSize - 24; // 减去一些 padding 防止贴死
+      if (top + elSize > winHeight) top = winHeight - elSize - 24;
       if (left + elSize > winWidth) left = winWidth - elSize - 24;
-
-      $fab.css({
-        top: top + 'px',
-        left: left + 'px',
-        bottom: 'auto',
-        right: 'auto'
-      });
+      $fab.css({ top: top + 'px', left: left + 'px', bottom: 'auto', right: 'auto' });
     }
 
     // 初始化拖拽逻辑 (内部包含点击处理)
