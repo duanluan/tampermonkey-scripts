@@ -319,16 +319,23 @@ var Store = /*#__PURE__*/function () {
 
 /* harmony import */ var _utils_gm_Store__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(307);
 /* harmony import */ var _gemini_pro_src_Options__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(172);
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 // ==UserScript==
 // @name         Gemini Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.0.1
+// @version      0.1.0
 // @description  增强 Gemini 对话界面
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
 // @license      Apache-2.0; https://www.apache.org/licenses/LICENSE-2.0.txt
 // @homepage     https://greasyfork.org/zh-CN/scripts/558517
 // @match        https://gemini.google.com/*
+// @require      https://update.greasyfork.org/scripts/433051/Trusted%20Types%20Helper.js
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
 // @resource     layui_css https://cdn.jsdelivr.net/npm/layui-tampermonkey@2.9.9-rc.3/css/layui.css
 // @require      https://cdn.jsdelivr.net/npm/layui-tampermonkey@2.9.9-rc.3/layui.js
@@ -349,78 +356,314 @@ var Store = /*#__PURE__*/function () {
 (function () {
   'use strict';
 
-  // 加载 CSS
+  // 加载 Layui CSS
   GM_addStyle(GM_getResourceText('layui_css'));
-  // layer 图标未知原因失效，手动添加样式
-  $(document.head).append("<style>\n    .layui-layer-ico{background:url('https://cdn.jsdelivr.net/npm/layer-src@3.5.1/dist/theme/default/icon.png') no-repeat}\n    .layui-layer-ico1{background-position:-30px 0}\n    .layui-layer-ico2{background-position:-60px 0}\n    .layui-layer-ico3{background-position:-90px 0}\n    .layui-layer-ico4{background-position:-120px 0}\n    .layui-layer-ico5{background-position:-150px 0}\n    .layui-layer-ico6{background-position:-180px 0}\n  </style>");
+
+  // 注入自定义样式
+  GM_addStyle("\n    .layui-layer-ico{background:url('https://cdn.jsdelivr.net/npm/layer-src@3.5.1/dist/theme/default/icon.png') no-repeat}\n    .layui-layer-ico1{background-position:-30px 0}\n    .layui-layer-ico2{background-position:-60px 0}\n    .layui-layer-ico3{background-position:-90px 0}\n    .layui-layer-ico4{background-position:-120px 0}\n    .layui-layer-ico5{background-position:-150px 0}\n    .layui-layer-ico6{background-position:-180px 0}\n\n    /* === \u8BBE\u7F6E\u5165\u53E3\uFF1A\u60AC\u6D6E\u6309\u94AE === */\n    #gemini-pro-fab {\n      position: fixed;\n      /* \u9ED8\u8BA4\u4F4D\u7F6E\u5728\u53F3\u4E0B\u89D2\uFF0C\u5177\u4F53\u7684 top/left \u4F1A\u7531 JS \u8986\u76D6 */\n      bottom: 24px;\n      right: 24px;\n      width: 48px;\n      height: 48px;\n      border-radius: 50%;\n      background-color: #fff;\n      box-shadow: 0 4px 8px rgba(0,0,0,0.15);\n      z-index: 9999;\n      /* \u53EF\u62D6\u62FD */\n      cursor: grab;\n      display: flex;\n      align-items: center;\n      justify-content: center;\n      transition: background-color 0.2s;\n      color: #444746;\n      /* \u9632\u6B62\u62D6\u62FD\u65F6\u9009\u4E2D\u5185\u90E8\u56FE\u6807 */\n      user-select: none;\n    }\n\n    #gemini-pro-fab:active {\n      cursor: grabbing;\n      transform: scale(0.95);\n    }\n\n    #gemini-pro-fab:hover {\n      background-color: #f0f4f9;\n    }\n\n    #gemini-pro-fab svg {\n      fill: currentColor;\n      width: 24px;\n      height: 24px;\n      /* \u8BA9\u4E8B\u4EF6\u7A7F\u900F\u56FE\u6807\u76F4\u63A5\u6253\u5728 div \u4E0A */\n      pointer-events: none;\n    }\n    \n    /* \u6E05\u9664\u9876\u90E8\u7684\u865A\u5316\u906E\u7F69\uFF0C\u8FD9\u662F\u5BFC\u81F4\u957F\u622A\u56FE\u51FA\u73B0\u9634\u5F71\u63A5\u7F1D\u7684\u6839\u6E90 */\n    body.gemini-pro-no-input-shadow .input-gradient,\n    body.gemini-pro-no-input-shadow .input-gradient::before,\n    body.gemini-pro-no-input-shadow .input-gradient::after {\n      background: none !important;\n      background-image: none !important;\n      mask: none !important;\n      -webkit-mask: none !important;\n      box-shadow: none !important;\n    }\n  ");
   var selector = {
     // 我的内容入口按钮
     myContentEntryBtn: 'side-nav-entry-button',
     // 我的内容图片预览
-    myContentPreview: 'my-stuff-recents-preview'
+    myContentPreview: 'my-stuff-recents-preview',
+    // 底部免责声明
+    disclaimer: 'hallucination-disclaimer'
   };
   var defaultConfig = {
     hideMyContentEntryBtn: false,
-    hideMyContentPreview: false
+    hideMyContentPreview: false,
+    hideDisclaimer: false,
+    hideInputShadow: false,
+    // 记录悬浮按钮位置
+    fabPos: {
+      top: '',
+      left: ''
+    },
+    // 默认边距
+    page: {
+      chatLeftPadding: '10%',
+      chatRightPadding: '10%',
+      chatBottomPadding: ''
+    }
   };
   var STORE_CONF_KEY = 'config';
 
   // 读取配置
   var savedConfigStr = _utils_gm_Store__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.get(STORE_CONF_KEY);
   var config = savedConfigStr ? JSON.parse(savedConfigStr) : defaultConfig;
+  config.page = _objectSpread(_objectSpread({}, defaultConfig.page), config.page || {});
 
   /**
-   * 应用配置（根据配置显示或隐藏元素）
+   * 辅助函数：确保 CSS 值带有单位 (默认 px)
+   */
+  var toCssVal = function toCssVal(val) {
+    if (!val) return '0px';
+    val = String(val).trim();
+    // 纯数字补 px
+    if (/^\d+$/.test(val)) return val + 'px';
+    return val;
+  };
+
+  /**
+   * 应用页面宽度样式 (核心修复版)
+   */
+  var applyPageStyle = function applyPageStyle() {
+    var styleId = 'gemini-pro-page-style';
+    var $style = $("#".concat(styleId));
+    if ($style.length === 0) {
+      $style = $("<style id=\"".concat(styleId, "\"></style>"));
+      $('head').append($style);
+    }
+    var leftRaw = config.page.chatLeftPadding;
+    var rightRaw = config.page.chatRightPadding;
+    var bottomRaw = config.page.chatBottomPadding;
+
+    // 计算并限制总边距不超过 80%
+    var winWidth = $(window).width() || window.innerWidth || 0;
+    // 定义最大总边距 (80%)
+    var maxTotalPadding = winWidth * 0.8;
+
+    // 内部辅助：统一转像素
+    var parseToPx = function parseToPx(val) {
+      if (!val) return 0;
+      val = String(val).trim();
+      // 如果是百分比
+      if (val.endsWith('%')) {
+        return parseFloat(val) / 100 * winWidth;
+      }
+      // 否则视为数字或 px
+      return parseFloat(val) || 0;
+    };
+    var leftPx = parseToPx(leftRaw);
+    var rightPx = parseToPx(rightRaw);
+    var totalPx = leftPx + rightPx;
+
+    // 判断是否超过阈值 (需确保 width > 0 避免除以 0)
+    if (winWidth > 0 && totalPx > maxTotalPadding) {
+      // 计算缩放系数
+      var scale = maxTotalPadding / totalPx;
+
+      // 按比例缩放左右边距
+      leftPx = leftPx * scale;
+      rightPx = rightPx * scale;
+
+      // 覆盖原始值为计算后的 px 字符串
+      leftRaw = leftPx + 'px';
+      rightRaw = rightPx + 'px';
+      console.warn("Gemini Pro: Chat padding exceeded limit, adjusted to ".concat(leftRaw, " (left) and ").concat(rightRaw, " (right)"));
+    } else {
+      // 未超限，使用常规格式化 (补全单位)
+      leftRaw = toCssVal(leftRaw);
+      rightRaw = toCssVal(rightRaw);
+    }
+
+    // 底边距不需要参与宽度计算逻辑，直接格式化
+    bottomRaw = toCssVal(bottomRaw);
+    var chatLeftPadding = leftRaw;
+    var chatRightPadding = rightRaw;
+    var chatBottomPadding = bottomRaw;
+
+    // 将显隐逻辑直接转换为 CSS 规则
+    var displayNone = 'display: none !important;';
+    $style.text("\n      /* \u663E\u9690\u63A7\u5236 */\n      ".concat(selector.myContentEntryBtn, " {\n        ").concat(config.hideMyContentEntryBtn ? displayNone : '', "\n      }\n      ").concat(selector.myContentPreview, " {\n        ").concat(config.hideMyContentPreview ? displayNone : '', "\n      }\n      ").concat(selector.disclaimer, " {\n        ").concat(config.hideDisclaimer ? displayNone : '', "\n      }\n      \n      /* \u804A\u5929\u5BF9\u8BDD\u5BB9\u5668 */\n      #chat-history > .chat-history {\n        padding: 16px ").concat(chatRightPadding, " 20px ").concat(chatLeftPadding, " !important;\n      }\n      /* \u804A\u5929\u5BF9\u8BDD Gem \u4FE1\u606F */\n      #chat-history > .chat-history > .bot-info-card-container {\n        padding: 0 !important;\n      }\n      /* \u89E3\u51B3\u4FEE\u6539 Gem \u4FE1\u606F padding \u540E\u4E0D\u5C45\u4E2D\u95EE\u9898 */\n      bot-info-card > .bot-info-card-container {\n        align-items: center !important;\n      }\n      \n      /* \u7528\u6237\u8BF4 */\n      user-query {\n        max-width: 100% !important;\n      }\n      user-query-content > .user-query-container {\n        max-width: 50% !important;\n      }\n      /* AI \u8BF4 */\n      .conversation-container {\n        max-width: 100% !important;\n      }\n      \n      /* \u804A\u5929\u8F93\u5165\u8FB9\u8DDD */\n      input-container {\n        padding: 0 ").concat(chatRightPadding, " ").concat(chatBottomPadding, " ").concat(chatLeftPadding, " !important;\n      }\n      /* \u804A\u5929\u8F93\u5165\u6700\u5927\u5BBD\u5EA6 */\n      .input-area-container {\n        max-width: 100% !important;\n      }\n    "));
+  };
+
+  /**
+   * 应用配置
    */
   var applyConfig = function applyConfig() {
-    // toggle(false) 等同于 hide(), toggle(true) 等同于 show()
-    // 如果配置为 hide (true)，则 toggle(false) 隐藏
-    $(selector.myContentEntryBtn).toggle(!config.hideMyContentEntryBtn);
-    $(selector.myContentPreview).toggle(!config.hideMyContentPreview);
+    // 样式类配置：通过 toggleClass 给 body 加标记
+    $('body').toggleClass('gemini-pro-no-input-shadow', config.hideInputShadow);
+    applyPageStyle();
   };
+
+  // 初始应用
   applyConfig();
 
-  // Gemini 是 SPA，元素是动态加载的，必须监听 DOM 变化才能在刷新后生效
-  var observer = new MutationObserver(function (mutations) {
-    // 当 DOM 发生变化时，重新应用配置
-    // 这里可以加防抖，但在简单显隐逻辑中直接调用通常性能损耗可忽略
-    applyConfig();
-  });
-
-  // 开始监听 body 的子元素变化
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true
+  // 监听窗口大小变化，动态重新计算边距限制
+  // (避免大屏幕下设置的 px 值在小屏幕上占满全屏)
+  $(window).on('resize', function () {
+    applyPageStyle();
   });
 
   // 定义点击设置时的回调函数
   var onSettingsClick = function onSettingsClick() {
     layer.open({
       type: 1,
-      area: ['500px', '400px'],
+      area: ['500px', '450px'],
       title: 'Gemini Pro 设置',
-      content: "\n      <form class=\"layui-form\" style=\"padding: 20px;\" action=\"\">\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">\u9690\u85CF\u4FA7\u8FB9\u680F\uFF1A</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" title=\"\u6211\u7684\u5185\u5BB9\" name=\"hideMyContentEntryBtn\" lay-filter=\"item-switch\" ".concat(config.hideMyContentEntryBtn ? 'checked' : '', "/>\n            <input type=\"checkbox\" title=\"\u6211\u7684\u5185\u5BB9\u56FE\u7247\u9884\u89C8\" name=\"hideMyContentPreview\" lay-filter=\"item-switch\" ").concat(config.hideMyContentPreview ? 'checked' : '', "/>\n          </div>\n        </div>\n      </form>\n    ")
+      // 点击遮罩关闭
+      shadeClose: true,
+      content: "\n        <div class=\"layui-tab layui-tab-brief\" lay-filter=\"gemini-settings-tab\" style=\"margin: 0;\">\n          <ul class=\"layui-tab-title\">\n            <li class=\"layui-this\">\u5E38\u89C4\u8BBE\u7F6E</li>\n            <li>\u9875\u9762\u8C03\u6574</li>\n          </ul>\n          <div class=\"layui-tab-content\">\n            <div class=\"layui-tab-item layui-show\">\n              <form class=\"layui-form\" style=\"padding: 10px;\" action=\"\">\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 60px;\">\u9690\u85CF\uFF1A</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 90px;\">\n                    <input type=\"checkbox\" title=\"\u4FA7\u8FB9\u680F-\u6211\u7684\u5185\u5BB9\" name=\"hideMyContentEntryBtn\" lay-filter=\"item-switch\" ".concat(config.hideMyContentEntryBtn ? 'checked' : '', "/>\n                    <input type=\"checkbox\" title=\"\u4FA7\u8FB9\u680F-\u6211\u7684\u5185\u5BB9\u56FE\u7247\" name=\"hideMyContentPreview\" lay-filter=\"item-switch\" ").concat(config.hideMyContentPreview ? 'checked' : '', "/>\n                    <input type=\"checkbox\" title=\"\u5E95\u90E8\u514D\u8D23\u58F0\u660E\" name=\"hideDisclaimer\" lay-filter=\"item-switch\" ").concat(config.hideDisclaimer ? 'checked' : '', "/>\n                    <input type=\"checkbox\" title=\"\u804A\u5929\u8F93\u5165\u6846\u4E0A\u65B9\u6E10\u53D8\" name=\"hideInputShadow\" lay-filter=\"item-switch\" ").concat(config.hideInputShadow ? 'checked' : '', "/>\n                  </div>\n                </div>\n              </form>\n            </div>\n\n            <div class=\"layui-tab-item\">\n              <form class=\"layui-form\" lay-filter=\"page-form\" style=\"padding: 10px;\">\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u804A\u5929\u5DE6\u8FB9\u8DDD</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"chatLeftPadding\" value=\"").concat(config.page.chatLeftPadding, "\" placeholder=\"\u5982 50px \u6216 10%\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u804A\u5929\u53F3\u8FB9\u8DDD</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"chatRightPadding\" value=\"").concat(config.page.chatRightPadding, "\" placeholder=\"\u5982 50px \u6216 10%\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u804A\u5929\u5E95\u8FB9\u8DDD</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"chatBottomPadding\" value=\"").concat(config.page.chatBottomPadding, "\" placeholder=\"\u5982 20px\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n                <div style=\"padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;\">\n                  <p>1. \u652F\u6301\u5355\u4F4D\uFF1Apx (\u50CF\u7D20) \u6216 % (\u767E\u5206\u6BD4)\u3002</p>\n                  <p>2. \u5982\u679C\u53EA\u586B\u6570\u5B57\uFF0C\u9ED8\u8BA4\u4E3A px\u3002</p>\n                </div>\n              </form>\n            </div>\n          </div>\n        </div>\n      ")
     });
 
     // layer.open 中 radio、checkbox、select 需要 render 才能显示
-    layui.use('form', function () {
-      layui.form.render();
-
+    layui.use(['form', 'element'], function () {
+      var form = layui.form;
+      form.render();
       // 监听复选框变更
-      layui.form.on('checkbox(item-switch)', function (data) {
+      form.on('checkbox(item-switch)', function (data) {
         // 更新配置对象
-        var name = data.elem.name;
-        config[name] = data.elem.checked;
-
-        // 保存并应用
+        config[data.elem.name] = data.elem.checked;
+        // 保存配置
         _utils_gm_Store__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.set(STORE_CONF_KEY, JSON.stringify(config));
+        applyConfig();
+      });
+
+      // 动态监听输入框变化
+      $('input[name="chatLeftPadding"], input[name="chatRightPadding"], input[name="chatBottomPadding"]').on('input', function () {
+        // 获取当前输入框的 name 和 value，更新内存中的配置
+        config.page[$(this).attr('name')] = $(this).val();
+        // 持久化保存
+        _utils_gm_Store__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.set(STORE_CONF_KEY, JSON.stringify(config));
+        // 实时应用样式
         applyConfig();
       });
     });
   };
 
-  // 注册选项并传入回调
+  /**
+   * 初始化拖拽功能 (增加边界限制)
+   */
+  var initDraggable = function initDraggable($el) {
+    var isDragging = false;
+    // 用于区分点击和拖拽
+    var hasMoved = false;
+    var startX = 0,
+      startY = 0;
+    var startLeft = 0,
+      startTop = 0;
+    $el.on('mousedown', function (e) {
+      // 只有左键可以拖拽
+      if (e.button !== 0) return;
+      isDragging = true;
+      hasMoved = false;
+
+      // 记录鼠标初始位置
+      startX = e.clientX;
+      startY = e.clientY;
+
+      // 记录元素初始位置 (获取当前的 computed style)
+      var rect = $el[0].getBoundingClientRect();
+      startLeft = rect.left;
+      startTop = rect.top;
+
+      // 阻止文字选中
+      e.preventDefault();
+
+      // 改变光标
+      $el.css('cursor', 'grabbing');
+    });
+
+    // 绑定到 document 以防止鼠标移出元素过快
+    $(document).on('mousemove', function (e) {
+      if (!isDragging) return;
+      var deltaX = e.clientX - startX;
+      var deltaY = e.clientY - startY;
+
+      // 如果移动距离超过 2px，则视为拖拽操作 (防止手抖)
+      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
+        hasMoved = true;
+      }
+
+      // 计算新坐标
+      var newLeft = startLeft + deltaX;
+      var newTop = startTop + deltaY;
+
+      // 边界限制：获取窗口宽高和元素宽高
+      var winWidth = $(window).width() || 0;
+      var winHeight = $(window).height() || 0;
+      var elWidth = $el.outerWidth() || 48;
+      var elHeight = $el.outerHeight() || 48;
+
+      // 限制左/右边界
+      if (newLeft < 0) newLeft = 0;
+      if (newLeft + elWidth > winWidth) newLeft = winWidth - elWidth;
+
+      // 限制上/下边界
+      if (newTop < 0) newTop = 0;
+      if (newTop + elHeight > winHeight) newTop = winHeight - elHeight;
+
+      // 更新位置
+      $el.css({
+        left: newLeft + 'px',
+        top: newTop + 'px',
+        bottom: 'auto',
+        right: 'auto'
+      });
+    });
+    $(document).on('mouseup', function (e) {
+      if (!isDragging) return;
+      isDragging = false;
+      $el.css('cursor', 'grab');
+
+      // 如果发生了实质性移动，保存位置
+      if (hasMoved) {
+        var rect = $el[0].getBoundingClientRect();
+        config.fabPos = {
+          top: rect.top + 'px',
+          left: rect.left + 'px'
+        };
+        _utils_gm_Store__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.set(STORE_CONF_KEY, JSON.stringify(config));
+      }
+    });
+
+    // 拦截点击事件
+    // 如果刚刚发生了拖拽 (hasMoved 为 true)，则阻止点击打开设置
+    $el.on('click', function (e) {
+      if (hasMoved) {
+        e.preventDefault();
+        e.stopPropagation();
+        hasMoved = false;
+      } else {
+        onSettingsClick();
+      }
+    });
+  };
+
+  /**
+   * 渲染/确保右下角悬浮按钮存在
+   */
+  var ensureFab = function ensureFab() {
+    var btnId = 'gemini-pro-fab';
+    if ($("#".concat(btnId)).length > 0) return;
+
+    // 创建悬浮按钮
+    var $fab = $("\n      <div id=\"".concat(btnId, "\" title=\"Gemini Pro \u8BBE\u7F6E\">\n        <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24\" viewBox=\"0 -960 960 960\" width=\"24\">\n          <path d=\"M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z\"/>\n        </svg>\n      </div>\n    "));
+
+    // 如果配置中有保存的位置，应用之 (带越界修正)
+    if (config.fabPos && config.fabPos.top && config.fabPos.left) {
+      var top = parseInt(config.fabPos.top);
+      var left = parseInt(config.fabPos.left);
+      var winWidth = $(window).width() || window.innerWidth;
+      var winHeight = $(window).height() || window.innerHeight;
+      // 按钮尺寸
+      var elSize = 48;
+      // 检查是否在屏幕外
+      if (top < 0) top = 0;
+      if (left < 0) left = 0;
+      if (top + elSize > winHeight) top = winHeight - elSize - 24;
+      if (left + elSize > winWidth) left = winWidth - elSize - 24;
+      $fab.css({
+        top: top + 'px',
+        left: left + 'px',
+        bottom: 'auto',
+        right: 'auto'
+      });
+    }
+
+    // 初始化拖拽逻辑 (内部包含点击处理)
+    initDraggable($fab);
+
+    // 添加到 Body
+    $('body').append($fab);
+  };
+
+  // 1. 注册 Tampermonkey 菜单选项 (保留作为备用入口)
   _gemini_pro_src_Options__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .A.registerAll(onSettingsClick);
+
+  // 2. 渲染页面 UI 入口
+  ensureFab();
 })();
 
 /***/ })

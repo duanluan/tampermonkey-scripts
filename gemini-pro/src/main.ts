@@ -114,7 +114,8 @@ import Options from "../../gemini-pro/src/Options";
     // 默认边距
     page: {
       chatLeftPadding: '10%',
-      chatRightPadding: '10%'
+      chatRightPadding: '10%',
+      chatBottomPadding: ''
     }
   }
   const STORE_CONF_KEY = 'config';
@@ -148,6 +149,7 @@ import Options from "../../gemini-pro/src/Options";
 
     let leftRaw = config.page.chatLeftPadding;
     let rightRaw = config.page.chatRightPadding;
+    let bottomRaw = config.page.chatBottomPadding;
 
     // 计算并限制总边距不超过 80%
     const winWidth = $(window).width() || window.innerWidth || 0;
@@ -189,8 +191,12 @@ import Options from "../../gemini-pro/src/Options";
       rightRaw = toCssVal(rightRaw);
     }
 
+    // 底边距不需要参与宽度计算逻辑，直接格式化
+    bottomRaw = toCssVal(bottomRaw);
+
     const chatLeftPadding = leftRaw;
     const chatRightPadding = rightRaw;
+    const chatBottomPadding = bottomRaw;
 
     // 将显隐逻辑直接转换为 CSS 规则
     const displayNone = 'display: none !important;';
@@ -234,7 +240,7 @@ import Options from "../../gemini-pro/src/Options";
       
       /* 聊天输入边距 */
       input-container {
-        padding: 0 ${chatRightPadding} 0 ${chatLeftPadding} !important;
+        padding: 0 ${chatRightPadding} ${chatBottomPadding} ${chatLeftPadding} !important;
       }
       /* 聊天输入最大宽度 */
       .input-area-container {
@@ -304,6 +310,12 @@ import Options from "../../gemini-pro/src/Options";
                     <input type="text" name="chatRightPadding" value="${config.page.chatRightPadding}" placeholder="如 50px 或 10%" autocomplete="off" class="layui-input">
                   </div>
                 </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 80px;">聊天底边距</label>
+                  <div class="layui-input-block" style="margin-left: 110px;">
+                    <input type="text" name="chatBottomPadding" value="${config.page.chatBottomPadding}" placeholder="如 20px" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
                 <div style="padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;">
                   <p>1. 支持单位：px (像素) 或 % (百分比)。</p>
                   <p>2. 如果只填数字，默认为 px。</p>
@@ -329,7 +341,7 @@ import Options from "../../gemini-pro/src/Options";
       });
 
       // 动态监听输入框变化
-      $('input[name="chatLeftPadding"], input[name="chatRightPadding"]').on('input', function() {
+      $('input[name="chatLeftPadding"], input[name="chatRightPadding"], input[name="chatBottomPadding"]').on('input', function() {
         // 获取当前输入框的 name 和 value，更新内存中的配置
         config.page[$(this).attr('name')] =  $(this).val();
         // 持久化保存
