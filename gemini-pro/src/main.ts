@@ -98,7 +98,7 @@ import Options from "../../gemini-pro/src/Options";
   const selector = {
     // 我的内容入口按钮
     myContentEntryBtn: 'side-nav-entry-button',
-    // 我的内容图片预览
+    // 我的内容预览
     myContentPreview: 'my-stuff-recents-preview',
     // 底部免责声明
     disclaimer: 'hallucination-disclaimer'
@@ -115,7 +115,17 @@ import Options from "../../gemini-pro/src/Options";
     page: {
       chatLeftPadding: '10%',
       chatRightPadding: '10%',
-      chatBottomPadding: ''
+      chatBottomPadding: '',
+      // 新增：Markdown 内容间距设置 (P 只设下边距，H/LI 设上下边距)
+      pBottomSpacing: '',
+      hTopSpacing: '',
+      hBottomSpacing: '',
+      // 新增：UL/OL 列表整体间距
+      ulTopSpacing: '',
+      ulBottomSpacing: '',
+      // LI 列表项间距
+      liTopSpacing: '',
+      liBottomSpacing: ''
     }
   }
   const STORE_CONF_KEY = 'config';
@@ -198,6 +208,15 @@ import Options from "../../gemini-pro/src/Options";
     const chatRightPadding = rightRaw;
     const chatBottomPadding = bottomRaw;
 
+    // 处理 Markdown 间距配置
+    const pBottom = toCssVal(config.page.pBottomSpacing);
+    const hTop = toCssVal(config.page.hTopSpacing);
+    const hBottom = toCssVal(config.page.hBottomSpacing);
+    const ulTop = toCssVal(config.page.ulTopSpacing);
+    const ulBottom = toCssVal(config.page.ulBottomSpacing);
+    const liTop = toCssVal(config.page.liTopSpacing);
+    const liBottom = toCssVal(config.page.liBottomSpacing);
+
     // 将显隐逻辑直接转换为 CSS 规则
     const displayNone = 'display: none !important;';
 
@@ -246,6 +265,44 @@ import Options from "../../gemini-pro/src/Options";
       .input-area-container {
         max-width: 100% !important;
       }
+
+      /* === Markdown 内容间距调整 === */
+      
+      /* 段落 (P)：只控制下边距 */
+      ${config.page.pBottomSpacing ? `
+      message-content .markdown p {
+        margin-bottom: ${pBottom} !important;
+      }` : ''}
+
+      /* 标题 (H1-H6)：控制上下边距 */
+      ${config.page.hTopSpacing || config.page.hBottomSpacing ? `
+      message-content .markdown h1,
+      message-content .markdown h2,
+      message-content .markdown h3,
+      message-content .markdown h4,
+      message-content .markdown h5,
+      message-content .markdown h6 {
+        ${config.page.hTopSpacing ? `margin-top: ${hTop} !important;` : ''}
+        ${config.page.hBottomSpacing ? `margin-bottom: ${hBottom} !important;` : ''}
+      }` : ''}
+
+      /* 列表整体 (UL/OL)：控制上下边距 */
+      ${config.page.ulTopSpacing || config.page.ulBottomSpacing ? `
+      message-content .markdown ul,
+      message-content .markdown ol {
+        ${config.page.ulTopSpacing ? `margin-top: ${ulTop} !important;` : ''}
+        ${config.page.ulBottomSpacing ? `margin-bottom: ${ulBottom} !important;` : ''}
+      }` : ''}
+
+      /* 列表项 (LI)：控制上下边距 */
+      ${config.page.liTopSpacing || config.page.liBottomSpacing ? `
+      message-content .markdown ul li,
+      message-content .markdown ol li,
+      message-content .markdown ul li > p,
+      message-content .markdown ol li > p {
+        ${config.page.liTopSpacing ? `margin-top: ${liTop} !important;` : ''}
+        ${config.page.liBottomSpacing ? `margin-bottom: ${liBottom} !important;` : ''}
+      }` : ''}
     `);
   };
 
@@ -269,9 +326,42 @@ import Options from "../../gemini-pro/src/Options";
 
   // 定义点击设置时的回调函数
   const onSettingsClick = () => {
+    // 辅助函数：获取配置值 > 页面实时计算值 > 兜底默认值
+    const getVal = (key: string, selector: string, prop: any, fallback: string) => {
+      // 1. 如果有配置值，直接使用 (保持用户输入的原样)
+      if (config.page[key]) return config.page[key];
+
+      // 2. 尝试从 DOM 获取当前计算样式 (浏览器通常返回 px)
+      const el = document.querySelector(selector);
+      if (el) {
+        return getComputedStyle(el)[prop];
+      }
+
+      // 3. 使用兜底默认值，如果是 rem 则转换为 px
+      if (fallback && fallback.includes('rem')) {
+        const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        return (parseFloat(fallback) * rootFontSize) + 'px';
+      }
+
+      return fallback || '';
+    };
+
+    // 获取用于显示在 Input 框中的值
+    // 默认值参考：s=8px, h-top=1.75rem, h-bottom=8px, li=8px
+    const pBottom = getVal('pBottomSpacing', 'message-content .markdown p', 'marginBottom', '');
+    const hTop = getVal('hTopSpacing', 'message-content .markdown h2', 'marginTop', '1.75rem');
+    const hBottom = getVal('hBottomSpacing', 'message-content .markdown h2', 'marginBottom', '8px');
+
+    // UL/OL 默认通常是 1em，这里兜底给 16px (1rem)
+    const ulTop = getVal('ulTopSpacing', 'message-content .markdown ul', 'marginTop', '1rem');
+    const ulBottom = getVal('ulBottomSpacing', 'message-content .markdown ul', 'marginBottom', '1rem');
+
+    const liTop = getVal('liTopSpacing', 'message-content .markdown li', 'marginTop', '8px');
+    const liBottom = getVal('liBottomSpacing', 'message-content .markdown li', 'marginBottom', '8px');
+
     layer.open({
       type: 1,
-      area: ['500px', '450px'],
+      area: ['500px', '620px'],
       title: 'Gemini Pro 设置',
       // 点击遮罩关闭
       shadeClose: true,
@@ -288,7 +378,7 @@ import Options from "../../gemini-pro/src/Options";
                   <label class="layui-form-label" style="width: 60px;">隐藏：</label>
                   <div class="layui-input-block" style="margin-left: 90px;">
                     <input type="checkbox" title="侧边栏-我的内容" name="hideMyContentEntryBtn" lay-filter="item-switch" ${config.hideMyContentEntryBtn ? 'checked' : ''}/>
-                    <input type="checkbox" title="侧边栏-我的内容图片" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
+                    <input type="checkbox" title="侧边栏-我的内容预览" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
                     <input type="checkbox" title="底部免责声明" name="hideDisclaimer" lay-filter="item-switch" ${config.hideDisclaimer ? 'checked' : ''}/>
                     <input type="checkbox" title="聊天输入框上方渐变" name="hideInputShadow" lay-filter="item-switch" ${config.hideInputShadow ? 'checked' : ''}/>
                   </div>
@@ -298,27 +388,90 @@ import Options from "../../gemini-pro/src/Options";
 
             <div class="layui-tab-item">
               <form class="layui-form" lay-filter="page-form" style="padding: 10px;">
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+                  <legend style="font-size: 14px;">容器边距</legend>
+                </fieldset>
                 <div class="layui-form-item">
-                  <label class="layui-form-label" style="width: 80px;">聊天左边距</label>
-                  <div class="layui-input-block" style="margin-left: 110px;">
-                    <input type="text" name="chatLeftPadding" value="${config.page.chatLeftPadding}" placeholder="如 50px 或 10%" autocomplete="off" class="layui-input">
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 80px;">聊天左</label>
+                    <div class="layui-input-inline" style="width: 100px;">
+                      <input type="text" name="chatLeftPadding" value="${config.page.chatLeftPadding}" placeholder="如 50px 或 10%" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 80px;">聊天右</label>
+                    <div class="layui-input-inline" style="width: 100px;">
+                      <input type="text" name="chatRightPadding" value="${config.page.chatRightPadding}" placeholder="如 50px 或 10%" autocomplete="off" class="layui-input">
+                    </div>
                   </div>
                 </div>
                 <div class="layui-form-item">
-                  <label class="layui-form-label" style="width: 80px;">聊天右边距</label>
-                  <div class="layui-input-block" style="margin-left: 110px;">
-                    <input type="text" name="chatRightPadding" value="${config.page.chatRightPadding}" placeholder="如 50px 或 10%" autocomplete="off" class="layui-input">
-                  </div>
-                </div>
-                <div class="layui-form-item">
-                  <label class="layui-form-label" style="width: 80px;">聊天底边距</label>
+                  <label class="layui-form-label" style="width: 80px;">聊天下</label>
                   <div class="layui-input-block" style="margin-left: 110px;">
                     <input type="text" name="chatBottomPadding" value="${config.page.chatBottomPadding}" placeholder="如 20px" autocomplete="off" class="layui-input">
                   </div>
                 </div>
+                
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                  <legend style="font-size: 14px;">内容间距</legend>
+                </fieldset>
+
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 80px;">段落下</label>
+                  <div class="layui-input-block" style="margin-left: 110px;">
+                    <input type="text" name="pBottomSpacing" value="${pBottom}" placeholder="下间距，如 10px" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+
+                <div class="layui-form-item">
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 80px;">标题上</label>
+                    <div class="layui-input-inline" style="width: 100px;">
+                      <input type="text" name="hTopSpacing" value="${hTop}" placeholder="上间距" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 60px;">标题下</label>
+                    <div class="layui-input-inline" style="width: 100px;">
+                      <input type="text" name="hBottomSpacing" value="${hBottom}" placeholder="下间距" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="layui-form-item">
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 80px;">列表上</label>
+                    <div class="layui-input-inline" style="width: 100px;">
+                      <input type="text" name="ulTopSpacing" value="${ulTop}" placeholder="上间距" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 60px;">列表下</label>
+                    <div class="layui-input-inline" style="width: 100px;">
+                      <input type="text" name="ulBottomSpacing" value="${ulBottom}" placeholder="下间距" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="layui-form-item">
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 80px;">列表项上</label>
+                    <div class="layui-input-inline" style="width: 100px;">
+                      <input type="text" name="liTopSpacing" value="${liTop}" placeholder="上间距" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 60px;">列表项下</label>
+                    <div class="layui-input-inline" style="width: 100px;">
+                      <input type="text" name="liBottomSpacing" value="${liBottom}" placeholder="下间距" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                </div>
+
                 <div style="padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;">
                   <p>1. 支持单位：px (像素) 或 % (百分比)。</p>
                   <p>2. 如果只填数字，默认为 px。</p>
+                  <p>3. 留空则保持默认不调整。</p>
                 </div>
               </form>
             </div>
@@ -340,8 +493,21 @@ import Options from "../../gemini-pro/src/Options";
         applyConfig();
       });
 
-      // 动态监听输入框变化
-      $('input[name="chatLeftPadding"], input[name="chatRightPadding"], input[name="chatBottomPadding"]').on('input', function() {
+      // 动态监听输入框变化 (包含原来的边距和新增的内容间距)
+      const inputSelector = [
+        'input[name="chatLeftPadding"]',
+        'input[name="chatRightPadding"]',
+        'input[name="chatBottomPadding"]',
+        'input[name="pBottomSpacing"]',
+        'input[name="hTopSpacing"]',
+        'input[name="hBottomSpacing"]',
+        'input[name="ulTopSpacing"]',
+        'input[name="ulBottomSpacing"]',
+        'input[name="liTopSpacing"]',
+        'input[name="liBottomSpacing"]'
+      ].join(', ');
+
+      $(inputSelector).on('input', function() {
         // 获取当前输入框的 name 和 value，更新内存中的配置
         config.page[$(this).attr('name')] =  $(this).val();
         // 持久化保存
