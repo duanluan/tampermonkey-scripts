@@ -110,7 +110,7 @@ import Options from "../../gemini-pro/src/Options";
     hideDisclaimer: false,
     hideInputShadow: false,
     // 记录悬浮按钮位置
-    fabPos: { top: '', left: '' },
+    fabPos: {top: '', left: ''},
     // 默认边距
     page: {
       chatLeftPadding: '10%',
@@ -127,7 +127,9 @@ import Options from "../../gemini-pro/src/Options";
       liTopSpacing: '',
       liBottomSpacing: '',
       // 代码块行高
-      codeLineHeight: ''
+      codeLineHeight: '',
+      // 代码块最大高度 (替代原最大行数)
+      codeMaxHeight: ''
     }
   }
   const STORE_CONF_KEY = 'config';
@@ -135,7 +137,7 @@ import Options from "../../gemini-pro/src/Options";
   // 读取配置
   let savedConfigStr = Store.get(STORE_CONF_KEY);
   let config = savedConfigStr ? JSON.parse(savedConfigStr) : defaultConfig;
-  config.page = { ...defaultConfig.page, ...(config.page || {}) };
+  config.page = {...defaultConfig.page, ...(config.page || {})};
 
   /**
    * 辅助函数：确保 CSS 值带有单位 (默认 px)
@@ -218,7 +220,24 @@ import Options from "../../gemini-pro/src/Options";
     const ulBottom = toCssVal(config.page.ulBottomSpacing);
     const liTop = toCssVal(config.page.liTopSpacing);
     const liBottom = toCssVal(config.page.liBottomSpacing);
-    const codeLH = toCssVal(config.page.codeLineHeight);
+
+    // 代码行高：不使用 toCssVal，允许纯数字作为倍数
+    const codeLH = config.page.codeLineHeight ? String(config.page.codeLineHeight).trim() : '';
+
+    // 代码块最大高度 CSS 生成逻辑
+    let codeMaxHeightCss = '';
+    if (config.page.codeMaxHeight) {
+      const maxH = toCssVal(config.page.codeMaxHeight);
+      // 作用于 code-block 内部的 pre 标签
+      // 强制 display: block 以确保 scrollbar 能正常出现
+      codeMaxHeightCss = `
+        .formatted-code-block-internal-container pre {
+            max-height: ${maxH} !important;
+            overflow-y: auto !important;
+            display: block !important;
+        }
+      `;
+    }
 
     // 将显隐逻辑直接转换为 CSS 规则
     const displayNone = 'display: none !important;';
@@ -307,11 +326,17 @@ import Options from "../../gemini-pro/src/Options";
         ${config.page.liBottomSpacing ? `margin-bottom: ${liBottom} !important;` : ''}
       }` : ''}
 
-      /* 代码块行高 */
+      /* 代码块行高 (同时控制外层容器和内层 span) */
       ${config.page.codeLineHeight ? `
-      .code-container {
+      .code-container,
+      .code-container pre,
+      .code-container code,
+      .code-container span {
         line-height: ${codeLH} !important;
       }` : ''}
+      
+      /* 代码块最大高度 (滚动条) */
+      ${codeMaxHeightCss}
     `);
   };
 
@@ -368,12 +393,14 @@ import Options from "../../gemini-pro/src/Options";
     const liTop = getVal('liTopSpacing', 'message-content .markdown li', 'marginTop', '8px');
     const liBottom = getVal('liBottomSpacing', 'message-content .markdown li', 'marginBottom', '8px');
 
-    // 代码块行高
-    const codeLH = getVal('codeLineHeight', '.code-container', 'lineHeight', '1.5');
+    // 代码块行高：优先获取 code 标签的行高，比 span 更能反映块级属性
+    const codeLH = getVal('codeLineHeight', '.code-container code', 'lineHeight', '1.5');
+    // 代码块最大高度
+    const codeMaxH = config.page.codeMaxHeight;
 
     layer.open({
       type: 1,
-      area: ['500px', '680px'],
+      area: ['500px', '650px'],
       title: 'Gemini Pro 设置',
       // 点击遮罩关闭
       shadeClose: true,
@@ -382,6 +409,7 @@ import Options from "../../gemini-pro/src/Options";
           <ul class="layui-tab-title">
             <li class="layui-this">常规设置</li>
             <li>页面调整</li>
+            <li>代码块增强</li>
           </ul>
           <div class="layui-tab-content">
             <div class="layui-tab-item layui-show">
@@ -479,17 +507,36 @@ import Options from "../../gemini-pro/src/Options";
                     </div>
                   </div>
                 </div>
+                
+                <div style="padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;">
+                  <p>1. 支持单位：px（像素）或 %（百分比）。</p>
+                  <p>2. 如果只填数字，默认为 px。</p>
+                  <p>3. 留空则不调整，支持鼠标滚轮调整数值。</p>
+                </div>
+              </form>
+            </div>
 
+            <div class="layui-tab-item">
+              <form class="layui-form" style="padding: 10px;">
+                <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
+                  <legend style="font-size: 14px;">显示设置</legend>
+                </fieldset>
                 <div class="layui-form-item">
                   <label class="layui-form-label" style="width: 80px;">代码行高</label>
                   <div class="layui-input-block" style="margin-left: 110px;">
                     <input type="text" name="codeLineHeight" value="${codeLH}" placeholder="如 1.5 或 24px" autocomplete="off" class="layui-input">
                   </div>
                 </div>
-
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 80px;">最大高度</label>
+                  <div class="layui-input-block" style="margin-left: 110px;">
+                    <input type="text" name="codeMaxHeight" value="${codeMaxH}" placeholder="超出则显示滚动条，如 600px" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+                
                 <div style="padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;">
-                  <p>1. 支持单位：px (像素) 或 % (百分比)。</p>
-                  <p>2. 如果只填数字，默认为 px。</p>
+                  <p>1. 支持单位：px（像素）。</p>
+                  <p>2. 行高若无单位则为倍数（支持小数）。</p>
                   <p>3. 留空则不调整，支持鼠标滚轮调整数值。</p>
                 </div>
               </form>
@@ -524,12 +571,13 @@ import Options from "../../gemini-pro/src/Options";
         'input[name="ulBottomSpacing"]',
         'input[name="liTopSpacing"]',
         'input[name="liBottomSpacing"]',
-        'input[name="codeLineHeight"]'
+        'input[name="codeLineHeight"]',
+        'input[name="codeMaxHeight"]'
       ].join(', ');
 
-      $(inputSelector).on('input', function() {
+      $(inputSelector).on('input', function () {
         // 获取当前输入框的 name 和 value，更新内存中的配置
-        config.page[$(this).attr('name')] =  $(this).val();
+        config.page[$(this).attr('name')] = $(this).val();
         // 持久化保存
         Store.set(STORE_CONF_KEY, JSON.stringify(config));
         // 实时应用样式
@@ -537,7 +585,7 @@ import Options from "../../gemini-pro/src/Options";
       });
 
       // 支持鼠标滚轮调整数值
-      $(inputSelector).on('wheel', function(e: any) {
+      $(inputSelector).on('wheel', function (e: any) {
         // 阻止默认滚动行为
         e.preventDefault();
         const $this = $(this);
@@ -551,24 +599,36 @@ import Options from "../../gemini-pro/src/Options";
         const match = valStr.match(/^(-?[\d\.]+)(.*)$/);
 
         let num = 0;
-        let unit = 'px'; // 默认单位
+        let unit = ''; // 默认单位为空，由后续逻辑决定
 
         if (match) {
           num = parseFloat(match[1]);
-          // 如果有单位则使用，否则如果是纯数字也默认为px显示（方便用户感知）
-          unit = match[2] || 'px';
+          unit = match[2];
         } else if (!valStr) {
-          // 如果为空，视为 0px
+          // 如果为空，视为 0
           num = 0;
+        }
+
+        // 其他字段默认补 px (行高除外)
+        const name = $this.attr('name');
+        if (!unit && name !== 'codeLineHeight') {
           unit = 'px';
         }
 
+        // 确定步长：如果是代码行高，步长为 0.1，否则为 1
+        const step = name === 'codeLineHeight' ? 0.1 : 1;
+
         // 根据滚动方向增减
         if (delta < 0) {
-          num += 1;
+          num += step;
         } else {
-          num -= 1;
+          num -= step;
           if (num < 0) num = 0;
+        }
+
+        // 针对小数运算修复精度问题
+        if (name === 'codeLineHeight') {
+          num = parseFloat(num.toFixed(1));
         }
 
         // 更新输入框并手动触发 input 事件以保存和应用
