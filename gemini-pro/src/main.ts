@@ -471,7 +471,7 @@ import Options from "../../gemini-pro/src/Options";
                 <div style="padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;">
                   <p>1. 支持单位：px (像素) 或 % (百分比)。</p>
                   <p>2. 如果只填数字，默认为 px。</p>
-                  <p>3. 留空则保持默认不调整。</p>
+                  <p>3. 留空则不调整，支持鼠标滚轮调整数值。</p>
                 </div>
               </form>
             </div>
@@ -514,6 +514,46 @@ import Options from "../../gemini-pro/src/Options";
         Store.set(STORE_CONF_KEY, JSON.stringify(config));
         // 实时应用样式
         applyConfig();
+      });
+
+      // 支持鼠标滚轮调整数值
+      $(inputSelector).on('wheel', function(e: any) {
+        // 阻止默认滚动行为
+        e.preventDefault();
+        const $this = $(this);
+        // 获取滚动方向：deltaY > 0 为向下滚动(数值减小)，deltaY < 0 为向上滚动(数值增加)
+        const originalEvent = e.originalEvent;
+        const delta = originalEvent.deltaY || -originalEvent.wheelDelta || originalEvent.detail;
+
+        // 获取当前值并分离数值和单位
+        let valStr = String($this.val());
+        // 正则匹配：开始(可选负号)(数字)(可选单位)
+        const match = valStr.match(/^(-?[\d\.]+)(.*)$/);
+
+        let num = 0;
+        let unit = 'px'; // 默认单位
+
+        if (match) {
+          num = parseFloat(match[1]);
+          // 如果有单位则使用，否则如果是纯数字也默认为px显示（方便用户感知）
+          unit = match[2] || 'px';
+        } else if (!valStr) {
+          // 如果为空，视为 0px
+          num = 0;
+          unit = 'px';
+        }
+
+        // 根据滚动方向增减
+        if (delta < 0) {
+          num += 1;
+        } else {
+          num -= 1;
+          if (num < 0) num = 0;
+        }
+
+        // 更新输入框并手动触发 input 事件以保存和应用
+        $this.val(num + unit);
+        $this.trigger('input');
       });
     });
   }
