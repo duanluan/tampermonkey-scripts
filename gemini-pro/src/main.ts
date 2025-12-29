@@ -125,7 +125,9 @@ import Options from "../../gemini-pro/src/Options";
       ulBottomSpacing: '',
       // LI 列表项间距
       liTopSpacing: '',
-      liBottomSpacing: ''
+      liBottomSpacing: '',
+      // 代码块行高
+      codeLineHeight: ''
     }
   }
   const STORE_CONF_KEY = 'config';
@@ -216,6 +218,7 @@ import Options from "../../gemini-pro/src/Options";
     const ulBottom = toCssVal(config.page.ulBottomSpacing);
     const liTop = toCssVal(config.page.liTopSpacing);
     const liBottom = toCssVal(config.page.liBottomSpacing);
+    const codeLH = toCssVal(config.page.codeLineHeight);
 
     // 将显隐逻辑直接转换为 CSS 规则
     const displayNone = 'display: none !important;';
@@ -303,6 +306,12 @@ import Options from "../../gemini-pro/src/Options";
         ${config.page.liTopSpacing ? `margin-top: ${liTop} !important;` : ''}
         ${config.page.liBottomSpacing ? `margin-bottom: ${liBottom} !important;` : ''}
       }` : ''}
+
+      /* 代码块行高 */
+      ${config.page.codeLineHeight ? `
+      .code-container {
+        line-height: ${codeLH} !important;
+      }` : ''}
     `);
   };
 
@@ -359,9 +368,12 @@ import Options from "../../gemini-pro/src/Options";
     const liTop = getVal('liTopSpacing', 'message-content .markdown li', 'marginTop', '8px');
     const liBottom = getVal('liBottomSpacing', 'message-content .markdown li', 'marginBottom', '8px');
 
+    // 代码块行高
+    const codeLH = getVal('codeLineHeight', '.code-container', 'lineHeight', '1.5');
+
     layer.open({
       type: 1,
-      area: ['500px', '620px'],
+      area: ['500px', '680px'],
       title: 'Gemini Pro 设置',
       // 点击遮罩关闭
       shadeClose: true,
@@ -468,6 +480,13 @@ import Options from "../../gemini-pro/src/Options";
                   </div>
                 </div>
 
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 80px;">代码行高</label>
+                  <div class="layui-input-block" style="margin-left: 110px;">
+                    <input type="text" name="codeLineHeight" value="${codeLH}" placeholder="如 1.5 或 24px" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+
                 <div style="padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;">
                   <p>1. 支持单位：px (像素) 或 % (百分比)。</p>
                   <p>2. 如果只填数字，默认为 px。</p>
@@ -504,7 +523,8 @@ import Options from "../../gemini-pro/src/Options";
         'input[name="ulTopSpacing"]',
         'input[name="ulBottomSpacing"]',
         'input[name="liTopSpacing"]',
-        'input[name="liBottomSpacing"]'
+        'input[name="liBottomSpacing"]',
+        'input[name="codeLineHeight"]'
       ].join(', ');
 
       $(inputSelector).on('input', function() {
