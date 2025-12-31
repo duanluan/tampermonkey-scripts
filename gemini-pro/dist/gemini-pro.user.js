@@ -328,7 +328,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // ==UserScript==
 // @name         Gemini Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.0
+// @version      0.2.0
 // @description  增强 Gemini 对话界面
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -364,7 +364,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
   var selector = {
     // 我的内容入口按钮
     myContentEntryBtn: 'side-nav-entry-button',
-    // 我的内容图片预览
+    // 我的内容预览
     myContentPreview: 'my-stuff-recents-preview',
     // 底部免责声明
     disclaimer: 'hallucination-disclaimer'
@@ -383,7 +383,21 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     page: {
       chatLeftPadding: '10%',
       chatRightPadding: '10%',
-      chatBottomPadding: ''
+      chatBottomPadding: '',
+      // 新增：Markdown 内容间距设置 (P 只设下边距，H/LI 设上下边距)
+      pBottomSpacing: '',
+      hTopSpacing: '',
+      hBottomSpacing: '',
+      // 新增：UL/OL 列表整体间距
+      ulTopSpacing: '',
+      ulBottomSpacing: '',
+      // LI 列表项间距
+      liTopSpacing: '',
+      liBottomSpacing: '',
+      // 代码块行高
+      codeLineHeight: '',
+      // 代码块最大高度 (替代原最大行数)
+      codeMaxHeight: ''
     }
   };
   var STORE_CONF_KEY = 'config';
@@ -463,9 +477,30 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     var chatRightPadding = rightRaw;
     var chatBottomPadding = bottomRaw;
 
+    // 处理 Markdown 间距配置
+    var pBottom = toCssVal(config.page.pBottomSpacing);
+    var hTop = toCssVal(config.page.hTopSpacing);
+    var hBottom = toCssVal(config.page.hBottomSpacing);
+    var ulTop = toCssVal(config.page.ulTopSpacing);
+    var ulBottom = toCssVal(config.page.ulBottomSpacing);
+    var liTop = toCssVal(config.page.liTopSpacing);
+    var liBottom = toCssVal(config.page.liBottomSpacing);
+
+    // 代码行高：不使用 toCssVal，允许纯数字作为倍数
+    var codeLH = config.page.codeLineHeight ? String(config.page.codeLineHeight).trim() : '';
+
+    // 代码块最大高度 CSS 生成逻辑
+    var codeMaxHeightCss = '';
+    if (config.page.codeMaxHeight) {
+      var maxH = toCssVal(config.page.codeMaxHeight);
+      // 作用于 code-block 内部的 pre 标签
+      // 强制 display: block 以确保 scrollbar 能正常出现
+      codeMaxHeightCss = "\n        .formatted-code-block-internal-container pre {\n            max-height: ".concat(maxH, " !important;\n            overflow-y: auto !important;\n            display: block !important;\n        }\n      ");
+    }
+
     // 将显隐逻辑直接转换为 CSS 规则
     var displayNone = 'display: none !important;';
-    $style.text("\n      /* \u663E\u9690\u63A7\u5236 */\n      ".concat(selector.myContentEntryBtn, " {\n        ").concat(config.hideMyContentEntryBtn ? displayNone : '', "\n      }\n      ").concat(selector.myContentPreview, " {\n        ").concat(config.hideMyContentPreview ? displayNone : '', "\n      }\n      ").concat(selector.disclaimer, " {\n        ").concat(config.hideDisclaimer ? displayNone : '', "\n      }\n      \n      /* \u804A\u5929\u5BF9\u8BDD\u5BB9\u5668 */\n      #chat-history > .chat-history {\n        padding: 16px ").concat(chatRightPadding, " 20px ").concat(chatLeftPadding, " !important;\n      }\n      /* \u804A\u5929\u5BF9\u8BDD Gem \u4FE1\u606F */\n      #chat-history > .chat-history > .bot-info-card-container {\n        padding: 0 !important;\n      }\n      /* \u89E3\u51B3\u4FEE\u6539 Gem \u4FE1\u606F padding \u540E\u4E0D\u5C45\u4E2D\u95EE\u9898 */\n      bot-info-card > .bot-info-card-container {\n        align-items: center !important;\n      }\n      \n      /* \u7528\u6237\u8BF4 */\n      user-query {\n        max-width: 100% !important;\n      }\n      user-query-content > .user-query-container {\n        max-width: 50% !important;\n      }\n      /* AI \u8BF4 */\n      .conversation-container {\n        max-width: 100% !important;\n      }\n      \n      /* \u804A\u5929\u8F93\u5165\u8FB9\u8DDD */\n      input-container {\n        padding: 0 ").concat(chatRightPadding, " ").concat(chatBottomPadding, " ").concat(chatLeftPadding, " !important;\n      }\n      /* \u804A\u5929\u8F93\u5165\u6700\u5927\u5BBD\u5EA6 */\n      .input-area-container {\n        max-width: 100% !important;\n      }\n    "));
+    $style.text("\n      /* \u663E\u9690\u63A7\u5236 */\n      ".concat(selector.myContentEntryBtn, " {\n        ").concat(config.hideMyContentEntryBtn ? displayNone : '', "\n      }\n      ").concat(selector.myContentPreview, " {\n        ").concat(config.hideMyContentPreview ? displayNone : '', "\n      }\n      ").concat(selector.disclaimer, " {\n        ").concat(config.hideDisclaimer ? displayNone : '', "\n      }\n      \n      /* \u804A\u5929\u5BF9\u8BDD\u5BB9\u5668 */\n      #chat-history > .chat-history {\n        padding: 16px ").concat(chatRightPadding, " 20px ").concat(chatLeftPadding, " !important;\n      }\n      /* \u804A\u5929\u5BF9\u8BDD Gem \u4FE1\u606F */\n      #chat-history > .chat-history > .bot-info-card-container {\n        padding: 0 !important;\n      }\n      /* \u89E3\u51B3\u4FEE\u6539 Gem \u4FE1\u606F padding \u540E\u4E0D\u5C45\u4E2D\u95EE\u9898 */\n      bot-info-card > .bot-info-card-container {\n        align-items: center !important;\n      }\n      \n      /* \u7528\u6237\u8BF4 */\n      user-query {\n        max-width: 100% !important;\n      }\n      user-query-content > .user-query-container {\n        max-width: 50% !important;\n      }\n      /* AI \u8BF4 */\n      .conversation-container {\n        max-width: 100% !important;\n      }\n      \n      /* \u804A\u5929\u8F93\u5165\u8FB9\u8DDD */\n      input-container {\n        padding: 0 ").concat(chatRightPadding, " ").concat(chatBottomPadding, " ").concat(chatLeftPadding, " !important;\n      }\n      /* \u804A\u5929\u8F93\u5165\u6700\u5927\u5BBD\u5EA6 */\n      .input-area-container {\n        max-width: 100% !important;\n      }\n\n      /* === Markdown \u5185\u5BB9\u95F4\u8DDD\u8C03\u6574 === */\n      \n      /* \u6BB5\u843D (P)\uFF1A\u53EA\u63A7\u5236\u4E0B\u8FB9\u8DDD */\n      ").concat(config.page.pBottomSpacing ? "\n      message-content .markdown p {\n        margin-bottom: ".concat(pBottom, " !important;\n      }") : '', "\n\n      /* \u6807\u9898 (H1-H6)\uFF1A\u63A7\u5236\u4E0A\u4E0B\u8FB9\u8DDD */\n      ").concat(config.page.hTopSpacing || config.page.hBottomSpacing ? "\n      message-content .markdown h1,\n      message-content .markdown h2,\n      message-content .markdown h3,\n      message-content .markdown h4,\n      message-content .markdown h5,\n      message-content .markdown h6 {\n        ".concat(config.page.hTopSpacing ? "margin-top: ".concat(hTop, " !important;") : '', "\n        ").concat(config.page.hBottomSpacing ? "margin-bottom: ".concat(hBottom, " !important;") : '', "\n      }") : '', "\n\n      /* \u5217\u8868\u6574\u4F53 (UL/OL)\uFF1A\u63A7\u5236\u4E0A\u4E0B\u8FB9\u8DDD */\n      ").concat(config.page.ulTopSpacing || config.page.ulBottomSpacing ? "\n      message-content .markdown ul,\n      message-content .markdown ol {\n        ".concat(config.page.ulTopSpacing ? "margin-top: ".concat(ulTop, " !important;") : '', "\n        ").concat(config.page.ulBottomSpacing ? "margin-bottom: ".concat(ulBottom, " !important;") : '', "\n      }") : '', "\n\n      /* \u5217\u8868\u9879 (LI)\uFF1A\u63A7\u5236\u4E0A\u4E0B\u8FB9\u8DDD */\n      ").concat(config.page.liTopSpacing || config.page.liBottomSpacing ? "\n      message-content .markdown ul li,\n      message-content .markdown ol li,\n      message-content .markdown ul li > p,\n      message-content .markdown ol li > p {\n        ".concat(config.page.liTopSpacing ? "margin-top: ".concat(liTop, " !important;") : '', "\n        ").concat(config.page.liBottomSpacing ? "margin-bottom: ".concat(liBottom, " !important;") : '', "\n      }") : '', "\n\n      /* \u4EE3\u7801\u5757\u884C\u9AD8 (\u540C\u65F6\u63A7\u5236\u5916\u5C42\u5BB9\u5668\u548C\u5185\u5C42 span) */\n      ").concat(config.page.codeLineHeight ? "\n      .code-container,\n      .code-container pre,\n      .code-container code,\n      .code-container span {\n        line-height: ".concat(codeLH, " !important;\n      }") : '', "\n      \n      /* \u4EE3\u7801\u5757\u6700\u5927\u9AD8\u5EA6 (\u6EDA\u52A8\u6761) */\n      ").concat(codeMaxHeightCss, "\n    "));
   };
 
   /**
@@ -488,13 +523,48 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
   // 定义点击设置时的回调函数
   var onSettingsClick = function onSettingsClick() {
+    // 辅助函数：获取配置值 > 页面实时计算值 > 兜底默认值
+    var getVal = function getVal(key, selector, prop, fallback) {
+      // 1. 如果有配置值，直接使用 (保持用户输入的原样)
+      if (config.page[key]) return config.page[key];
+
+      // 2. 尝试从 DOM 获取当前计算样式 (浏览器通常返回 px)
+      var el = document.querySelector(selector);
+      if (el) {
+        return getComputedStyle(el)[prop];
+      }
+
+      // 3. 使用兜底默认值，如果是 rem 则转换为 px
+      if (fallback && fallback.includes('rem')) {
+        var rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+        return parseFloat(fallback) * rootFontSize + 'px';
+      }
+      return fallback || '';
+    };
+
+    // 获取用于显示在 Input 框中的值
+    // 默认值参考：s=8px, h-top=1.75rem, h-bottom=8px, li=8px
+    var pBottom = getVal('pBottomSpacing', 'message-content .markdown p', 'marginBottom', '');
+    var hTop = getVal('hTopSpacing', 'message-content .markdown h2', 'marginTop', '1.75rem');
+    var hBottom = getVal('hBottomSpacing', 'message-content .markdown h2', 'marginBottom', '8px');
+
+    // UL/OL 默认通常是 1em，这里兜底给 16px (1rem)
+    var ulTop = getVal('ulTopSpacing', 'message-content .markdown ul', 'marginTop', '1rem');
+    var ulBottom = getVal('ulBottomSpacing', 'message-content .markdown ul', 'marginBottom', '1rem');
+    var liTop = getVal('liTopSpacing', 'message-content .markdown li', 'marginTop', '8px');
+    var liBottom = getVal('liBottomSpacing', 'message-content .markdown li', 'marginBottom', '8px');
+
+    // 代码块行高：优先获取 code 标签的行高，比 span 更能反映块级属性
+    var codeLH = getVal('codeLineHeight', '.code-container code', 'lineHeight', '1.5');
+    // 代码块最大高度
+    var codeMaxH = config.page.codeMaxHeight;
     layer.open({
       type: 1,
-      area: ['500px', '450px'],
+      area: ['500px', '650px'],
       title: 'Gemini Pro 设置',
       // 点击遮罩关闭
       shadeClose: true,
-      content: "\n        <div class=\"layui-tab layui-tab-brief\" lay-filter=\"gemini-settings-tab\" style=\"margin: 0;\">\n          <ul class=\"layui-tab-title\">\n            <li class=\"layui-this\">\u5E38\u89C4\u8BBE\u7F6E</li>\n            <li>\u9875\u9762\u8C03\u6574</li>\n          </ul>\n          <div class=\"layui-tab-content\">\n            <div class=\"layui-tab-item layui-show\">\n              <form class=\"layui-form\" style=\"padding: 10px;\" action=\"\">\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 60px;\">\u9690\u85CF\uFF1A</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 90px;\">\n                    <input type=\"checkbox\" title=\"\u4FA7\u8FB9\u680F-\u6211\u7684\u5185\u5BB9\" name=\"hideMyContentEntryBtn\" lay-filter=\"item-switch\" ".concat(config.hideMyContentEntryBtn ? 'checked' : '', "/>\n                    <input type=\"checkbox\" title=\"\u4FA7\u8FB9\u680F-\u6211\u7684\u5185\u5BB9\u56FE\u7247\" name=\"hideMyContentPreview\" lay-filter=\"item-switch\" ").concat(config.hideMyContentPreview ? 'checked' : '', "/>\n                    <input type=\"checkbox\" title=\"\u5E95\u90E8\u514D\u8D23\u58F0\u660E\" name=\"hideDisclaimer\" lay-filter=\"item-switch\" ").concat(config.hideDisclaimer ? 'checked' : '', "/>\n                    <input type=\"checkbox\" title=\"\u804A\u5929\u8F93\u5165\u6846\u4E0A\u65B9\u6E10\u53D8\" name=\"hideInputShadow\" lay-filter=\"item-switch\" ").concat(config.hideInputShadow ? 'checked' : '', "/>\n                  </div>\n                </div>\n              </form>\n            </div>\n\n            <div class=\"layui-tab-item\">\n              <form class=\"layui-form\" lay-filter=\"page-form\" style=\"padding: 10px;\">\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u804A\u5929\u5DE6\u8FB9\u8DDD</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"chatLeftPadding\" value=\"").concat(config.page.chatLeftPadding, "\" placeholder=\"\u5982 50px \u6216 10%\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u804A\u5929\u53F3\u8FB9\u8DDD</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"chatRightPadding\" value=\"").concat(config.page.chatRightPadding, "\" placeholder=\"\u5982 50px \u6216 10%\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u804A\u5929\u5E95\u8FB9\u8DDD</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"chatBottomPadding\" value=\"").concat(config.page.chatBottomPadding, "\" placeholder=\"\u5982 20px\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n                <div style=\"padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;\">\n                  <p>1. \u652F\u6301\u5355\u4F4D\uFF1Apx (\u50CF\u7D20) \u6216 % (\u767E\u5206\u6BD4)\u3002</p>\n                  <p>2. \u5982\u679C\u53EA\u586B\u6570\u5B57\uFF0C\u9ED8\u8BA4\u4E3A px\u3002</p>\n                </div>\n              </form>\n            </div>\n          </div>\n        </div>\n      ")
+      content: "\n        <div class=\"layui-tab layui-tab-brief\" lay-filter=\"gemini-settings-tab\" style=\"margin: 0;\">\n          <ul class=\"layui-tab-title\">\n            <li class=\"layui-this\">\u5E38\u89C4\u8BBE\u7F6E</li>\n            <li>\u9875\u9762\u8C03\u6574</li>\n            <li>\u4EE3\u7801\u5757\u589E\u5F3A</li>\n          </ul>\n          <div class=\"layui-tab-content\">\n            <div class=\"layui-tab-item layui-show\">\n              <form class=\"layui-form\" style=\"padding: 10px;\" action=\"\">\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 60px;\">\u9690\u85CF\uFF1A</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 90px;\">\n                    <input type=\"checkbox\" title=\"\u4FA7\u8FB9\u680F-\u6211\u7684\u5185\u5BB9\" name=\"hideMyContentEntryBtn\" lay-filter=\"item-switch\" ".concat(config.hideMyContentEntryBtn ? 'checked' : '', "/>\n                    <input type=\"checkbox\" title=\"\u4FA7\u8FB9\u680F-\u6211\u7684\u5185\u5BB9\u9884\u89C8\" name=\"hideMyContentPreview\" lay-filter=\"item-switch\" ").concat(config.hideMyContentPreview ? 'checked' : '', "/>\n                    <input type=\"checkbox\" title=\"\u5E95\u90E8\u514D\u8D23\u58F0\u660E\" name=\"hideDisclaimer\" lay-filter=\"item-switch\" ").concat(config.hideDisclaimer ? 'checked' : '', "/>\n                    <input type=\"checkbox\" title=\"\u804A\u5929\u8F93\u5165\u6846\u4E0A\u65B9\u6E10\u53D8\" name=\"hideInputShadow\" lay-filter=\"item-switch\" ").concat(config.hideInputShadow ? 'checked' : '', "/>\n                  </div>\n                </div>\n              </form>\n            </div>\n\n            <div class=\"layui-tab-item\">\n              <form class=\"layui-form\" lay-filter=\"page-form\" style=\"padding: 10px;\">\n                <fieldset class=\"layui-elem-field layui-field-title\" style=\"margin-top: 10px;\">\n                  <legend style=\"font-size: 14px;\">\u5BB9\u5668\u8FB9\u8DDD</legend>\n                </fieldset>\n                <div class=\"layui-form-item\">\n                  <div class=\"layui-inline\">\n                    <label class=\"layui-form-label\" style=\"width: 80px;\">\u804A\u5929\u5DE6</label>\n                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n                      <input type=\"text\" name=\"chatLeftPadding\" value=\"").concat(config.page.chatLeftPadding, "\" placeholder=\"\u5982 50px \u6216 10%\" autocomplete=\"off\" class=\"layui-input\">\n                    </div>\n                  </div>\n                  <div class=\"layui-inline\">\n                    <label class=\"layui-form-label\" style=\"width: 80px;\">\u804A\u5929\u53F3</label>\n                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n                      <input type=\"text\" name=\"chatRightPadding\" value=\"").concat(config.page.chatRightPadding, "\" placeholder=\"\u5982 50px \u6216 10%\" autocomplete=\"off\" class=\"layui-input\">\n                    </div>\n                  </div>\n                </div>\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u804A\u5929\u4E0B</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"chatBottomPadding\" value=\"").concat(config.page.chatBottomPadding, "\" placeholder=\"\u5982 20px\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n                \n                <fieldset class=\"layui-elem-field layui-field-title\" style=\"margin-top: 20px;\">\n                  <legend style=\"font-size: 14px;\">\u5185\u5BB9\u95F4\u8DDD</legend>\n                </fieldset>\n\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u6BB5\u843D\u4E0B</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"pBottomSpacing\" value=\"").concat(pBottom, "\" placeholder=\"\u4E0B\u95F4\u8DDD\uFF0C\u5982 10px\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n\n                <div class=\"layui-form-item\">\n                  <div class=\"layui-inline\">\n                    <label class=\"layui-form-label\" style=\"width: 80px;\">\u6807\u9898\u4E0A</label>\n                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n                      <input type=\"text\" name=\"hTopSpacing\" value=\"").concat(hTop, "\" placeholder=\"\u4E0A\u95F4\u8DDD\" autocomplete=\"off\" class=\"layui-input\">\n                    </div>\n                  </div>\n                  <div class=\"layui-inline\">\n                    <label class=\"layui-form-label\" style=\"width: 60px;\">\u6807\u9898\u4E0B</label>\n                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n                      <input type=\"text\" name=\"hBottomSpacing\" value=\"").concat(hBottom, "\" placeholder=\"\u4E0B\u95F4\u8DDD\" autocomplete=\"off\" class=\"layui-input\">\n                    </div>\n                  </div>\n                </div>\n                \n                <div class=\"layui-form-item\">\n                  <div class=\"layui-inline\">\n                    <label class=\"layui-form-label\" style=\"width: 80px;\">\u5217\u8868\u4E0A</label>\n                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n                      <input type=\"text\" name=\"ulTopSpacing\" value=\"").concat(ulTop, "\" placeholder=\"\u4E0A\u95F4\u8DDD\" autocomplete=\"off\" class=\"layui-input\">\n                    </div>\n                  </div>\n                  <div class=\"layui-inline\">\n                    <label class=\"layui-form-label\" style=\"width: 60px;\">\u5217\u8868\u4E0B</label>\n                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n                      <input type=\"text\" name=\"ulBottomSpacing\" value=\"").concat(ulBottom, "\" placeholder=\"\u4E0B\u95F4\u8DDD\" autocomplete=\"off\" class=\"layui-input\">\n                    </div>\n                  </div>\n                </div>\n\n                <div class=\"layui-form-item\">\n                  <div class=\"layui-inline\">\n                    <label class=\"layui-form-label\" style=\"width: 80px;\">\u5217\u8868\u9879\u4E0A</label>\n                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n                      <input type=\"text\" name=\"liTopSpacing\" value=\"").concat(liTop, "\" placeholder=\"\u4E0A\u95F4\u8DDD\" autocomplete=\"off\" class=\"layui-input\">\n                    </div>\n                  </div>\n                  <div class=\"layui-inline\">\n                    <label class=\"layui-form-label\" style=\"width: 60px;\">\u5217\u8868\u9879\u4E0B</label>\n                    <div class=\"layui-input-inline\" style=\"width: 100px;\">\n                      <input type=\"text\" name=\"liBottomSpacing\" value=\"").concat(liBottom, "\" placeholder=\"\u4E0B\u95F4\u8DDD\" autocomplete=\"off\" class=\"layui-input\">\n                    </div>\n                  </div>\n                </div>\n                \n                <div style=\"padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;\">\n                  <p>1. \u652F\u6301\u5355\u4F4D\uFF1Apx\uFF08\u50CF\u7D20\uFF09\u6216 %\uFF08\u767E\u5206\u6BD4\uFF09\u3002</p>\n                  <p>2. \u5982\u679C\u53EA\u586B\u6570\u5B57\uFF0C\u9ED8\u8BA4\u4E3A px\u3002</p>\n                  <p>3. \u7559\u7A7A\u5219\u4E0D\u8C03\u6574\uFF0C\u652F\u6301\u9F20\u6807\u6EDA\u8F6E\u8C03\u6574\u6570\u503C\u3002</p>\n                </div>\n              </form>\n            </div>\n\n            <div class=\"layui-tab-item\">\n              <form class=\"layui-form\" style=\"padding: 10px;\">\n                <fieldset class=\"layui-elem-field layui-field-title\" style=\"margin-top: 10px;\">\n                  <legend style=\"font-size: 14px;\">\u663E\u793A\u8BBE\u7F6E</legend>\n                </fieldset>\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u4EE3\u7801\u884C\u9AD8</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"codeLineHeight\" value=\"").concat(codeLH, "\" placeholder=\"\u5982 1.5 \u6216 24px\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n                <div class=\"layui-form-item\">\n                  <label class=\"layui-form-label\" style=\"width: 80px;\">\u6700\u5927\u9AD8\u5EA6</label>\n                  <div class=\"layui-input-block\" style=\"margin-left: 110px;\">\n                    <input type=\"text\" name=\"codeMaxHeight\" value=\"").concat(codeMaxH, "\" placeholder=\"\u8D85\u51FA\u5219\u663E\u793A\u6EDA\u52A8\u6761\uFF0C\u5982 600px\" autocomplete=\"off\" class=\"layui-input\">\n                  </div>\n                </div>\n                \n                <div style=\"padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;\">\n                  <p>1. \u652F\u6301\u5355\u4F4D\uFF1Apx\uFF08\u50CF\u7D20\uFF09\u3002</p>\n                  <p>2. \u884C\u9AD8\u82E5\u65E0\u5355\u4F4D\u5219\u4E3A\u500D\u6570\uFF08\u652F\u6301\u5C0F\u6570\uFF09\u3002</p>\n                  <p>3. \u7559\u7A7A\u5219\u4E0D\u8C03\u6574\uFF0C\u652F\u6301\u9F20\u6807\u6EDA\u8F6E\u8C03\u6574\u6570\u503C\u3002</p>\n                </div>\n              </form>\n            </div>\n          </div>\n        </div>\n      ")
     });
 
     // layer.open 中 radio、checkbox、select 需要 render 才能显示
@@ -510,14 +580,66 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
         applyConfig();
       });
 
-      // 动态监听输入框变化
-      $('input[name="chatLeftPadding"], input[name="chatRightPadding"], input[name="chatBottomPadding"]').on('input', function () {
+      // 动态监听输入框变化 (包含原来的边距和新增的内容间距)
+      var inputSelector = ['input[name="chatLeftPadding"]', 'input[name="chatRightPadding"]', 'input[name="chatBottomPadding"]', 'input[name="pBottomSpacing"]', 'input[name="hTopSpacing"]', 'input[name="hBottomSpacing"]', 'input[name="ulTopSpacing"]', 'input[name="ulBottomSpacing"]', 'input[name="liTopSpacing"]', 'input[name="liBottomSpacing"]', 'input[name="codeLineHeight"]', 'input[name="codeMaxHeight"]'].join(', ');
+      $(inputSelector).on('input', function () {
         // 获取当前输入框的 name 和 value，更新内存中的配置
         config.page[$(this).attr('name')] = $(this).val();
         // 持久化保存
         _utils_gm_Store__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.set(STORE_CONF_KEY, JSON.stringify(config));
         // 实时应用样式
         applyConfig();
+      });
+
+      // 支持鼠标滚轮调整数值
+      $(inputSelector).on('wheel', function (e) {
+        // 阻止默认滚动行为
+        e.preventDefault();
+        var $this = $(this);
+        // 获取滚动方向：deltaY > 0 为向下滚动(数值减小)，deltaY < 0 为向上滚动(数值增加)
+        var originalEvent = e.originalEvent;
+        var delta = originalEvent.deltaY || -originalEvent.wheelDelta || originalEvent.detail;
+
+        // 获取当前值并分离数值和单位
+        var valStr = String($this.val());
+        // 正则匹配：开始(可选负号)(数字)(可选单位)
+        var match = valStr.match(/^(-?[\d\.]+)(.*)$/);
+        var num = 0;
+        var unit = ''; // 默认单位为空，由后续逻辑决定
+
+        if (match) {
+          num = parseFloat(match[1]);
+          unit = match[2];
+        } else if (!valStr) {
+          // 如果为空，视为 0
+          num = 0;
+        }
+
+        // 其他字段默认补 px (行高除外)
+        var name = $this.attr('name');
+        if (!unit && name !== 'codeLineHeight') {
+          unit = 'px';
+        }
+
+        // 确定步长：如果是代码行高，步长为 0.1，否则为 1
+        var step = name === 'codeLineHeight' ? 0.1 : 1;
+
+        // 根据滚动方向增减
+        if (delta < 0) {
+          num += step;
+        } else {
+          num -= step;
+          if (num < 0) num = 0;
+        }
+
+        // 针对小数运算修复精度问题
+        if (name === 'codeLineHeight') {
+          num = parseFloat(num.toFixed(1));
+        }
+
+        // 更新输入框并手动触发 input 事件以保存和应用
+        $this.val(num + unit);
+        $this.trigger('input');
       });
     });
   };
