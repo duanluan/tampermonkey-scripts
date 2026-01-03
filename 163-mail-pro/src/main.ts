@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.3.1
+// @version      0.4.0
 // @description  增强 163 网易邮箱。
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -72,11 +72,15 @@ import Store from "@utils/gm/Store";
     // AI 助理入口
     smartAssistantOperating: '.APP-smartAssistant-operating',
     smartAssistantBtn: '.APP-smartAssistant-btn',
-    // 邮件列表 AI 总结图标 (特定类名)
+    // AI 翻译提示
+    smartAssistantReminder: '.APP-smartAssistant-reminder',
+    // AI 助理右侧边栏
+    smartAssistantContainer: '.APP-smartAssistant-container',
+    // 邮件列表 AI 总结图标
     mailListAiSummaryIcon: '.nui-ico-letterai',
-    // 邮件内容 AI 总结推广 (特定 ID 后缀)
+    // 邮件内容 AI 总结推广
     mailContentAiSummaryGuide: '[id$="_dvReadSAGuide"]',
-    // 邮件内容 广告/占位容器 (特定 ID 后缀)
+    // 邮件内容 广告/占位容器
     mailContentAdContainer: '[id$="_dvReadYad"]',
     // 用户名左侧 Plus 图标
     userPlusIcon: '.nui-ico-newplusSmall',
@@ -133,6 +137,10 @@ import Store from "@utils/gm/Store";
     // 隐藏 AI 助理入口
     hideSmartAssistantOperating: true,
     hidesmartAssistantBtn: true,
+    // 隐藏 AI 翻译提示
+    hideSmartAssistantReminder: true,
+    // 隐藏 AI 助理侧边栏
+    hideSmartAssistantContainer: true,
     // 隐藏邮件列表 AI 总结图标
     hideMailListAiSummaryIcon: true,
     // 隐藏邮件内容 AI 总结推广 (同时包含 Yad 占位符)
@@ -190,6 +198,8 @@ import Store from "@utils/gm/Store";
     $(selector.searchInputAiIcon).toggle(!config.hideSearchInputAiIcon);
     $(selector.smartAssistantOperating).toggle(!config.hideSmartAssistantOperating);
     $(selector.smartAssistantBtn).toggle(!config.hidesmartAssistantBtn);
+    $(selector.smartAssistantReminder).toggle(!config.hideSmartAssistantReminder);
+    $(selector.smartAssistantContainer).toggle(!config.hideSmartAssistantContainer);
 
     // 这里的开关同时控制 Guide 和 Yad 两个元素
     $(selector.mailContentAiSummaryGuide).toggle(!config.hideMailContentAiSummaryGuide);
@@ -213,6 +223,12 @@ import Store from "@utils/gm/Store";
       hideSelectors.push(selector.mailContentAiSummaryGuide);
       hideSelectors.push(selector.mailContentAdContainer); // 将 Yad 也加入强制隐藏列表
     }
+    if (config.hideSmartAssistantReminder) {
+      hideSelectors.push(selector.smartAssistantReminder);
+    }
+    if (config.hideSmartAssistantContainer) {
+      hideSelectors.push(selector.smartAssistantContainer);
+    }
 
     if (hideSelectors.length > 0) {
       const cssContent = hideSelectors.join(', ') + ' { display: none !important; }';
@@ -231,6 +247,8 @@ import Store from "@utils/gm/Store";
       $(selector.mailListAiSummaryIcon).css('display', '');
       $(selector.mailContentAiSummaryGuide).css('display', '');
       $(selector.mailContentAdContainer).css('display', '');
+      $(selector.smartAssistantReminder).css('display', '');
+      $(selector.smartAssistantContainer).css('display', '');
     }
 
     // --- 其他工具栏目 ---
@@ -337,6 +355,8 @@ import Store from "@utils/gm/Store";
             <input type="checkbox" title="一键生成 PPT..." name="hideSmartAssistantOperating" lay-filter="item-switch" ${config.hideSmartAssistantOperating ? 'checked' : ''}/>
             <input type="checkbox" title="搜索栏 AI 搜" name="hideSearchInputAiIcon" lay-filter="item-switch" ${config.hideSearchInputAiIcon ? 'checked' : ''}/>
             <input type="checkbox" title="AI 助理" name="hidesmartAssistantBtn" lay-filter="item-switch" ${config.hidesmartAssistantBtn ? 'checked' : ''}/>
+            <input type="checkbox" title="AI 翻译提示" name="hideSmartAssistantReminder" lay-filter="item-switch" ${config.hideSmartAssistantReminder ? 'checked' : ''}/>
+            <input type="checkbox" title="AI 助理侧边栏" name="hideSmartAssistantContainer" lay-filter="item-switch" ${config.hideSmartAssistantContainer ? 'checked' : ''}/>
             <input type="checkbox" title="开通邮箱“超级会员”……" name="hideWarnTips" lay-filter="item-switch" ${config.hideWarnTips ? 'checked' : ''}/>
             <input type="checkbox" title="邮件列表项 AI 总结图标" name="hideMailListAiSummaryIcon" lay-filter="item-switch" ${config.hideMailListAiSummaryIcon ? 'checked' : ''}/>
             <input type="checkbox" title="邮件详情推广提示条" name="hideMailContentAiSummaryGuide" lay-filter="item-switch" ${config.hideMailContentAiSummaryGuide ? 'checked' : ''}/>
