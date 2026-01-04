@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gemini Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.2.0
+// @version      0.3.0
 // @description  增强 Gemini 对话界面
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -126,6 +126,8 @@ import Options from "../../gemini-pro/src/Options";
       // LI 列表项间距
       liTopSpacing: '',
       liBottomSpacing: '',
+      // 表格下边距
+      tableBottomPadding: '0px',
       // 代码块行高
       codeLineHeight: '',
       // 代码块最大高度 (替代原最大行数)
@@ -220,6 +222,7 @@ import Options from "../../gemini-pro/src/Options";
     const ulBottom = toCssVal(config.page.ulBottomSpacing);
     const liTop = toCssVal(config.page.liTopSpacing);
     const liBottom = toCssVal(config.page.liBottomSpacing);
+    const tableBottom = toCssVal(config.page.tableBottomPadding);
 
     // 代码行高：不使用 toCssVal，允许纯数字作为倍数
     const codeLH = config.page.codeLineHeight ? String(config.page.codeLineHeight).trim() : '';
@@ -326,6 +329,14 @@ import Options from "../../gemini-pro/src/Options";
         ${config.page.liBottomSpacing ? `margin-bottom: ${liBottom} !important;` : ''}
       }` : ''}
 
+      /* 表格 (Table) 间距及滚动控制 */
+      ${config.page.tableBottomPadding !== '' ? `
+      .horizontal-scroll-wrapper,
+      .horizontal-scroll-wrapper > .table-block-component {
+        overflow-x: auto !important;
+        padding-bottom: ${tableBottom} !important;
+      }` : ''}
+
       /* 代码块行高 (同时控制外层容器和内层 span) */
       ${config.page.codeLineHeight ? `
       .code-container,
@@ -392,6 +403,9 @@ import Options from "../../gemini-pro/src/Options";
 
     const liTop = getVal('liTopSpacing', 'message-content .markdown li', 'marginTop', '8px');
     const liBottom = getVal('liBottomSpacing', 'message-content .markdown li', 'marginBottom', '8px');
+
+    // 表格下边距
+    const tableBottom = getVal('tableBottomPadding', '.horizontal-scroll-wrapper', 'paddingBottom', '0px');
 
     // 代码块行高：优先获取 code 标签的行高，比 span 更能反映块级属性
     const codeLH = getVal('codeLineHeight', '.code-container code', 'lineHeight', '1.5');
@@ -508,6 +522,13 @@ import Options from "../../gemini-pro/src/Options";
                   </div>
                 </div>
                 
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 80px;">表格下</label>
+                  <div class="layui-input-block" style="margin-left: 110px;">
+                    <input type="text" name="tableBottomPadding" value="${tableBottom}" placeholder="下间距，如 0px" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+                
                 <div style="padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;">
                   <p>1. 支持单位：px（像素）或 %（百分比）。</p>
                   <p>2. 如果只填数字，默认为 px。</p>
@@ -571,6 +592,7 @@ import Options from "../../gemini-pro/src/Options";
         'input[name="ulBottomSpacing"]',
         'input[name="liTopSpacing"]',
         'input[name="liBottomSpacing"]',
+        'input[name="tableBottomPadding"]',
         'input[name="codeLineHeight"]',
         'input[name="codeMaxHeight"]'
       ].join(', ');
