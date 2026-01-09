@@ -3,7 +3,7 @@
 > 🚀 **专注邮件，拒绝打扰。**
 > 为 163 网易邮箱提供更清爽、可定制的使用体验。
 
-<img src="./assets/preview.png" alt="163 Mail Pro Preview" width="100%" />
+<img src="https://raw.githubusercontent.com/duanluan/tampermonkey-scripts/main/163-mail-pro/assets/preview.png" alt="163 Mail Pro Preview" width="100%" />
 
 ---
 
