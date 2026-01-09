@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         163 Mail Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.4.0
+// @version      0.5.0
 // @description  增强 163 网易邮箱。
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -53,6 +53,8 @@ import Store from "@utils/gm/Store";
     contactsTab: '#_mail_tabitem_1_83',
     // AI 工具箱 tab
     aiToolboxTab: '#_mail_tabitem_2_84',
+    // 企业邮箱 tab
+    enterpriseMailTab: '#_mail_tabitem_4_86',
 
     // 开通超级会员无限容量 nav item
     enableVipNavItem: '#_mail_component_73_73',
@@ -118,6 +120,8 @@ import Store from "@utils/gm/Store";
     hideContactsTab: true,
     // 隐藏 AI 工具箱 Tab
     hideAiToolboxTab: true,
+    // 隐藏企业邮箱 Tab
+    hideEnterpriseMailTab: true,
 
     // 隐藏开通超级会员无限容量 nav item
     hideEnableVipNavItem: true,
@@ -187,6 +191,7 @@ import Store from "@utils/gm/Store";
     $(selector.indexTab).toggle(!config.hideIndexTab);
     $(selector.contactsTab).toggle(!config.hideContactsTab);
     $(selector.aiToolboxTab).toggle(!config.hideAiToolboxTab);
+    $(selector.enterpriseMailTab).toggle(!config.hideEnterpriseMailTab);
 
     $(selector.enableVipNavItem).toggle(!config.hideEnableVipNavItem);
     $(selector.downAppNavItem).toggle(!config.hideDownAppNavItem);
@@ -322,6 +327,7 @@ import Store from "@utils/gm/Store";
             <input type="checkbox" title="首页" name="hideIndexTab" lay-filter="item-switch" ${config.hideIndexTab ? 'checked' : ''}/>
             <input type="checkbox" title="通讯录" name="hideContactsTab" lay-filter="item-switch" ${config.hideContactsTab ? 'checked' : ''}/>
             <input type="checkbox" title="AI 工具箱" name="hideAiToolboxTab" lay-filter="item-switch" ${config.hideAiToolboxTab ? 'checked' : ''}/>
+            <input type="checkbox" title="企业邮箱" name="hideEnterpriseMailTab" lay-filter="item-switch" ${config.hideEnterpriseMailTab ? 'checked' : ''}/>
           </div>
         </div>
         <div class="layui-form-item">
