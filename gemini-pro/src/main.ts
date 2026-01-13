@@ -43,43 +43,45 @@ import Options from "../../gemini-pro/src/Options";
     .layui-layer-ico5{background-position:-150px 0}
     .layui-layer-ico6{background-position:-180px 0}
 
-    /* === 设置入口：悬浮按钮 === */
-    #gemini-pro-fab {
-      position: fixed;
-      /* 默认位置在右下角，具体的 top/left 会由 JS 覆盖 */
-      bottom: 24px;
-      right: 24px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background-color: #fff;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      z-index: 9999;
-      /* 可拖拽 */
-      cursor: grab;
-      display: flex;
+    /* === 设置入口：嵌入式按钮样式 === */
+    #gemini-pro-toolbar-btn {
+      display: inline-flex;
       align-items: center;
       justify-content: center;
-      transition: background-color 0.2s;
-      color: #444746;
-      /* 防止拖拽时选中内部图标 */
-      user-select: none;
-    }
-
-    #gemini-pro-fab:active {
-      cursor: grabbing;
-      transform: scale(0.95);
-    }
-
-    #gemini-pro-fab:hover {
-      background-color: #f0f4f9;
-    }
-
-    #gemini-pro-fab svg {
+      box-sizing: border-box;
+      width: 40px; /* 标准 Material Icon Button 大小 */
+      height: 40px;
+      border: none;
+      outline: none;
+      background-color: transparent;
       fill: currentColor;
+      color: #444746;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-right: 4px; /* 与右侧原有图标保持一点距离 */
+      transition: background-color 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+    
+    /* 暗黑模式适配 (尝试匹配 Gemini 的颜色变量或通用深色) */
+    @media (prefers-color-scheme: dark) {
+      #gemini-pro-toolbar-btn {
+        color: #e3e3e3;
+      }
+      #gemini-pro-toolbar-btn:hover {
+        background-color: rgba(227, 227, 227, 0.08);
+      }
+    }
+    
+    /* 普通模式下的 Hover */
+    @media (prefers-color-scheme: light) {
+      #gemini-pro-toolbar-btn:hover {
+        background-color: rgba(68, 71, 70, 0.08);
+      }
+    }
+
+    #gemini-pro-toolbar-btn svg {
       width: 24px;
       height: 24px;
-      /* 让事件穿透图标直接打在 div 上 */
       pointer-events: none;
     }
     
@@ -109,8 +111,7 @@ import Options from "../../gemini-pro/src/Options";
     hideMyContentPreview: false,
     hideDisclaimer: false,
     hideInputShadow: false,
-    // 记录悬浮按钮位置
-    fabPos: {top: '', left: ''},
+    // 注意：移除 fabPos，因为不再需要悬浮按钮位置
     // 默认边距
     page: {
       chatLeftPadding: '10%',
@@ -661,149 +662,76 @@ import Options from "../../gemini-pro/src/Options";
   }
 
   /**
-   * 初始化拖拽功能 (增加边界限制)
+   * 将设置按钮嵌入到页面顶部导航栏 (替代原有的悬浮球逻辑)
    */
-  const initDraggable = ($el: JQuery) => {
-    let isDragging = false;
-    // 用于区分点击和拖拽
-    let hasMoved = false;
-    let startX = 0, startY = 0;
-    let startLeft = 0, startTop = 0;
+  const mountToolbarButton = () => {
+    const btnId = 'gemini-pro-toolbar-btn';
 
-    $el.on('mousedown', (e) => {
-      // 只有左键可以拖拽
-      if (e.button !== 0) return;
+    // 如果按钮已经存在，则无需重复创建
+    if (document.getElementById(btnId)) return;
 
-      isDragging = true;
-      hasMoved = false;
+    // 寻找插入点：
+    // 优先寻找 "studio-sidebar-button" (文件列表图标)
+    // 其次寻找 "pillbox" (PRO 按钮)
+    let anchorEl = document.querySelector('studio-sidebar-button') || document.querySelector('[data-test-id="pillbox"]');
 
-      // 记录鼠标初始位置
-      startX = e.clientX;
-      startY = e.clientY;
+    if (!anchorEl) return; // 还没加载出来，等待下一次 Observer 触发
 
-      // 记录元素初始位置 (获取当前的 computed style)
-      const rect = $el[0].getBoundingClientRect();
-      startLeft = rect.left;
-      startTop = rect.top;
+    // 找到这些按钮的父容器 (也就是 class="buttons-container" 的那个)
+    // 根据结构，这些按钮可能被包裹在内层容器中，我们需要把按钮放到最外层的 buttons-container 的最前面
+    const container = anchorEl.closest('.buttons-container');
 
-      // 阻止文字选中
-      e.preventDefault();
-
-      // 改变光标
-      $el.css('cursor', 'grabbing');
-    });
-
-    // 绑定到 document 以防止鼠标移出元素过快
-    $(document).on('mousemove', (e) => {
-      if (!isDragging) return;
-
-      const deltaX = e.clientX - startX;
-      const deltaY = e.clientY - startY;
-
-      // 如果移动距离超过 2px，则视为拖拽操作 (防止手抖)
-      if (Math.abs(deltaX) > 2 || Math.abs(deltaY) > 2) {
-        hasMoved = true;
+    // 逻辑：如果找到的容器只有这一个子元素（Wrapper），说明是内层，需要再往上找一级
+    if (container) {
+      // 检查是否是内层包装器
+      if (container.children.length === 1 && container.contains(anchorEl)) {
+        const parentContainer = container.parentElement?.closest('.buttons-container');
+        if (parentContainer) {
+          insertButton(parentContainer);
+          return;
+        }
       }
 
-      // 计算新坐标
-      let newLeft = startLeft + deltaX;
-      let newTop = startTop + deltaY;
-
-      // 边界限制：获取窗口宽高和元素宽高
-      const winWidth = $(window).width() || 0;
-      const winHeight = $(window).height() || 0;
-      const elWidth = $el.outerWidth() || 48;
-      const elHeight = $el.outerHeight() || 48;
-
-      // 限制左/右边界
-      if (newLeft < 0) newLeft = 0;
-      if (newLeft + elWidth > winWidth) newLeft = winWidth - elWidth;
-
-      // 限制上/下边界
-      if (newTop < 0) newTop = 0;
-      if (newTop + elHeight > winHeight) newTop = winHeight - elHeight;
-
-      // 更新位置
-      $el.css({
-        left: newLeft + 'px',
-        top: newTop + 'px',
-        bottom: 'auto',
-        right: 'auto'
-      });
-    });
-
-    $(document).on('mouseup', (e) => {
-      if (!isDragging) return;
-
-      isDragging = false;
-      $el.css('cursor', 'grab');
-
-      // 如果发生了实质性移动，保存位置
-      if (hasMoved) {
-        const rect = $el[0].getBoundingClientRect();
-        config.fabPos = {
-          top: rect.top + 'px',
-          left: rect.left + 'px'
-        };
-        Store.set(STORE_CONF_KEY, JSON.stringify(config));
-      }
-    });
-
-    // 拦截点击事件
-    // 如果刚刚发生了拖拽 (hasMoved 为 true)，则阻止点击打开设置
-    $el.on('click', (e) => {
-      if (hasMoved) {
-        e.preventDefault();
-        e.stopPropagation();
-        hasMoved = false;
-      } else {
-        onSettingsClick();
-      }
-    });
-  };
-
-  /**
-   * 渲染/确保右下角悬浮按钮存在
-   */
-  const ensureFab = () => {
-    const btnId = 'gemini-pro-fab';
-    if ($(`#${btnId}`).length > 0) return;
-
-    // 创建悬浮按钮
-    const $fab = $(`
-      <div id="${btnId}" title="Gemini Pro 设置">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
-          <path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z"/>
-        </svg>
-      </div>
-    `);
-
-    // 如果配置中有保存的位置，应用之 (带越界修正)
-    if (config.fabPos && config.fabPos.top && config.fabPos.left) {
-      let top = parseInt(config.fabPos.top);
-      let left = parseInt(config.fabPos.left);
-      const winWidth = $(window).width() || window.innerWidth;
-      const winHeight = $(window).height() || window.innerHeight;
-      // 按钮尺寸
-      const elSize = 48;
-      // 检查是否在屏幕外
-      if (top < 0) top = 0;
-      if (left < 0) left = 0;
-      if (top + elSize > winHeight) top = winHeight - elSize - 24;
-      if (left + elSize > winWidth) left = winWidth - elSize - 24;
-      $fab.css({ top: top + 'px', left: left + 'px', bottom: 'auto', right: 'auto' });
+      // 默认尝试插入当前找到的容器
+      insertButton(container);
     }
 
-    // 初始化拖拽逻辑 (内部包含点击处理)
-    initDraggable($fab);
+    function insertButton(targetContainer) {
+      // 再次检查防止重复 (以防万一)
+      if (targetContainer.querySelector(`#${btnId}`)) return;
 
-    // 添加到 Body
-    $('body').append($fab);
+      const $btn = $(`
+        <button id="${btnId}" title="Gemini Pro 设置">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+            <path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z"/>
+          </svg>
+        </button>
+      `);
+
+      $btn.on('click', (e) => {
+        // 阻止冒泡，防止触发潜在的导航栏点击事件
+        e.stopPropagation();
+        onSettingsClick();
+      });
+
+      // 插入到容器的第一个位置 (Prepend)
+      $(targetContainer).prepend($btn);
+    }
   };
+
+  // 使用 MutationObserver 监听 DOM 变化，确保 SPA 页面切换/刷新时按钮依然存在
+  const observer = new MutationObserver((mutations) => {
+    mountToolbarButton();
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 
   // 1. 注册 Tampermonkey 菜单选项 (保留作为备用入口)
   Options.registerAll(onSettingsClick);
 
   // 2. 渲染页面 UI 入口
-  ensureFab();
+  mountToolbarButton();
 })();
