@@ -547,7 +547,7 @@ import Options from "../../gemini-pro/src/Options";
                 <div class="layui-form-item">
                   <label class="layui-form-label" style="width: 60px;">其他：</label>
                   <div class="layui-input-block" style="margin-left: 90px;">
-                    <input type="checkbox" title="剪贴板-删除多余空行" name="trimCopyNewline" lay-filter="item-switch" ${config.trimCopyNewline ? 'checked' : ''}/>
+                    <input type="checkbox" title="剪贴板-删除错误空行" name="trimCopyNewline" lay-filter="item-switch" ${config.trimCopyNewline ? 'checked' : ''}/>
                   </div>
                 </div>
               </form>
