@@ -716,6 +716,20 @@ import Options from "../../gemini-pro/src/Options";
 
       // 插入到容器的第一个位置 (Prepend)
       $(targetContainer).prepend($btn);
+
+      // 首次运行时显示设置入口提示
+      if (!Store.get('hasShownButtonHint')) {
+        setTimeout(() => {
+          // 使用 layer.tips 在按钮下方显示提示，5秒后自动消失
+          layer.tips('Gemini Pro 设置入口在这里', `#${btnId}`, {
+            tips: [3, '#009688'], // 3=Bottom, 颜色使用 Teal
+            time: 5000,
+            anim: 5 // 渐显效果
+          });
+          // 标记已提示
+          Store.set('hasShownButtonHint', true);
+        }, 4000);
+      }
     }
   };
 
