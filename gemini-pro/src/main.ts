@@ -111,6 +111,8 @@ import Options from "../../gemini-pro/src/Options";
     hideMyContentPreview: false,
     hideDisclaimer: false,
     hideInputShadow: false,
+    // 复制时合并多余换行
+    trimCopyNewline: false,
     // 注意：移除 fabPos，因为不再需要悬浮按钮位置
     // 默认边距
     page: {
@@ -370,6 +372,109 @@ import Options from "../../gemini-pro/src/Options";
     applyPageStyle();
   });
 
+  // 标记是否点击了Gemini原生的复制按钮（代码块按钮 或 底部回答按钮）
+  let isNativeCopyBtnClick = false;
+
+  // 监听点击事件 (捕获阶段，确保先于页面逻辑执行)
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+
+    // 1. 代码块右上角的复制按钮 (class="copy-button")
+    // 2. 回答底部的复制按钮组件 (tag="copy-button" 或 attribute data-test-id="copy-button")
+    const btn = target.closest('button.copy-button') ||
+      target.closest('copy-button');
+
+    if (btn) {
+      isNativeCopyBtnClick = true;
+      // 500ms 后重置，防止影响后续操作
+      setTimeout(() => {
+        isNativeCopyBtnClick = false;
+      }, 500);
+    }
+  }, true);
+
+  // 监听复制事件 (使用 { capture: true } 以在页面脚本之前拦截)
+  document.addEventListener('copy', (e) => {
+      // 0. 全局开关校验
+      if (!config.trimCopyNewline) return;
+
+      // 1. 如果是点击了 Gemini 原生的复制按钮，放行 (不做 preventDefault)
+      if (isNativeCopyBtnClick) {
+        isNativeCopyBtnClick = false; // 消费掉标记
+        return;
+      }
+
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
+
+      // 2. 如果选区完全在代码块内部（Code Block），也不做处理
+      // 查找选区的公共祖先，看它是否在 pre 或 .code-block-component 内
+      let commonNode = selection.getRangeAt(0).commonAncestorContainer;
+      // 如果是文本节点，取其父元素
+      if (commonNode.nodeType === 3) {
+        commonNode = commonNode.parentNode;
+      }
+      const parentEl = commonNode as HTMLElement;
+      // 检查是否在代码块容器中
+      if (parentEl.closest('pre') || parentEl.closest('.code-block-component')) {
+        // 纯代码块内容复制，不执行空行合并
+        return;
+      }
+
+      // 3. 执行混合内容的智能处理（保护代码块结构，合并普通文本空行）
+      // 关键修复：阻止后续事件处理，并清除已存在的(可能由页面生成的)数据
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      // 获取 DOM 片段
+      const range = selection.getRangeAt(0);
+      const fragment = range.cloneContents();
+      const tempDiv = document.createElement('div');
+      tempDiv.appendChild(fragment);
+
+      // 保护代码块：查找 <pre>
+      const codeBlocks = tempDiv.querySelectorAll('pre');
+      const placeholders = [];
+
+      codeBlocks.forEach((block, index) => {
+        // 生成唯一占位符
+        const placeholder = `__GEMINI_CODE_BLOCK_PROTECTION_${index}_${Date.now()}__`;
+        // 保存原始内容
+        placeholders.push({
+          id: placeholder,
+          content: block.innerText
+        });
+        // 替换
+        block.textContent = placeholder;
+      });
+
+      // 获取文本并处理
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.opacity = '0';
+      document.body.appendChild(tempDiv);
+
+      let text = tempDiv.innerText;
+
+      document.body.removeChild(tempDiv);
+
+      // 合并换行逻辑：每两个换行符替换为一个
+      text = text.replace(/\n\n/g, '\n');
+
+      // 还原代码块
+      placeholders.forEach((item) => {
+        text = text.replace(item.id, item.content);
+      });
+
+      // 4. 彻底清空剪贴板数据 (防止 text/html 残留)
+      if (e.clipboardData) {
+        e.clipboardData.clearData();
+        e.clipboardData.setData('text/plain', text);
+      }
+    },
+    // 表示在捕获阶段执行
+    true);
+
   // 定义点击设置时的回调函数
   const onSettingsClick = () => {
     // 辅助函数：获取配置值 > 页面实时计算值 > 兜底默认值
@@ -436,6 +541,13 @@ import Options from "../../gemini-pro/src/Options";
                     <input type="checkbox" title="侧边栏-我的内容预览" name="hideMyContentPreview" lay-filter="item-switch" ${config.hideMyContentPreview ? 'checked' : ''}/>
                     <input type="checkbox" title="底部免责声明" name="hideDisclaimer" lay-filter="item-switch" ${config.hideDisclaimer ? 'checked' : ''}/>
                     <input type="checkbox" title="聊天输入框上方渐变" name="hideInputShadow" lay-filter="item-switch" ${config.hideInputShadow ? 'checked' : ''}/>
+                  </div>
+                </div>
+                
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 60px;">其他：</label>
+                  <div class="layui-input-block" style="margin-left: 90px;">
+                    <input type="checkbox" title="剪贴板-删除多余空行" name="trimCopyNewline" lay-filter="item-switch" ${config.trimCopyNewline ? 'checked' : ''}/>
                   </div>
                 </div>
               </form>
