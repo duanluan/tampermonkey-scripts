@@ -99,7 +99,7 @@ import Options from "../../gemini-pro/src/Options";
 
   const selector = {
     // 我的内容入口按钮
-    myContentEntryBtn: 'side-nav-entry-button',
+    myContentEntryBtn: '.side-nav-entry-container > side-nav-entry-button',
     // 我的内容预览
     myContentPreview: 'my-stuff-recents-preview',
     // 底部免责声明
