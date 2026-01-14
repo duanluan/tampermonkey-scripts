@@ -520,7 +520,7 @@ import Options from "../../gemini-pro/src/Options";
 
     layer.open({
       type: 1,
-      area: ['500px', '650px'],
+      area: ['600px', '650px'],
       title: 'Gemini Pro 设置',
       // 点击遮罩关闭
       shadeClose: true,
@@ -558,24 +558,25 @@ import Options from "../../gemini-pro/src/Options";
                 <fieldset class="layui-elem-field layui-field-title" style="margin-top: 10px;">
                   <legend style="font-size: 14px;">容器边距</legend>
                 </fieldset>
+                
                 <div class="layui-form-item">
                   <div class="layui-inline">
-                    <label class="layui-form-label" style="width: 80px;">聊天左</label>
-                    <div class="layui-input-inline" style="width: 100px;">
-                      <input type="text" name="chatLeftPadding" value="${config.page.chatLeftPadding}" placeholder="如 50px 或 10%" autocomplete="off" class="layui-input">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">聊天左</label>
+                    <div class="layui-input-inline" style="width: 90px;">
+                      <input type="text" name="chatLeftPadding" value="${config.page.chatLeftPadding}" placeholder="如 10%" autocomplete="off" class="layui-input">
                     </div>
                   </div>
                   <div class="layui-inline">
-                    <label class="layui-form-label" style="width: 80px;">聊天右</label>
-                    <div class="layui-input-inline" style="width: 100px;">
-                      <input type="text" name="chatRightPadding" value="${config.page.chatRightPadding}" placeholder="如 50px 或 10%" autocomplete="off" class="layui-input">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">聊天右</label>
+                    <div class="layui-input-inline" style="width: 90px;">
+                      <input type="text" name="chatRightPadding" value="${config.page.chatRightPadding}" placeholder="如 10%" autocomplete="off" class="layui-input">
                     </div>
                   </div>
-                </div>
-                <div class="layui-form-item">
-                  <label class="layui-form-label" style="width: 80px;">聊天下</label>
-                  <div class="layui-input-block" style="margin-left: 110px;">
-                    <input type="text" name="chatBottomPadding" value="${config.page.chatBottomPadding}" placeholder="如 20px" autocomplete="off" class="layui-input">
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">聊天下</label>
+                    <div class="layui-input-inline" style="width: 90px;">
+                      <input type="text" name="chatBottomPadding" value="${config.page.chatBottomPadding}" placeholder="如 20px" autocomplete="off" class="layui-input">
+                    </div>
                   </div>
                 </div>
                 
@@ -584,22 +585,21 @@ import Options from "../../gemini-pro/src/Options";
                 </fieldset>
 
                 <div class="layui-form-item">
-                  <label class="layui-form-label" style="width: 80px;">段落下</label>
-                  <div class="layui-input-block" style="margin-left: 110px;">
-                    <input type="text" name="pBottomSpacing" value="${pBottom}" placeholder="下间距，如 10px" autocomplete="off" class="layui-input">
-                  </div>
-                </div>
-
-                <div class="layui-form-item">
                   <div class="layui-inline">
-                    <label class="layui-form-label" style="width: 80px;">标题上</label>
-                    <div class="layui-input-inline" style="width: 100px;">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">段落下</label>
+                    <div class="layui-input-inline" style="width: 90px;">
+                      <input type="text" name="pBottomSpacing" value="${pBottom}" placeholder="如 10px" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">标题上</label>
+                    <div class="layui-input-inline" style="width: 90px;">
                       <input type="text" name="hTopSpacing" value="${hTop}" placeholder="上间距" autocomplete="off" class="layui-input">
                     </div>
                   </div>
                   <div class="layui-inline">
-                    <label class="layui-form-label" style="width: 60px;">标题下</label>
-                    <div class="layui-input-inline" style="width: 100px;">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">标题下</label>
+                    <div class="layui-input-inline" style="width: 90px;">
                       <input type="text" name="hBottomSpacing" value="${hBottom}" placeholder="下间距" autocomplete="off" class="layui-input">
                     </div>
                   </div>
@@ -607,38 +607,37 @@ import Options from "../../gemini-pro/src/Options";
                 
                 <div class="layui-form-item">
                   <div class="layui-inline">
-                    <label class="layui-form-label" style="width: 80px;">列表上</label>
-                    <div class="layui-input-inline" style="width: 100px;">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">列表上</label>
+                    <div class="layui-input-inline" style="width: 90px;">
                       <input type="text" name="ulTopSpacing" value="${ulTop}" placeholder="上间距" autocomplete="off" class="layui-input">
                     </div>
                   </div>
                   <div class="layui-inline">
-                    <label class="layui-form-label" style="width: 60px;">列表下</label>
-                    <div class="layui-input-inline" style="width: 100px;">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">列表下</label>
+                    <div class="layui-input-inline" style="width: 90px;">
                       <input type="text" name="ulBottomSpacing" value="${ulBottom}" placeholder="下间距" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                    <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">表格下</label>
+                    <div class="layui-input-inline" style="width: 90px;">
+                      <input type="text" name="tableBottomPadding" value="${tableBottom}" placeholder="下间距" autocomplete="off" class="layui-input">
                     </div>
                   </div>
                 </div>
 
                 <div class="layui-form-item">
                   <div class="layui-inline">
-                    <label class="layui-form-label" style="width: 80px;">列表项上</label>
-                    <div class="layui-input-inline" style="width: 100px;">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">列表项上</label>
+                    <div class="layui-input-inline" style="width: 90px;">
                       <input type="text" name="liTopSpacing" value="${liTop}" placeholder="上间距" autocomplete="off" class="layui-input">
                     </div>
                   </div>
                   <div class="layui-inline">
-                    <label class="layui-form-label" style="width: 60px;">列表项下</label>
-                    <div class="layui-input-inline" style="width: 100px;">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">列表项下</label>
+                    <div class="layui-input-inline" style="width: 90px;">
                       <input type="text" name="liBottomSpacing" value="${liBottom}" placeholder="下间距" autocomplete="off" class="layui-input">
                     </div>
-                  </div>
-                </div>
-                
-                <div class="layui-form-item">
-                  <label class="layui-form-label" style="width: 80px;">表格下</label>
-                  <div class="layui-input-block" style="margin-left: 110px;">
-                    <input type="text" name="tableBottomPadding" value="${tableBottom}" placeholder="下间距，如 0px" autocomplete="off" class="layui-input">
                   </div>
                 </div>
                 
