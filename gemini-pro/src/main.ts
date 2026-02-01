@@ -828,25 +828,35 @@ import Options from "../../gemini-pro/src/Options";
         'input[name="sidebarWidth"]'
       ].join(', ');
 
+      // 防抖定时器：将“保存”和“应用样式”打包在一起延迟执行，解决滚轮调整时的卡顿问题
+      let saveAndApplyTimer: number | null = null;
+      const saveAndApply = () => {
+        // 持久化保存
+        Store.set(STORE_CONF_KEY, JSON.stringify(config));
+        // 实时应用样式
+        applyConfig();
+      };
+
       $(inputSelector).on('input', function () {
         const $this = $(this);
         const name = $this.attr('name');
         const val = $this.val();
 
-        // 修改侧边栏宽度的处理逻辑
+        // 更新内存中的配置对象
         if (name === 'sidebarWidth') {
-          // 使用验证函数修正数值
-          const validatedVal = validateSidebarWidth(val);
-
           // 保存修正后的值
-          config[name] = validatedVal;
+          config[name] = validateSidebarWidth(val);
         } else {
-          config.page[name] = val; // 存入 config.page
+          config.page[name] = val;
         }
-        // 持久化保存
-        Store.set(STORE_CONF_KEY, JSON.stringify(config));
-        // 实时应用样式
-        applyConfig();
+
+        // 避免高频 JSON 序列化和 DOM 操作阻塞主线程
+        if (saveAndApplyTimer !== null) {
+          clearTimeout(saveAndApplyTimer);
+        }
+        saveAndApplyTimer = window.setTimeout(() => {
+          saveAndApply();
+        }, 150);
       });
 
       // 支持鼠标滚轮调整数值
