@@ -306,7 +306,7 @@ import Options from "../../gemini-pro/src/Options";
         message-content .markdown p {
           margin-bottom: ${pBottom} !important;
         }
-      `: ''}
+      ` : ''}
 
       /* 标题 (H1-H6)：控制上下边距 */
       ${config.page.hTopSpacing || config.page.hBottomSpacing ? `
@@ -882,8 +882,8 @@ import Options from "../../gemini-pro/src/Options";
       });
 
       // 侧边栏输入框失去焦点时，修正显示值
-      $('input[name="sidebarWidth"]').on('blur', function() {
-        const $this =$(this);
+      $('input[name="sidebarWidth"]').on('blur', function () {
+        const $this = $(this);
         // 获取最终保存的配置值（一定是合法的，比如 200px）
         const finalVal = config.sidebarWidth;
 
@@ -901,83 +901,68 @@ import Options from "../../gemini-pro/src/Options";
   const mountToolbarButton = () => {
     const btnId = 'gemini-pro-toolbar-btn';
 
-    // 如果按钮已经存在，则无需重复创建
-    if (document.getElementById(btnId)) return;
+    // 如果按钮已经存在，直接返回
+    if ($(`#${btnId}`).length > 0) return;
 
-    // 寻找插入点：
-    // 优先寻找 "studio-sidebar-button"（文件列表图标）
-    // 其次寻找 "pillbox"（PRO 按钮）
-    let anchorEl = document.querySelector('studio-sidebar-button') || document.querySelector('[data-test-id="pillbox"]');
+    // 寻找容器：使用 .first() 确保只操作第一个匹配的容器
+    const $container = $('div.right-section .buttons-container').first();
 
-    // 还没加载出来，等待下一次 Observer 触发
-    if (!anchorEl) return;
+    // 如果容器不存在，直接返回
+    if ($container.length === 0) return;
 
-    const container = anchorEl.closest('.buttons-container');
-    // 如果找到的容器只有这一个子元素（Wrapper），说明是内层，需要再往上找一级
-    if (container) {
-      // 检查是否是内层包装器
-      if (container.children.length === 1 && container.contains(anchorEl)) {
-        const parentContainer = container.parentElement?.closest('.buttons-container');
-        if (parentContainer) {
-          insertButton(parentContainer);
-          return;
-        }
-      }
+    const $btn = $(`
+    <button id="${btnId}" title="Gemini Pro 设置">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+        <path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z"/>
+      </svg>
+    </button>
+  `);
 
-      // 默认尝试插入当前找到的容器
-      insertButton(container);
-    }
+    $btn.on('click', (e) => {
+      e.stopPropagation();
+      onSettingsClick();
+    });
 
-    function insertButton(targetContainer) {
-      // 再次检查防止重复插入
-      if (targetContainer.querySelector(`#${btnId}`)) return;
+    // 插入到容器第一个位置
+    $container.prepend($btn);
 
-      const $btn = $(`
-        <button id="${btnId}" title="Gemini Pro 设置">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
-            <path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z"/>
-          </svg>
-        </button>
-      `);
-
-      $btn.on('click', (e) => {
-        // 阻止冒泡，防止触发潜在的导航栏点击事件
-        e.stopPropagation();
-        onSettingsClick();
-      });
-
-      // 插入到容器的第一个位置
-      $(targetContainer).prepend($btn);
-
-      // 首次运行时显示设置入口提示
-      if (!Store.get('hasShownButtonHint')) {
-        setTimeout(() => {
-          // 使用 layer.tips 在按钮下方显示提示，5秒后自动消失
-          layer.tips('Gemini Pro 设置入口在这里', `#${btnId}`, {
-            tips: [3, '#009688'], // 3=Bottom, 颜色使用 Teal
-            time: 5000,
-            anim: 5 // 渐显效果
-          });
-          // 标记已提示
-          Store.set('hasShownButtonHint', true);
-        }, 4000);
-      }
+    // 首次运行时显示设置入口提示
+    if (!Store.get('hasShownButtonHint')) {
+      setTimeout(() => {
+        layer.tips('Gemini Pro 设置入口在这里', `#${btnId}`, {
+          tips: [3, '#009688'],
+          time: 5000,
+          anim: 5
+        });
+        Store.set('hasShownButtonHint', true);
+      }, 4000);
     }
   };
 
-  // 使用 MutationObserver 监听 DOM 变化，确保 SPA 页面切换/刷新时按钮依然存在
-  const observer = new MutationObserver((mutations) => {
-    mountToolbarButton();
-    applyPageStyle();
+  // 防抖定时器
+  let mountTimer: number | null = null;
+
+  // 使用 MutationObserver 监听 DOM 变化
+  const observer = new MutationObserver(() => {
+    // 防抖处理：避免短时间内频繁触发
+    if (mountTimer !== null) {
+      clearTimeout(mountTimer);
+    }
+
+    mountTimer = window.setTimeout(() => {
+      mountToolbarButton();
+      applyPageStyle();
+    }, 100);
   });
 
+  // 直接监听 document.body，简单有效，覆盖所有子树变化
   observer.observe(document.body, {
     childList: true,
     subtree: true
   });
 
-  // 1. 注册 Tampermonkey 菜单选项
+  // 注册 Tampermonkey 菜单选项
   Options.registerAll(onSettingsClick);
-  // 2. 渲染页面 UI 入口
+  // 初始尝试渲染
   mountToolbarButton();
 })();
