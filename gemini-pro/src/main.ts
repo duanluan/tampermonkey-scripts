@@ -100,13 +100,46 @@ import Options from "../../gemini-pro/src/Options";
   `);
 
   const selector = {
+    toolbarBtn: '#gemini-pro-toolbar-btn',
+
     // 我的内容入口按钮
     myContentEntryBtn: '.side-nav-entry-container > side-nav-entry-button',
     // 我的内容预览
     myContentPreview: 'my-stuff-recents-preview',
     // 底部免责声明
-    disclaimer: 'hallucination-disclaimer'
-  }
+    disclaimer: 'hallucination-disclaimer',
+
+    // 样式应用相关
+    styleId: '#gemini-pro-page-style',
+    chatHistory: '#chat-history > .chat-history',
+    botInfoCardContainer: '#chat-history > .chat-history > .bot-info-card-container',
+    botInfoCardWrapper: 'bot-info-card > .bot-info-card-container',
+    userQuery: 'user-query',
+    userQueryContainer: 'user-query-content > .user-query-container',
+    conversationContainer: '.conversation-container',
+    inputContainer: 'input-container',
+    inputAreaContainer: '.input-area-container',
+    messageContent: 'message-content .markdown',
+    horizontalScrollWrapper: '.horizontal-scroll-wrapper',
+    tableBlockComponent: '.horizontal-scroll-wrapper > .table-block-component',
+    codeContainer: '.code-container',
+    formattedCodeBlock: '.formatted-code-block-internal-container pre',
+
+    // 侧边栏
+    sidenavContainer: 'bard-sidenav-container[data-test-id="bard-sidenav-container"]',
+    sidenav: 'bard-sidenav',
+    sideNavigationContent: 'side-navigation-content',
+
+    // 按钮挂载点
+    rightSectionContainer: 'div.right-section .buttons-container',
+
+    // 代码块右上角的复制按钮
+    copyButton: 'button.copy-button',
+    // 回答底部的复制按钮组件
+    copyComponent: 'copy-button',
+    pre: 'pre',
+    codeBlockComponent: '.code-block-component',
+  };
 
   const defaultConfig = {
     hideMyContentEntryBtn: false,
@@ -164,10 +197,9 @@ import Options from "../../gemini-pro/src/Options";
    * 应用页面宽度样式
    */
   const applyPageStyle = () => {
-    const styleId = 'gemini-pro-page-style';
-    let $style = $(`#${styleId}`);
+    let $style = $(selector.styleId);
     if ($style.length === 0) {
-      $style = $(`<style id="${styleId}"></style>`);
+      $style = $(`<style id="${selector.styleId.substring(1)}"></style>`);
       $('head').append($style);
     }
 
@@ -239,10 +271,8 @@ import Options from "../../gemini-pro/src/Options";
     let codeMaxHeightCss = '';
     if (config.page.codeMaxHeight) {
       const maxH = toPxVal(config.page.codeMaxHeight);
-      // 作用于 code-block 内部的 pre 标签
-      // 强制 display: block 以确保 scrollbar 能正常出现
       codeMaxHeightCss = `
-        .formatted-code-block-internal-container pre {
+        ${selector.formattedCodeBlock} {
             max-height: ${maxH} !important;
             overflow-y: auto !important;
             display: block !important;
@@ -266,36 +296,36 @@ import Options from "../../gemini-pro/src/Options";
       }
       
       /* 聊天对话容器 */
-      #chat-history > .chat-history {
+      ${selector.chatHistory} {
         padding: 16px ${chatRightPadding} 20px ${chatLeftPadding} !important;
       }
       /* 聊天对话 Gem 信息 */
-      #chat-history > .chat-history > .bot-info-card-container {
+      ${selector.botInfoCardContainer} {
         padding: 0 !important;
       }
       /* 解决修改 Gem 信息 padding 后不居中问题 */
-      bot-info-card > .bot-info-card-container {
+      ${selector.botInfoCardWrapper} {
         align-items: center !important;
       }
       
       /* 用户说 */
-      user-query {
+      ${selector.userQuery} {
         max-width: 100% !important;
       }
-      user-query-content > .user-query-container {
+      ${selector.userQueryContainer} {
         max-width: 50% !important;
       }
       /* AI 说 */
-      .conversation-container {
+      ${selector.conversationContainer} {
         max-width: 100% !important;
       }
       
       /* 聊天输入边距 */
-      input-container {
+      ${selector.inputContainer} {
         padding: 0 ${chatRightPadding} ${chatBottomPadding} ${chatLeftPadding} !important;
       }
       /* 聊天输入最大宽度 */
-      .input-area-container {
+      ${selector.inputAreaContainer} {
         max-width: 100% !important;
       }
 
@@ -303,19 +333,19 @@ import Options from "../../gemini-pro/src/Options";
       
       /* 段落 (P)：只控制下边距 */
       ${config.page.pBottomSpacing ? `
-        message-content .markdown p {
+        ${selector.messageContent} p {
           margin-bottom: ${pBottom} !important;
         }
       ` : ''}
 
       /* 标题 (H1-H6)：控制上下边距 */
       ${config.page.hTopSpacing || config.page.hBottomSpacing ? `
-        message-content .markdown h1,
-        message-content .markdown h2,
-        message-content .markdown h3,
-        message-content .markdown h4,
-        message-content .markdown h5,
-        message-content .markdown h6 {
+        ${selector.messageContent} h1,
+        ${selector.messageContent} h2,
+        ${selector.messageContent} h3,
+        ${selector.messageContent} h4,
+        ${selector.messageContent} h5,
+        ${selector.messageContent} h6 {
           ${config.page.hTopSpacing ? `margin-top: ${hTop} !important;` : ''}
           ${config.page.hBottomSpacing ? `margin-bottom: ${hBottom} !important;` : ''}
         }
@@ -323,8 +353,8 @@ import Options from "../../gemini-pro/src/Options";
 
       /* 列表整体 (UL/OL)：控制上下边距 */
       ${config.page.ulTopSpacing || config.page.ulBottomSpacing ? `
-        message-content .markdown ul,
-        message-content .markdown ol {
+        ${selector.messageContent} ul,
+        ${selector.messageContent} ol {
           ${config.page.ulTopSpacing ? `margin-top: ${ulTop} !important;` : ''}
           ${config.page.ulBottomSpacing ? `margin-bottom: ${ulBottom} !important;` : ''}
         }
@@ -332,10 +362,10 @@ import Options from "../../gemini-pro/src/Options";
 
       /* 列表项 (LI)：控制上下边距 */
       ${config.page.liTopSpacing || config.page.liBottomSpacing ? `
-        message-content .markdown ul li,
-        message-content .markdown ol li,
-        message-content .markdown ul li > p,
-        message-content .markdown ol li > p {
+        ${selector.messageContent} ul li,
+        ${selector.messageContent} ol li,
+        ${selector.messageContent} ul li > p,
+        ${selector.messageContent} ol li > p {
           ${config.page.liTopSpacing ? `margin-top: ${liTop} !important;` : ''}
           ${config.page.liBottomSpacing ? `margin-bottom: ${liBottom} !important;` : ''}
         }
@@ -343,8 +373,8 @@ import Options from "../../gemini-pro/src/Options";
 
       /* 表格 (Table) 间距及滚动控制 */
       ${config.page.tableBottomPadding !== '' ? `
-        .horizontal-scroll-wrapper,
-        .horizontal-scroll-wrapper > .table-block-component {
+        ${selector.horizontalScrollWrapper},
+        ${selector.tableBlockComponent} {
           overflow-x: auto !important;
           padding-bottom: ${tableBottom} !important;
         }
@@ -352,10 +382,10 @@ import Options from "../../gemini-pro/src/Options";
 
       /* 代码块行高 (同时控制外层容器和内层 span) */
       ${config.page.codeLineHeight ? `
-        .code-container,
-        .code-container pre,
-        .code-container code,
-        .code-container span {
+        ${selector.codeContainer},
+        ${selector.codeContainer} pre,
+        ${selector.codeContainer} code,
+        ${selector.codeContainer} span {
           line-height: ${codeLH} !important;
         }
       ` : ''}
@@ -371,11 +401,11 @@ import Options from "../../gemini-pro/src/Options";
       // 需要修改变量的所有目标元素
       const targets = [
         // 侧边栏容器
-        document.querySelector('bard-sidenav-container[data-test-id="bard-sidenav-container"]'),
+        document.querySelector(selector.sidenavContainer),
         // 侧边栏
-        document.querySelector('bard-sidenav'),
+        document.querySelector(selector.sidenav),
         // 侧边栏内容
-        document.querySelector('side-navigation-content')
+        document.querySelector(selector.sideNavigationContent)
       ];
 
       targets.forEach(el => {
@@ -388,9 +418,9 @@ import Options from "../../gemini-pro/src/Options";
     } else {
       // 如果用户清空了设置，移除所有强制修改
       const targets = [
-        document.querySelector('bard-sidenav-container[data-test-id="bard-sidenav-container"]'),
-        document.querySelector('bard-sidenav'),
-        document.querySelector('side-navigation-content')
+        document.querySelector(selector.sidenavContainer),
+        document.querySelector(selector.sidenav),
+        document.querySelector(selector.sideNavigationContent)
       ];
 
       targets.forEach(el => {
@@ -400,9 +430,7 @@ import Options from "../../gemini-pro/src/Options";
         }
       });
     }
-
-
-  };
+  }
 
   /**
    * 应用配置
@@ -430,9 +458,9 @@ import Options from "../../gemini-pro/src/Options";
 
     const btn =
       // 代码块右上角的复制按钮
-      target.closest('button.copy-button')
+      target.closest(selector.copyButton)
       // 回答底部的复制按钮组件
-      || target.closest('copy-button');
+      || target.closest(selector.copyComponent);
 
     if (btn) {
       isNativeCopyBtnClick = true;
@@ -458,7 +486,6 @@ import Options from "../../gemini-pro/src/Options";
       if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
 
       // 如果选区完全在代码块内部（Code Block），也不做处理
-      // 查找选区的公共祖先，看它是否在 pre 或 .code-block-component 内
       let commonNode = selection.getRangeAt(0).commonAncestorContainer;
       // 如果是文本节点，取其父元素
       if (commonNode.nodeType === 3) {
@@ -466,7 +493,7 @@ import Options from "../../gemini-pro/src/Options";
       }
       const parentEl = commonNode as HTMLElement;
       // 检查是否在代码块容器中
-      if (parentEl.closest('pre') || parentEl.closest('.code-block-component')) {
+      if (parentEl.closest(selector.pre) || parentEl.closest(selector.codeBlockComponent)) {
         // 纯代码块内容复制，不执行空行合并
         return;
       }
@@ -482,7 +509,7 @@ import Options from "../../gemini-pro/src/Options";
       tempDiv.appendChild(fragment);
 
       // 保护代码块：查找 <pre>
-      const codeBlocks = tempDiv.querySelectorAll('pre');
+      const codeBlocks = tempDiv.querySelectorAll(selector.pre);
       const placeholders = [];
 
       codeBlocks.forEach((block, index) => {
@@ -527,12 +554,12 @@ import Options from "../../gemini-pro/src/Options";
   // 定义点击设置时的回调函数
   const onSettingsClick = () => {
     // 获取配置值 > 页面实时计算值 > 兜底默认值
-    const getVal = (key: string, selector: string, prop: any, fallback: string) => {
+    const getVal = (key: string, selectorStr: string, prop: any, fallback: string) => {
       // 如果有配置值，直接使用（保持用户输入的原样）
       if (config.page[key]) return config.page[key];
 
       // 尝试从 DOM 获取当前计算样式（浏览器通常返回 px）
-      const el = document.querySelector(selector);
+      const el = document.querySelector(selectorStr);
       if (el) {
         return getComputedStyle(el)[prop];
       }
@@ -548,22 +575,22 @@ import Options from "../../gemini-pro/src/Options";
 
     // 获取用于显示在 Input 框中的值
     // 默认值参考：s=8px, h-top=1.75rem, h-bottom=8px, li=8px
-    const pBottom = getVal('pBottomSpacing', 'message-content .markdown p', 'marginBottom', '');
-    const hTop = getVal('hTopSpacing', 'message-content .markdown h2', 'marginTop', '1.75rem');
-    const hBottom = getVal('hBottomSpacing', 'message-content .markdown h2', 'marginBottom', '8px');
+    const pBottom = getVal('pBottomSpacing', `${selector.messageContent} p`, 'marginBottom', '');
+    const hTop = getVal('hTopSpacing', `${selector.messageContent} h2`, 'marginTop', '1.75rem');
+    const hBottom = getVal('hBottomSpacing', `${selector.messageContent} h2`, 'marginBottom', '8px');
 
     // UL/OL 默认通常是 1em，这里兜底给 16px（1rem）
-    const ulTop = getVal('ulTopSpacing', 'message-content .markdown ul', 'marginTop', '1rem');
-    const ulBottom = getVal('ulBottomSpacing', 'message-content .markdown ul', 'marginBottom', '1rem');
+    const ulTop = getVal('ulTopSpacing', `${selector.messageContent} ul`, 'marginTop', '1rem');
+    const ulBottom = getVal('ulBottomSpacing', `${selector.messageContent} ul`, 'marginBottom', '1rem');
 
-    const liTop = getVal('liTopSpacing', 'message-content .markdown li', 'marginTop', '8px');
-    const liBottom = getVal('liBottomSpacing', 'message-content .markdown li', 'marginBottom', '8px');
+    const liTop = getVal('liTopSpacing', `${selector.messageContent} li`, 'marginTop', '8px');
+    const liBottom = getVal('liBottomSpacing', `${selector.messageContent} li`, 'marginBottom', '8px');
 
     // 表格下边距
-    const tableBottom = getVal('tableBottomPadding', '.horizontal-scroll-wrapper', 'paddingBottom', '0px');
+    const tableBottom = getVal('tableBottomPadding', selector.horizontalScrollWrapper, 'paddingBottom', '0px');
 
     // 代码块行高：优先获取 code 标签的行高，比 span 更能反映块级属性
-    const codeLH = getVal('codeLineHeight', '.code-container code', 'lineHeight', '1.5');
+    const codeLH = getVal('codeLineHeight', `${selector.codeContainer} code`, 'lineHeight', '1.5');
     // 代码块最大高度
     const codeMaxH = config.page.codeMaxHeight;
 
@@ -899,19 +926,17 @@ import Options from "../../gemini-pro/src/Options";
    * 将设置按钮嵌入到页面顶部导航栏
    */
   const mountToolbarButton = () => {
-    const btnId = 'gemini-pro-toolbar-btn';
-
     // 如果按钮已经存在，直接返回
-    if ($(`#${btnId}`).length > 0) return;
+    if ($(selector.toolbarBtn).length > 0) return;
 
     // 寻找容器：使用 .first() 确保只操作第一个匹配的容器
-    const $container = $('div.right-section .buttons-container').first();
+    const $container = $(selector.rightSectionContainer).first();
 
     // 如果容器不存在，直接返回
     if ($container.length === 0) return;
 
     const $btn = $(`
-    <button id="${btnId}" title="Gemini Pro 设置">
+    <button id="${selector.toolbarBtn.substring(1)}" title="Gemini Pro 设置">
       <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
         <path d="M440-120v-240h80v80h320v80H520v80h-80Zm-320-80v-80h240v80H120Zm160-160v-80H120v-80h160v-80h80v240h-80Zm160-80v-80h400v80H440Zm160-160v-240h80v80h160v80H680v80h-80Zm-480-80v-80h400v80H120Z"/>
       </svg>
@@ -929,7 +954,7 @@ import Options from "../../gemini-pro/src/Options";
     // 首次运行时显示设置入口提示
     if (!Store.get('hasShownButtonHint')) {
       setTimeout(() => {
-        layer.tips('Gemini Pro 设置入口在这里', `#${btnId}`, {
+        layer.tips('Gemini Pro 设置入口在这里', selector.toolbarBtn, {
           tips: [3, '#009688'],
           time: 5000,
           anim: 5
