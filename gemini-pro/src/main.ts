@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gemini Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.3.0
+// @version      0.4.0
 // @description  增强 Gemini 对话界面
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -43,13 +43,14 @@ import Options from "../../gemini-pro/src/Options";
     .layui-layer-ico5{background-position:-150px 0}
     .layui-layer-ico6{background-position:-180px 0}
 
-    /* === 设置入口：嵌入式按钮样式 === */
+    /* 设置按钮 */
     #gemini-pro-toolbar-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       box-sizing: border-box;
-      width: 40px; /* 标准 Material Icon Button 大小 */
+      /* 标准 Material Icon Button 大小 */
+      width: 40px;
       height: 40px;
       border: none;
       outline: none;
@@ -58,11 +59,12 @@ import Options from "../../gemini-pro/src/Options";
       color: #444746;
       border-radius: 50%;
       cursor: pointer;
-      margin-right: 4px; /* 与右侧原有图标保持一点距离 */
+      /* 与右侧原有图标保持一点距离 */
+      margin-right: 4px;
       transition: background-color 0.15s cubic-bezier(0.4, 0.0, 0.2, 1);
     }
     
-    /* 暗黑模式适配 (尝试匹配 Gemini 的颜色变量或通用深色) */
+    /* 暗黑模式适配 */
     @media (prefers-color-scheme: dark) {
       #gemini-pro-toolbar-btn {
         color: #e3e3e3;
@@ -113,17 +115,19 @@ import Options from "../../gemini-pro/src/Options";
     hideInputShadow: false,
     // 复制时合并多余换行
     trimCopyNewline: false,
-    // 注意：移除 fabPos，因为不再需要悬浮按钮位置
-    // 默认边距
     page: {
+      // 聊天对话容器左边距
       chatLeftPadding: '10%',
+      // 聊天对话容器右边距
       chatRightPadding: '10%',
+      // 聊天输入容器底边距
       chatBottomPadding: '',
-      // 新增：Markdown 内容间距设置 (P 只设下边距，H/LI 设上下边距)
+      // Markdown 内容底边距
       pBottomSpacing: '',
+      // 标题上下间距
       hTopSpacing: '',
       hBottomSpacing: '',
-      // 新增：UL/OL 列表整体间距
+      // UL/OL 列表整体间距
       ulTopSpacing: '',
       ulBottomSpacing: '',
       // LI 列表项间距
@@ -133,9 +137,11 @@ import Options from "../../gemini-pro/src/Options";
       tableBottomPadding: '0px',
       // 代码块行高
       codeLineHeight: '',
-      // 代码块最大高度 (替代原最大行数)
+      // 代码块最大高度
       codeMaxHeight: ''
-    }
+    },
+    // 侧边栏宽度
+    sidebarWidth: ''
   }
   const STORE_CONF_KEY = 'config';
 
@@ -145,18 +151,17 @@ import Options from "../../gemini-pro/src/Options";
   config.page = {...defaultConfig.page, ...(config.page || {})};
 
   /**
-   * 辅助函数：确保 CSS 值带有单位 (默认 px)
+   * 将值转换为带 px 的值
    */
-  const toCssVal = (val) => {
+  const toPxVal = (val) => {
     if (!val) return '0px';
     val = String(val).trim();
-    // 纯数字补 px
     if (/^\d+$/.test(val)) return val + 'px';
     return val;
   };
 
   /**
-   * 应用页面宽度样式 (核心修复版)
+   * 应用页面宽度样式
    */
   const applyPageStyle = () => {
     const styleId = 'gemini-pro-page-style';
@@ -172,26 +177,26 @@ import Options from "../../gemini-pro/src/Options";
 
     // 计算并限制总边距不超过 80%
     const winWidth = $(window).width() || window.innerWidth || 0;
-    // 定义最大总边距 (80%)
+    // 最大总边距
     const maxTotalPadding = winWidth * 0.8;
 
-    // 内部辅助：统一转像素
-    const parseToPx = (val) => {
+    // 将值转换为像素（支持百分比和数字）
+    const convertToPixels = (val) => {
       if (!val) return 0;
       val = String(val).trim();
-      // 如果是百分比
+      // 处理百分比
       if (val.endsWith('%')) {
         return (parseFloat(val) / 100) * winWidth;
       }
-      // 否则视为数字或 px
+      // 处理数字或像素值
       return parseFloat(val) || 0;
     };
 
-    let leftPx = parseToPx(leftRaw);
-    let rightPx = parseToPx(rightRaw);
+    let leftPx = convertToPixels(leftRaw);
+    let rightPx = convertToPixels(rightRaw);
     const totalPx = leftPx + rightPx;
 
-    // 判断是否超过阈值 (需确保 width > 0 避免除以 0)
+    // 判断是否超过阈值
     if (winWidth > 0 && totalPx > maxTotalPadding) {
       // 计算缩放系数
       const scale = maxTotalPadding / totalPx;
@@ -205,35 +210,35 @@ import Options from "../../gemini-pro/src/Options";
       rightRaw = rightPx + 'px';
       console.warn(`Gemini Pro: Chat padding exceeded limit, adjusted to ${leftRaw} (left) and ${rightRaw} (right)`);
     } else {
-      // 未超限，使用常规格式化 (补全单位)
-      leftRaw = toCssVal(leftRaw);
-      rightRaw = toCssVal(rightRaw);
+      // 未超限，使用常规格式化
+      leftRaw = toPxVal(leftRaw);
+      rightRaw = toPxVal(rightRaw);
     }
 
     // 底边距不需要参与宽度计算逻辑，直接格式化
-    bottomRaw = toCssVal(bottomRaw);
+    bottomRaw = toPxVal(bottomRaw);
 
     const chatLeftPadding = leftRaw;
     const chatRightPadding = rightRaw;
     const chatBottomPadding = bottomRaw;
 
     // 处理 Markdown 间距配置
-    const pBottom = toCssVal(config.page.pBottomSpacing);
-    const hTop = toCssVal(config.page.hTopSpacing);
-    const hBottom = toCssVal(config.page.hBottomSpacing);
-    const ulTop = toCssVal(config.page.ulTopSpacing);
-    const ulBottom = toCssVal(config.page.ulBottomSpacing);
-    const liTop = toCssVal(config.page.liTopSpacing);
-    const liBottom = toCssVal(config.page.liBottomSpacing);
-    const tableBottom = toCssVal(config.page.tableBottomPadding);
+    const pBottom = toPxVal(config.page.pBottomSpacing);
+    const hTop = toPxVal(config.page.hTopSpacing);
+    const hBottom = toPxVal(config.page.hBottomSpacing);
+    const ulTop = toPxVal(config.page.ulTopSpacing);
+    const ulBottom = toPxVal(config.page.ulBottomSpacing);
+    const liTop = toPxVal(config.page.liTopSpacing);
+    const liBottom = toPxVal(config.page.liBottomSpacing);
+    const tableBottom = toPxVal(config.page.tableBottomPadding);
 
-    // 代码行高：不使用 toCssVal，允许纯数字作为倍数
+    // 代码行高：不使用 toPxVal，允许纯数字作为倍数
     const codeLH = config.page.codeLineHeight ? String(config.page.codeLineHeight).trim() : '';
 
     // 代码块最大高度 CSS 生成逻辑
     let codeMaxHeightCss = '';
     if (config.page.codeMaxHeight) {
-      const maxH = toCssVal(config.page.codeMaxHeight);
+      const maxH = toPxVal(config.page.codeMaxHeight);
       // 作用于 code-block 内部的 pre 标签
       // 强制 display: block 以确保 scrollbar 能正常出现
       codeMaxHeightCss = `
@@ -294,64 +299,109 @@ import Options from "../../gemini-pro/src/Options";
         max-width: 100% !important;
       }
 
-      /* === Markdown 内容间距调整 === */
+      /* Markdown 内容间距调整 */
       
       /* 段落 (P)：只控制下边距 */
       ${config.page.pBottomSpacing ? `
-      message-content .markdown p {
-        margin-bottom: ${pBottom} !important;
-      }` : ''}
+        message-content .markdown p {
+          margin-bottom: ${pBottom} !important;
+        }
+      `: ''}
 
       /* 标题 (H1-H6)：控制上下边距 */
       ${config.page.hTopSpacing || config.page.hBottomSpacing ? `
-      message-content .markdown h1,
-      message-content .markdown h2,
-      message-content .markdown h3,
-      message-content .markdown h4,
-      message-content .markdown h5,
-      message-content .markdown h6 {
-        ${config.page.hTopSpacing ? `margin-top: ${hTop} !important;` : ''}
-        ${config.page.hBottomSpacing ? `margin-bottom: ${hBottom} !important;` : ''}
-      }` : ''}
+        message-content .markdown h1,
+        message-content .markdown h2,
+        message-content .markdown h3,
+        message-content .markdown h4,
+        message-content .markdown h5,
+        message-content .markdown h6 {
+          ${config.page.hTopSpacing ? `margin-top: ${hTop} !important;` : ''}
+          ${config.page.hBottomSpacing ? `margin-bottom: ${hBottom} !important;` : ''}
+        }
+      ` : ''}
 
       /* 列表整体 (UL/OL)：控制上下边距 */
       ${config.page.ulTopSpacing || config.page.ulBottomSpacing ? `
-      message-content .markdown ul,
-      message-content .markdown ol {
-        ${config.page.ulTopSpacing ? `margin-top: ${ulTop} !important;` : ''}
-        ${config.page.ulBottomSpacing ? `margin-bottom: ${ulBottom} !important;` : ''}
-      }` : ''}
+        message-content .markdown ul,
+        message-content .markdown ol {
+          ${config.page.ulTopSpacing ? `margin-top: ${ulTop} !important;` : ''}
+          ${config.page.ulBottomSpacing ? `margin-bottom: ${ulBottom} !important;` : ''}
+        }
+      ` : ''}
 
       /* 列表项 (LI)：控制上下边距 */
       ${config.page.liTopSpacing || config.page.liBottomSpacing ? `
-      message-content .markdown ul li,
-      message-content .markdown ol li,
-      message-content .markdown ul li > p,
-      message-content .markdown ol li > p {
-        ${config.page.liTopSpacing ? `margin-top: ${liTop} !important;` : ''}
-        ${config.page.liBottomSpacing ? `margin-bottom: ${liBottom} !important;` : ''}
-      }` : ''}
+        message-content .markdown ul li,
+        message-content .markdown ol li,
+        message-content .markdown ul li > p,
+        message-content .markdown ol li > p {
+          ${config.page.liTopSpacing ? `margin-top: ${liTop} !important;` : ''}
+          ${config.page.liBottomSpacing ? `margin-bottom: ${liBottom} !important;` : ''}
+        }
+      ` : ''}
 
       /* 表格 (Table) 间距及滚动控制 */
       ${config.page.tableBottomPadding !== '' ? `
-      .horizontal-scroll-wrapper,
-      .horizontal-scroll-wrapper > .table-block-component {
-        overflow-x: auto !important;
-        padding-bottom: ${tableBottom} !important;
-      }` : ''}
+        .horizontal-scroll-wrapper,
+        .horizontal-scroll-wrapper > .table-block-component {
+          overflow-x: auto !important;
+          padding-bottom: ${tableBottom} !important;
+        }
+      ` : ''}
 
       /* 代码块行高 (同时控制外层容器和内层 span) */
       ${config.page.codeLineHeight ? `
-      .code-container,
-      .code-container pre,
-      .code-container code,
-      .code-container span {
-        line-height: ${codeLH} !important;
-      }` : ''}
+        .code-container,
+        .code-container pre,
+        .code-container code,
+        .code-container span {
+          line-height: ${codeLH} !important;
+        }
+      ` : ''}
       
       /* 代码块最大高度 (滚动条) */
       ${codeMaxHeightCss}
     `);
+
+    // 处理侧边栏宽度
+    if (config.sidebarWidth) {
+      const val = toPxVal(config.sidebarWidth);
+
+      // 需要修改变量的所有目标元素
+      const targets = [
+        // 侧边栏容器
+        document.querySelector('bard-sidenav-container[data-test-id="bard-sidenav-container"]'),
+        // 侧边栏
+        document.querySelector('bard-sidenav'),
+        // 侧边栏内容
+        document.querySelector('side-navigation-content')
+      ];
+
+      targets.forEach(el => {
+        if (el) {
+          // 设置展开宽度为自定义值
+          (el as HTMLElement).style.setProperty('--bard-sidenav-open-width', val, 'important');
+        }
+      });
+
+    } else {
+      // 如果用户清空了设置，移除所有强制修改
+      const targets = [
+        document.querySelector('bard-sidenav-container[data-test-id="bard-sidenav-container"]'),
+        document.querySelector('bard-sidenav'),
+        document.querySelector('side-navigation-content')
+      ];
+
+      targets.forEach(el => {
+        if (el) {
+          (el as HTMLElement).style.removeProperty('--bard-sidenav-open-width');
+          (el as HTMLElement).style.removeProperty('--bard-sidenav-closed-width');
+        }
+      });
+    }
+
+
   };
 
   /**
@@ -367,7 +417,6 @@ import Options from "../../gemini-pro/src/Options";
   applyConfig();
 
   // 监听窗口大小变化，动态重新计算边距限制
-  // (避免大屏幕下设置的 px 值在小屏幕上占满全屏)
   $(window).on('resize', () => {
     applyPageStyle();
   });
@@ -375,14 +424,15 @@ import Options from "../../gemini-pro/src/Options";
   // 标记是否点击了Gemini原生的复制按钮（代码块按钮 或 底部回答按钮）
   let isNativeCopyBtnClick = false;
 
-  // 监听点击事件 (捕获阶段，确保先于页面逻辑执行)
+  // 监听点击事件，用于检测是否点击了原生复制按钮
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
 
-    // 1. 代码块右上角的复制按钮 (class="copy-button")
-    // 2. 回答底部的复制按钮组件 (tag="copy-button" 或 attribute data-test-id="copy-button")
-    const btn = target.closest('button.copy-button') ||
-      target.closest('copy-button');
+    const btn =
+      // 代码块右上角的复制按钮
+      target.closest('button.copy-button')
+      // 回答底部的复制按钮组件
+      || target.closest('copy-button');
 
     if (btn) {
       isNativeCopyBtnClick = true;
@@ -393,21 +443,21 @@ import Options from "../../gemini-pro/src/Options";
     }
   }, true);
 
-  // 监听复制事件 (使用 { capture: true } 以在页面脚本之前拦截)
+  // 监听复制事件（使用 { capture: true } 以在页面脚本之前拦截）
   document.addEventListener('copy', (e) => {
-      // 0. 全局开关校验
+      // 全局开关校验
       if (!config.trimCopyNewline) return;
 
-      // 1. 如果是点击了 Gemini 原生的复制按钮，放行 (不做 preventDefault)
+      // 如果是点击了 Gemini 原生的复制按钮，放行
       if (isNativeCopyBtnClick) {
-        isNativeCopyBtnClick = false; // 消费掉标记
+        isNativeCopyBtnClick = false;
         return;
       }
 
       const selection = window.getSelection();
       if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
 
-      // 2. 如果选区完全在代码块内部（Code Block），也不做处理
+      // 如果选区完全在代码块内部（Code Block），也不做处理
       // 查找选区的公共祖先，看它是否在 pre 或 .code-block-component 内
       let commonNode = selection.getRangeAt(0).commonAncestorContainer;
       // 如果是文本节点，取其父元素
@@ -421,8 +471,7 @@ import Options from "../../gemini-pro/src/Options";
         return;
       }
 
-      // 3. 执行混合内容的智能处理（保护代码块结构，合并普通文本空行）
-      // 关键修复：阻止后续事件处理，并清除已存在的(可能由页面生成的)数据
+      // 执行混合内容的智能处理（保护代码块结构，合并普通文本空行）
       e.preventDefault();
       e.stopImmediatePropagation();
 
@@ -466,7 +515,7 @@ import Options from "../../gemini-pro/src/Options";
         text = text.replace(item.id, item.content);
       });
 
-      // 4. 彻底清空剪贴板数据 (防止 text/html 残留)
+      // 彻底清空剪贴板数据并设置新的内容
       if (e.clipboardData) {
         e.clipboardData.clearData();
         e.clipboardData.setData('text/plain', text);
@@ -477,18 +526,18 @@ import Options from "../../gemini-pro/src/Options";
 
   // 定义点击设置时的回调函数
   const onSettingsClick = () => {
-    // 辅助函数：获取配置值 > 页面实时计算值 > 兜底默认值
+    // 获取配置值 > 页面实时计算值 > 兜底默认值
     const getVal = (key: string, selector: string, prop: any, fallback: string) => {
-      // 1. 如果有配置值，直接使用 (保持用户输入的原样)
+      // 如果有配置值，直接使用（保持用户输入的原样）
       if (config.page[key]) return config.page[key];
 
-      // 2. 尝试从 DOM 获取当前计算样式 (浏览器通常返回 px)
+      // 尝试从 DOM 获取当前计算样式（浏览器通常返回 px）
       const el = document.querySelector(selector);
       if (el) {
         return getComputedStyle(el)[prop];
       }
 
-      // 3. 使用兜底默认值，如果是 rem 则转换为 px
+      // 使用兜底默认值，如果是 rem 则转换为 px
       if (fallback && fallback.includes('rem')) {
         const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
         return (parseFloat(fallback) * rootFontSize) + 'px';
@@ -503,7 +552,7 @@ import Options from "../../gemini-pro/src/Options";
     const hTop = getVal('hTopSpacing', 'message-content .markdown h2', 'marginTop', '1.75rem');
     const hBottom = getVal('hBottomSpacing', 'message-content .markdown h2', 'marginBottom', '8px');
 
-    // UL/OL 默认通常是 1em，这里兜底给 16px (1rem)
+    // UL/OL 默认通常是 1em，这里兜底给 16px（1rem）
     const ulTop = getVal('ulTopSpacing', 'message-content .markdown ul', 'marginTop', '1rem');
     const ulBottom = getVal('ulBottomSpacing', 'message-content .markdown ul', 'marginBottom', '1rem');
 
@@ -576,6 +625,14 @@ import Options from "../../gemini-pro/src/Options";
                     <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">聊天下</label>
                     <div class="layui-input-inline" style="width: 90px;">
                       <input type="text" name="chatBottomPadding" value="${config.page.chatBottomPadding}" placeholder="如 20px" autocomplete="off" class="layui-input">
+                    </div>
+                  </div>
+                </div>
+                <div class="layui-form-item">
+                  <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 70px; padding-left: 5px; padding-right: 5px;">侧边栏宽</label>
+                    <div class="layui-input-inline" style="width: 90px;">
+                      <input type="text" name="sidebarWidth" value="${config.sidebarWidth}" placeholder="如 300px" autocomplete="off" class="layui-input">
                     </div>
                   </div>
                 </div>
@@ -682,6 +739,40 @@ import Options from "../../gemini-pro/src/Options";
     // layer.open 中 radio、checkbox、select 需要 render 才能显示
     layui.use(['form', 'element'], () => {
       const form = layui.form;
+
+      // 验证并修正侧边栏宽度
+      const validateSidebarWidth = (input: any): string => {
+        // 如果输入为空，直接返回空（表示使用默认/不修改）
+        const strVal = String(input).trim();
+        if (strVal === '') return '';
+
+        const winWidth = window.innerWidth;
+        let pxVal = 0;
+
+        // 解析数值（支持百分比和 px）
+        if (strVal.endsWith('%')) {
+          const pct = parseFloat(strVal);
+          if (!isNaN(pct)) {
+            pxVal = (pct / 100) * winWidth;
+          }
+        } else {
+          pxVal = parseFloat(strVal);
+        }
+
+        // 如果解析失败（非数字），返回空
+        if (isNaN(pxVal)) return '';
+
+        // 边界检查
+        const MIN_PX = 200;
+        const MAX_PX = winWidth * 0.5;
+
+        if (pxVal < MIN_PX) pxVal = MIN_PX;
+        if (pxVal > MAX_PX) pxVal = MAX_PX;
+
+        // 返回修正后的 px 值字符串
+        return Math.round(pxVal) + 'px';
+      };
+
       form.render();
       // 监听复选框变更
       form.on('checkbox(item-switch)', (data: any) => {
@@ -692,7 +783,7 @@ import Options from "../../gemini-pro/src/Options";
         applyConfig();
       });
 
-      // 动态监听输入框变化 (包含原来的边距和新增的内容间距)
+      // 动态监听输入框变化
       const inputSelector = [
         'input[name="chatLeftPadding"]',
         'input[name="chatRightPadding"]',
@@ -706,12 +797,25 @@ import Options from "../../gemini-pro/src/Options";
         'input[name="liBottomSpacing"]',
         'input[name="tableBottomPadding"]',
         'input[name="codeLineHeight"]',
-        'input[name="codeMaxHeight"]'
+        'input[name="codeMaxHeight"]',
+        'input[name="sidebarWidth"]'
       ].join(', ');
 
       $(inputSelector).on('input', function () {
-        // 获取当前输入框的 name 和 value，更新内存中的配置
-        config.page[$(this).attr('name')] = $(this).val();
+        const $this = $(this);
+        const name = $this.attr('name');
+        const val = $this.val();
+
+        // 修改侧边栏宽度的处理逻辑
+        if (name === 'sidebarWidth') {
+          // 使用验证函数修正数值
+          const validatedVal = validateSidebarWidth(val);
+
+          // 保存修正后的值
+          config[name] = validatedVal;
+        } else {
+          config.page[name] = val; // 存入 config.page
+        }
         // 持久化保存
         Store.set(STORE_CONF_KEY, JSON.stringify(config));
         // 实时应用样式
@@ -743,7 +847,7 @@ import Options from "../../gemini-pro/src/Options";
           num = 0;
         }
 
-        // 其他字段默认补 px (行高除外)
+        // 其他字段默认补 px（行高除外）
         const name = $this.attr('name');
         if (!unit && name !== 'codeLineHeight') {
           unit = 'px';
@@ -765,15 +869,34 @@ import Options from "../../gemini-pro/src/Options";
           num = parseFloat(num.toFixed(1));
         }
 
+        // 针对侧边栏宽度的滚轮验证
+        let finalValStr = num + unit;
+        if (name === 'sidebarWidth') {
+          // 将计算出的值传入验证函数，得到修正后的值
+          finalValStr = validateSidebarWidth(finalValStr);
+        }
+
         // 更新输入框并手动触发 input 事件以保存和应用
-        $this.val(num + unit);
+        $this.val(finalValStr);
         $this.trigger('input');
+      });
+
+      // 侧边栏输入框失去焦点时，修正显示值
+      $('input[name="sidebarWidth"]').on('blur', function() {
+        const $this =$(this);
+        // 获取最终保存的配置值（一定是合法的，比如 200px）
+        const finalVal = config.sidebarWidth;
+
+        // 只有当输入框当前显示的内容与最终保存值不一致时才修正
+        if ($this.val() !== finalVal) {
+          $this.val(finalVal);
+        }
       });
     });
   }
 
   /**
-   * 将设置按钮嵌入到页面顶部导航栏 (替代原有的悬浮球逻辑)
+   * 将设置按钮嵌入到页面顶部导航栏
    */
   const mountToolbarButton = () => {
     const btnId = 'gemini-pro-toolbar-btn';
@@ -782,17 +905,15 @@ import Options from "../../gemini-pro/src/Options";
     if (document.getElementById(btnId)) return;
 
     // 寻找插入点：
-    // 优先寻找 "studio-sidebar-button" (文件列表图标)
-    // 其次寻找 "pillbox" (PRO 按钮)
+    // 优先寻找 "studio-sidebar-button"（文件列表图标）
+    // 其次寻找 "pillbox"（PRO 按钮）
     let anchorEl = document.querySelector('studio-sidebar-button') || document.querySelector('[data-test-id="pillbox"]');
 
-    if (!anchorEl) return; // 还没加载出来，等待下一次 Observer 触发
+    // 还没加载出来，等待下一次 Observer 触发
+    if (!anchorEl) return;
 
-    // 找到这些按钮的父容器 (也就是 class="buttons-container" 的那个)
-    // 根据结构，这些按钮可能被包裹在内层容器中，我们需要把按钮放到最外层的 buttons-container 的最前面
     const container = anchorEl.closest('.buttons-container');
-
-    // 逻辑：如果找到的容器只有这一个子元素（Wrapper），说明是内层，需要再往上找一级
+    // 如果找到的容器只有这一个子元素（Wrapper），说明是内层，需要再往上找一级
     if (container) {
       // 检查是否是内层包装器
       if (container.children.length === 1 && container.contains(anchorEl)) {
@@ -808,7 +929,7 @@ import Options from "../../gemini-pro/src/Options";
     }
 
     function insertButton(targetContainer) {
-      // 再次检查防止重复 (以防万一)
+      // 再次检查防止重复插入
       if (targetContainer.querySelector(`#${btnId}`)) return;
 
       const $btn = $(`
@@ -825,7 +946,7 @@ import Options from "../../gemini-pro/src/Options";
         onSettingsClick();
       });
 
-      // 插入到容器的第一个位置 (Prepend)
+      // 插入到容器的第一个位置
       $(targetContainer).prepend($btn);
 
       // 首次运行时显示设置入口提示
@@ -847,6 +968,7 @@ import Options from "../../gemini-pro/src/Options";
   // 使用 MutationObserver 监听 DOM 变化，确保 SPA 页面切换/刷新时按钮依然存在
   const observer = new MutationObserver((mutations) => {
     mountToolbarButton();
+    applyPageStyle();
   });
 
   observer.observe(document.body, {
@@ -854,9 +976,8 @@ import Options from "../../gemini-pro/src/Options";
     subtree: true
   });
 
-  // 1. 注册 Tampermonkey 菜单选项 (保留作为备用入口)
+  // 1. 注册 Tampermonkey 菜单选项
   Options.registerAll(onSettingsClick);
-
   // 2. 渲染页面 UI 入口
   mountToolbarButton();
 })();
