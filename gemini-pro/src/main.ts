@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gemini Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.4.0
+// @version      0.4.1
 // @description  增强 Gemini 对话界面
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -534,8 +534,8 @@ import Options from "../../gemini-pro/src/Options";
 
       document.body.removeChild(tempDiv);
 
-      // 合并换行逻辑：每两个换行符替换为一个
-      text = text.replace(/\n\n/g, '\n');
+      // 合并换行逻辑：将连续多个换行符折叠为一个（兼容 contenteditable/Quill 产生的多重空段落）
+      text = text.replace(/\n{2,}/g, '\n');
 
       // 还原代码块
       placeholders.forEach((item) => {

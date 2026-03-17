@@ -328,7 +328,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // ==UserScript==
 // @name         Gemini Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.4.0
+// @version      0.4.1
 // @description  增强 Gemini 对话界面
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -657,8 +657,8 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     var text = tempDiv.innerText;
     document.body.removeChild(tempDiv);
 
-    // 合并换行逻辑：每两个换行符替换为一个
-    text = text.replace(/\n\n/g, '\n');
+    // 合并换行逻辑：将连续多个换行符折叠为一个（兼容 contenteditable/Quill 产生的多重空段落）
+    text = text.replace(/\n{2,}/g, '\n');
 
     // 还原代码块
     placeholders.forEach(function (item) {
@@ -785,6 +785,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 
         // 更新内存中的配置对象
         if (name === 'sidebarWidth') {
+          // 保存修正后的值
           config[name] = validateSidebarWidth(val);
         } else {
           config.page[name] = val;
@@ -982,9 +983,9 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 /******/ 	
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
+/******/ 	__webpack_require__(490);
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	__webpack_require__(172);
-/******/ 	var __webpack_exports__ = __webpack_require__(490);
+/******/ 	var __webpack_exports__ = __webpack_require__(172);
 /******/ 	
 /******/ })()
 ;
