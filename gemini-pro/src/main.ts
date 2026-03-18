@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Gemini Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.4.1
+// @version      0.5.0
 // @description  增强 Gemini 对话界面
 // @author       duanluan
 // @copyright    2025, duanluan (https://github.com/duanluan)
@@ -139,6 +139,9 @@ import Options from "../../gemini-pro/src/Options";
     copyComponent: 'copy-button',
     pre: 'pre',
     codeBlockComponent: '.code-block-component',
+    // 输入框右侧发送/停止按钮
+    sendButton: 'button.send-button',
+    sendStopButton: 'button.send-button.stop',
   };
 
   const defaultConfig = {
@@ -148,6 +151,8 @@ import Options from "../../gemini-pro/src/Options";
     hideInputShadow: false,
     // 复制时合并多余换行
     trimCopyNewline: false,
+    // 回答完成后通知
+    notifyOnAnswerComplete: false,
     page: {
       // 聊天对话容器左边距
       chatLeftPadding: '10%',
@@ -180,8 +185,12 @@ import Options from "../../gemini-pro/src/Options";
 
   // 读取配置
   let savedConfigStr = Store.get(STORE_CONF_KEY);
-  let config = savedConfigStr ? JSON.parse(savedConfigStr) : defaultConfig;
-  config.page = {...defaultConfig.page, ...(config.page || {})};
+  const parsedConfig = savedConfigStr ? JSON.parse(savedConfigStr) : {};
+  let config = {
+    ...defaultConfig,
+    ...parsedConfig,
+    page: {...defaultConfig.page, ...((parsedConfig && parsedConfig.page) || {})}
+  };
 
   /**
    * 将值转换为带 px 的值
@@ -449,12 +458,213 @@ import Options from "../../gemini-pro/src/Options";
     applyPageStyle();
   });
 
+  // 回答完成通知：基于发送按钮 stop/submit 状态变化进行判定
+  const ANSWER_COMPLETE_CONFIRM_DELAY = 1200;
+  const MANUAL_STOP_MARK_DURATION = 3000;
+  let sendButtonObserver: MutationObserver | null = null;
+  let observedSendButton: HTMLButtonElement | null = null;
+  let hasBoundSendButtonOnce = false;
+  let wasGeneratingByButton: boolean | null = null;
+  let hasStartedGenerationRound = false;
+  let manualStopPending = false;
+  let manualStopTimer: number | null = null;
+  let completeConfirmTimer: number | null = null;
+
+  const getSendButton = () => {
+    return document.querySelector(selector.sendButton) as HTMLButtonElement | null;
+  };
+
+  const isGeneratingByButton = () => {
+    const btn = getSendButton();
+    if (!btn) return false;
+
+    // 主判定：class stop/submit
+    if (btn.classList.contains('stop')) return true;
+    if (btn.classList.contains('submit')) return false;
+
+    // 兜底判定：aria-label
+    const ariaLabel = (btn.getAttribute('aria-label') || '').trim();
+    if (ariaLabel.includes('停止回答')) return true;
+    if (ariaLabel.includes('发送')) return false;
+
+    return false;
+  };
+
+  type NotificationPermissionStatus = NotificationPermission | 'unsupported';
+  type NotificationPermissionRequestStatus = NotificationPermissionStatus | 'error';
+  type SystemNotificationSendStatus = 'success' | 'unsupported' | 'default' | 'denied' | 'error';
+
+  const getNotificationPermissionStatus = (): NotificationPermissionStatus => {
+    if (!('Notification' in window)) return 'unsupported';
+    return Notification.permission;
+  };
+
+  const requestNotificationPermissionIfNeeded = async (): Promise<NotificationPermissionRequestStatus> => {
+    const status = getNotificationPermissionStatus();
+
+    if (status === 'unsupported') return status;
+    if (status !== 'default') return status;
+
+    try {
+      return await Notification.requestPermission();
+    } catch (_) {
+      return 'error';
+    }
+  };
+
+  const sendSystemNotification = (title: string, body: string): SystemNotificationSendStatus => {
+    const permission = getNotificationPermissionStatus();
+
+    if (permission === 'unsupported') return 'unsupported';
+    if (permission === 'denied') return 'denied';
+    if (permission === 'default') return 'default';
+
+    try {
+      new Notification(title, {body});
+      return 'success';
+    } catch (_) {
+      return 'error';
+    }
+  };
+
+  const notifyAnswerComplete = () => {
+    // 页面内轻提示始终可用
+    layer.msg('Gemini 回答已完成', {
+      time: 2200,
+      shade: 0
+    });
+
+    const sendResult = sendSystemNotification('Gemini Pro', '回答已完成');
+
+    if (sendResult === 'error') {
+      layer.msg('系统通知发送失败，请查看控制台错误');
+      return;
+    }
+    if (sendResult === 'denied') {
+      layer.msg('系统通知权限已拒绝，仅显示页面内通知');
+      return;
+    }
+    if (sendResult === 'default') {
+      layer.msg('系统通知权限未决定，仅显示页面内通知');
+      return;
+    }
+  };
+
+  const resetAnswerCompleteState = () => {
+    if (completeConfirmTimer !== null) {
+      clearTimeout(completeConfirmTimer);
+      completeConfirmTimer = null;
+    }
+    if (manualStopTimer !== null) {
+      clearTimeout(manualStopTimer);
+      manualStopTimer = null;
+    }
+    hasStartedGenerationRound = false;
+    manualStopPending = false;
+    hasBoundSendButtonOnce = false;
+    wasGeneratingByButton = isGeneratingByButton();
+  };
+
+  const handleGenerationTransition = () => {
+    const isGeneratingNow = isGeneratingByButton();
+
+    // 首次只记录状态，避免页面初始化误报
+    if (wasGeneratingByButton === null) {
+      wasGeneratingByButton = isGeneratingNow;
+      return;
+    }
+
+    // submit -> stop：一轮回答开始
+    if (!wasGeneratingByButton && isGeneratingNow) {
+      hasStartedGenerationRound = true;
+      manualStopPending = false;
+
+      if (completeConfirmTimer !== null) {
+        clearTimeout(completeConfirmTimer);
+        completeConfirmTimer = null;
+      }
+    }
+
+    // stop -> submit：候选完成，延时确认
+    if (wasGeneratingByButton && !isGeneratingNow) {
+      if (completeConfirmTimer !== null) {
+        clearTimeout(completeConfirmTimer);
+      }
+
+      completeConfirmTimer = window.setTimeout(() => {
+        completeConfirmTimer = null;
+
+        // 确认期内若重新进入 stop，视为未完成
+        if (isGeneratingByButton()) return;
+        if (!hasStartedGenerationRound) return;
+
+        const shouldSkipNotify = manualStopPending;
+        manualStopPending = false;
+        hasStartedGenerationRound = false;
+
+        if (shouldSkipNotify || !config.notifyOnAnswerComplete) return;
+        notifyAnswerComplete();
+      }, ANSWER_COMPLETE_CONFIRM_DELAY);
+    }
+
+    wasGeneratingByButton = isGeneratingNow;
+  };
+
+  const observeSendButtonState = () => {
+    const sendBtn = getSendButton();
+    if (sendBtn === observedSendButton) return;
+
+    if (sendButtonObserver) {
+      sendButtonObserver.disconnect();
+      sendButtonObserver = null;
+    }
+
+    observedSendButton = sendBtn;
+    if (!sendBtn) return;
+
+    sendButtonObserver = new MutationObserver(() => {
+      handleGenerationTransition();
+    });
+
+    sendButtonObserver.observe(sendBtn, {
+      attributes: true,
+      attributeFilter: ['class', 'aria-label']
+    });
+
+    // 首次绑定仅做基线初始化，避免页面加载阶段误报
+    if (!hasBoundSendButtonOnce) {
+      hasBoundSendButtonOnce = true;
+      wasGeneratingByButton = isGeneratingByButton();
+      return;
+    }
+
+    // 非首次绑定时，补一次状态同步
+    handleGenerationTransition();
+  };
+
+  const initAnswerCompleteNotifier = () => {
+    resetAnswerCompleteState();
+    observeSendButtonState();
+  };
+
   // 标记是否点击了Gemini原生的复制按钮（代码块按钮 或 底部回答按钮）
   let isNativeCopyBtnClick = false;
 
   // 监听点击事件，用于检测是否点击了原生复制按钮
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement;
+
+    // 如果用户主动点击了 stop 按钮，标记为“手动停止”
+    if (target.closest(selector.sendStopButton)) {
+      manualStopPending = true;
+      if (manualStopTimer !== null) {
+        clearTimeout(manualStopTimer);
+      }
+      manualStopTimer = window.setTimeout(() => {
+        manualStopPending = false;
+        manualStopTimer = null;
+      }, MANUAL_STOP_MARK_DURATION);
+    }
 
     const btn =
       // 代码块右上角的复制按钮
@@ -518,7 +728,7 @@ import Options from "../../gemini-pro/src/Options";
         // 保存原始内容
         placeholders.push({
           id: placeholder,
-          content: block.innerText
+          content: (block as HTMLElement).innerText
         });
         // 替换
         block.textContent = placeholder;
@@ -624,6 +834,7 @@ import Options from "../../gemini-pro/src/Options";
                   <label class="layui-form-label" style="width: 60px;">其他：</label>
                   <div class="layui-input-block" style="margin-left: 90px;">
                     <input type="checkbox" title="剪贴板-删除错误空行" name="trimCopyNewline" lay-filter="item-switch" ${config.trimCopyNewline ? 'checked' : ''}/>
+                    <input type="checkbox" title="回答完成时通知我" name="notifyOnAnswerComplete" lay-filter="item-switch" ${config.notifyOnAnswerComplete ? 'checked' : ''}/>
                   </div>
                 </div>
               </form>
@@ -801,10 +1012,22 @@ import Options from "../../gemini-pro/src/Options";
       };
 
       form.render();
+
       // 监听复选框变更
       form.on('checkbox(item-switch)', (data: any) => {
+        const key = data.elem.name;
         // 更新配置对象
-        config[data.elem.name] = data.elem.checked;
+        config[key] = data.elem.checked;
+
+        if (key === 'notifyOnAnswerComplete') {
+          // 在用户交互场景下请求系统通知权限
+          if (config.notifyOnAnswerComplete) {
+            void requestNotificationPermissionIfNeeded();
+          }
+          // 开关变化时重置状态，避免误报
+          resetAnswerCompleteState();
+        }
+
         // 保存配置
         Store.set(STORE_CONF_KEY, JSON.stringify(config));
         applyConfig();
@@ -987,6 +1210,7 @@ import Options from "../../gemini-pro/src/Options";
     mountTimer = window.setTimeout(() => {
       mountToolbarButton();
       applyPageStyle();
+      observeSendButtonState();
     }, 100);
   });
 
@@ -995,6 +1219,9 @@ import Options from "../../gemini-pro/src/Options";
     childList: true,
     subtree: true
   });
+
+  // 初始化回答完成通知监听
+  initAnswerCompleteNotifier();
 
   // 注册 Tampermonkey 菜单选项
   Options.registerAll(onSettingsClick);
