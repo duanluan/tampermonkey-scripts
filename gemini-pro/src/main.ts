@@ -97,6 +97,14 @@ import Options from "../../gemini-pro/src/Options";
       -webkit-mask: none !important;
       box-shadow: none !important;
     }
+
+    /* 代码块缩进包装节点（只影响显示宽度，不改变文本） */
+    .gemini-pro-indent {
+      display: inline-block;
+      white-space: pre;
+      overflow: hidden;
+      vertical-align: baseline;
+    }
   `);
 
   const selector = {
@@ -122,8 +130,9 @@ import Options from "../../gemini-pro/src/Options";
     messageContent: 'message-content .markdown',
     horizontalScrollWrapper: '.horizontal-scroll-wrapper',
     tableBlockComponent: '.horizontal-scroll-wrapper > .table-block-component',
-    codeContainer: '.code-container',
     formattedCodeBlock: '.formatted-code-block-internal-container pre',
+    // 真实结构：pre > code.code-container
+    formattedCodeContent: '.formatted-code-block-internal-container pre > code.code-container',
 
     // 侧边栏
     sidenavContainer: 'bard-sidenav-container[data-test-id="bard-sidenav-container"]',
@@ -176,7 +185,9 @@ import Options from "../../gemini-pro/src/Options";
       // 代码块行高
       codeLineHeight: '',
       // 代码块最大高度
-      codeMaxHeight: ''
+      codeMaxHeight: '',
+      // 每一级代码缩进的显示宽度（兼容 Tab / 行首空格）
+      codeTabSize: ''
     },
     // 侧边栏宽度
     sidebarWidth: ''
@@ -200,6 +211,20 @@ import Options from "../../gemini-pro/src/Options";
     val = String(val).trim();
     if (/^\d+$/.test(val)) return val + 'px';
     return val;
+  };
+
+  /**
+   * 解析代码缩进宽度配置（每一级缩进宽度，默认按 4 空格为 1 级）
+   */
+  const parseCodeIndentSize = (val): number | null => {
+    if (val === undefined || val === null) return null;
+    const str = String(val).trim();
+    if (!str) return null;
+    if (!/^\d+$/.test(str)) return null;
+
+    const parsed = parseInt(str, 10);
+    if (isNaN(parsed) || parsed <= 0) return null;
+    return parsed;
   };
 
   /**
@@ -285,6 +310,19 @@ import Options from "../../gemini-pro/src/Options";
             max-height: ${maxH} !important;
             overflow-y: auto !important;
             display: block !important;
+        }
+      `;
+    }
+
+    // Tab 缩进宽度兼容（Tab 字符场景）
+    let codeTabSizeCss = '';
+    const codeIndentSize = parseCodeIndentSize(config.page.codeTabSize);
+    if (codeIndentSize !== null) {
+      codeTabSizeCss = `
+        ${selector.formattedCodeBlock},
+        ${selector.formattedCodeContent} {
+          tab-size: ${codeIndentSize} !important;
+          -moz-tab-size: ${codeIndentSize} !important;
         }
       `;
     }
@@ -391,16 +429,18 @@ import Options from "../../gemini-pro/src/Options";
 
       /* 代码块行高 (同时控制外层容器和内层 span) */
       ${config.page.codeLineHeight ? `
-        ${selector.codeContainer},
-        ${selector.codeContainer} pre,
-        ${selector.codeContainer} code,
-        ${selector.codeContainer} span {
+        ${selector.formattedCodeBlock},
+        ${selector.formattedCodeContent},
+        ${selector.formattedCodeContent} span {
           line-height: ${codeLH} !important;
         }
       ` : ''}
       
       /* 代码块最大高度 (滚动条) */
       ${codeMaxHeightCss}
+
+      /* 代码块缩进宽度（Tab 兼容） */
+      ${codeTabSizeCss}
     `);
 
     // 处理侧边栏宽度
@@ -441,6 +481,226 @@ import Options from "../../gemini-pro/src/Options";
     }
   }
 
+  const CODE_INDENT_SPAN_CLASS = 'gemini-pro-indent';
+  const CODE_INDENT_SIZE_ATTR = 'data-gemini-pro-indent-size';
+  const CODE_INDENT_FP_ATTR = 'data-gemini-pro-indent-fingerprint';
+  const CODE_INDENT_HAS_WRAP_ATTR = 'data-gemini-pro-indent-has-wrap';
+  const CODE_INDENT_BASE_SPACES = 4;
+  const CODE_INDENT_DEBUG = true;
+  const CODE_INDENT_LOG_PREFIX = '[Gemini Pro][indent]';
+  let codeIndentRenderTimer: number | null = null;
+
+  /**
+   * 计算代码块内容指纹，用于避免重复处理
+   */
+  const getCodeBlockFingerprint = (codeBlockEl: HTMLElement): string => {
+    const text = codeBlockEl.textContent || '';
+    let hash = 0;
+
+    for (let i = 0; i < text.length; i += 1) {
+      hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0;
+    }
+
+    return `${text.length}:${hash}`;
+  };
+
+  /**
+   * 还原已包装的缩进 span
+   */
+  const unwrapCodeIndentSpans = (codeBlockEl: HTMLElement) => {
+    const indentSpans = codeBlockEl.querySelectorAll(`.${CODE_INDENT_SPAN_CLASS}`);
+    indentSpans.forEach((span) => {
+      span.replaceWith(document.createTextNode(span.textContent || ''));
+    });
+    codeBlockEl.normalize();
+  };
+
+  const createCodeIndentSpan = (spaceCount: number, indentSize: number) => {
+    const span = document.createElement('span');
+    const widthInCh = (spaceCount * indentSize) / CODE_INDENT_BASE_SPACES;
+
+    span.className = CODE_INDENT_SPAN_CLASS;
+    span.textContent = ' '.repeat(spaceCount);
+    span.style.width = `${parseFloat(widthInCh.toFixed(4))}ch`;
+
+    return span;
+  };
+
+  /**
+   * 仅包装“每一行行首连续空格”
+   */
+  const wrapLeadingSpacesInTextNode = (
+    textNode: Text,
+    state: {isLineStart: boolean},
+    indentSize: number
+  ): boolean => {
+    const text = textNode.nodeValue || '';
+    if (!text) return false;
+
+    const parts: Array<string | HTMLSpanElement> = [];
+    let buffer = '';
+    let changed = false;
+    let idx = 0;
+
+    while (idx < text.length) {
+      if (state.isLineStart && text[idx] === ' ') {
+        let spaceCount = 0;
+        while (idx + spaceCount < text.length && text[idx + spaceCount] === ' ') {
+          spaceCount += 1;
+        }
+
+        if (buffer) {
+          parts.push(buffer);
+          buffer = '';
+        }
+
+        parts.push(createCodeIndentSpan(spaceCount, indentSize));
+        idx += spaceCount;
+        changed = true;
+        continue;
+      }
+
+      const ch = text[idx];
+      buffer += ch;
+
+      if (ch === '\n') {
+        state.isLineStart = true;
+      } else {
+        state.isLineStart = false;
+      }
+
+      idx += 1;
+    }
+
+    if (!changed) return false;
+
+    if (buffer) {
+      parts.push(buffer);
+    }
+
+    const fragment = document.createDocumentFragment();
+    parts.forEach((part) => {
+      if (typeof part === 'string') {
+        if (part) {
+          fragment.appendChild(document.createTextNode(part));
+        }
+        return;
+      }
+
+      fragment.appendChild(part);
+    });
+
+    textNode.replaceWith(fragment);
+    return true;
+  };
+
+  const applyLeadingSpaceIndentToCodeBlock = (codeBlockEl: HTMLElement, indentSize: number) => {
+    const textNodes: Text[] = [];
+    const walker = document.createTreeWalker(codeBlockEl, NodeFilter.SHOW_TEXT);
+
+    while (walker.nextNode()) {
+      const node = walker.currentNode as Text;
+      if (!node.nodeValue) continue;
+      textNodes.push(node);
+    }
+
+    let didWrap = false;
+    const state = {isLineStart: true};
+    textNodes.forEach((textNode) => {
+      if (wrapLeadingSpacesInTextNode(textNode, state, indentSize)) {
+        didWrap = true;
+      }
+    });
+
+    return didWrap;
+  };
+
+  /**
+   * 兼容两类缩进：
+   * 1) tab-size 处理 Tab 字符
+   * 2) 行首空格包装 span 处理空格缩进
+   */
+  const renderCodeIndentation = () => {
+    const indentSize = parseCodeIndentSize(config.page.codeTabSize);
+    const codeBlocks = document.querySelectorAll(selector.formattedCodeContent) as NodeListOf<HTMLElement>;
+
+    if (CODE_INDENT_DEBUG) {
+      console.log(`${CODE_INDENT_LOG_PREFIX} renderCodeIndentation`, {
+        selector: selector.formattedCodeContent,
+        codeBlocks: codeBlocks.length,
+        indentSize
+      });
+    }
+
+    codeBlocks.forEach((codeBlockEl) => {
+      const appliedSize = codeBlockEl.getAttribute(CODE_INDENT_SIZE_ATTR);
+      const appliedFingerprint = codeBlockEl.getAttribute(CODE_INDENT_FP_ATTR);
+      const appliedHasWrap = codeBlockEl.getAttribute(CODE_INDENT_HAS_WRAP_ATTR);
+      const currentFingerprint = getCodeBlockFingerprint(codeBlockEl);
+      const hasIndentSpan = !!codeBlockEl.querySelector(`.${CODE_INDENT_SPAN_CLASS}`);
+
+      if (indentSize === null) {
+        if (hasIndentSpan) {
+          unwrapCodeIndentSpans(codeBlockEl);
+        }
+        if (CODE_INDENT_DEBUG) {
+          console.log(`${CODE_INDENT_LOG_PREFIX} skip wrap (indent not set)`, {
+            hasIndentSpan
+          });
+        }
+        codeBlockEl.removeAttribute(CODE_INDENT_SIZE_ATTR);
+        codeBlockEl.removeAttribute(CODE_INDENT_FP_ATTR);
+        codeBlockEl.removeAttribute(CODE_INDENT_HAS_WRAP_ATTR);
+        return;
+      }
+
+      const nextSize = String(indentSize);
+      if (
+        appliedSize === nextSize
+        && appliedFingerprint === currentFingerprint
+        && (appliedHasWrap !== '1' || hasIndentSpan)
+      ) {
+        if (CODE_INDENT_DEBUG) {
+          console.log(`${CODE_INDENT_LOG_PREFIX} skip wrap (unchanged)`, {
+            appliedSize,
+            appliedFingerprint,
+            hasIndentSpan
+          });
+        }
+        return;
+      }
+
+      if (hasIndentSpan) {
+        unwrapCodeIndentSpans(codeBlockEl);
+      }
+
+      const didWrap = applyLeadingSpaceIndentToCodeBlock(codeBlockEl, indentSize);
+      const wrappedCount = codeBlockEl.querySelectorAll(`.${CODE_INDENT_SPAN_CLASS}`).length;
+
+      if (CODE_INDENT_DEBUG) {
+        console.log(`${CODE_INDENT_LOG_PREFIX} processed code block`, {
+          didWrap,
+          wrappedCount
+        });
+      }
+
+      codeBlockEl.setAttribute(CODE_INDENT_SIZE_ATTR, nextSize);
+      codeBlockEl.setAttribute(CODE_INDENT_FP_ATTR, getCodeBlockFingerprint(codeBlockEl));
+      codeBlockEl.setAttribute(CODE_INDENT_HAS_WRAP_ATTR, didWrap ? '1' : '0');
+    });
+  };
+
+  const scheduleCodeIndentRender = () => {
+    if (codeIndentRenderTimer !== null) {
+      clearTimeout(codeIndentRenderTimer);
+    }
+
+    codeIndentRenderTimer = window.setTimeout(() => {
+      codeIndentRenderTimer = null;
+      renderCodeIndentation();
+    }, 80);
+  };
+
   /**
    * 应用配置
    */
@@ -448,6 +708,7 @@ import Options from "../../gemini-pro/src/Options";
     // 样式类配置：通过 toggleClass 给 body 加标记
     $('body').toggleClass('gemini-pro-no-input-shadow', config.hideInputShadow);
     applyPageStyle();
+    scheduleCodeIndentRender();
   };
 
   // 初始应用
@@ -456,6 +717,7 @@ import Options from "../../gemini-pro/src/Options";
   // 监听窗口大小变化，动态重新计算边距限制
   $(window).on('resize', () => {
     applyPageStyle();
+    scheduleCodeIndentRender();
   });
 
   // 回答完成通知：基于发送按钮 stop/submit 状态变化进行判定
@@ -800,9 +1062,11 @@ import Options from "../../gemini-pro/src/Options";
     const tableBottom = getVal('tableBottomPadding', selector.horizontalScrollWrapper, 'paddingBottom', '0px');
 
     // 代码块行高：优先获取 code 标签的行高，比 span 更能反映块级属性
-    const codeLH = getVal('codeLineHeight', `${selector.codeContainer} code`, 'lineHeight', '1.5');
+    const codeLH = getVal('codeLineHeight', selector.formattedCodeContent, 'lineHeight', '1.5');
     // 代码块最大高度
     const codeMaxH = config.page.codeMaxHeight;
+    // 代码块缩进（每一级缩进显示宽度）
+    const codeTabSize = config.page.codeTabSize;
 
     layer.open({
       type: 1,
@@ -961,11 +1225,18 @@ import Options from "../../gemini-pro/src/Options";
                     <input type="text" name="codeMaxHeight" value="${codeMaxH}" placeholder="超出则显示滚动条，如 600px" autocomplete="off" class="layui-input">
                   </div>
                 </div>
+                <div class="layui-form-item">
+                  <label class="layui-form-label" style="width: 80px;">代码缩进</label>
+                  <div class="layui-input-block" style="margin-left: 110px;">
+                    <input type="text" name="codeTabSize" value="${codeTabSize}" placeholder="如 2 / 4 / 8" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
                 
                 <div style="padding: 0 20px; color: #999; font-size: 12px; line-height: 1.5;">
-                  <p>1. 支持单位：px（像素）。</p>
+                  <p>1. 代码缩进使用纯数字（如 2 / 4 / 8），表示每一级缩进的显示宽度。</p>
                   <p>2. 行高若无单位则为倍数（支持小数）。</p>
-                  <p>3. 留空则不调整，支持鼠标滚轮调整数值。</p>
+                  <p>3. 兼容 Tab 与行首空格缩进；只影响显示，不修改复制内容。</p>
+                  <p>4. 留空则不调整，支持鼠标滚轮调整数值。</p>
                 </div>
               </form>
             </div>
@@ -1048,6 +1319,7 @@ import Options from "../../gemini-pro/src/Options";
         'input[name="tableBottomPadding"]',
         'input[name="codeLineHeight"]',
         'input[name="codeMaxHeight"]',
+        'input[name="codeTabSize"]',
         'input[name="sidebarWidth"]'
       ].join(', ');
 
@@ -1109,7 +1381,7 @@ import Options from "../../gemini-pro/src/Options";
 
         // 其他字段默认补 px（行高除外）
         const name = $this.attr('name');
-        if (!unit && name !== 'codeLineHeight') {
+        if (!unit && name !== 'codeLineHeight' && name !== 'codeTabSize') {
           unit = 'px';
         }
 
@@ -1127,6 +1399,8 @@ import Options from "../../gemini-pro/src/Options";
         // 针对小数运算修复精度问题
         if (name === 'codeLineHeight') {
           num = parseFloat(num.toFixed(1));
+        } else if (name === 'codeTabSize' && !unit) {
+          num = Math.round(num);
         }
 
         // 针对侧边栏宽度的滚轮验证
@@ -1210,6 +1484,7 @@ import Options from "../../gemini-pro/src/Options";
     mountTimer = window.setTimeout(() => {
       mountToolbarButton();
       applyPageStyle();
+      scheduleCodeIndentRender();
       observeSendButtonState();
     }, 100);
   });
