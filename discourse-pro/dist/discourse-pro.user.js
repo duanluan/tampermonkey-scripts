@@ -9,6 +9,9 @@
 // EXTERNAL MODULE: ./utils/src/gm/Store.ts
 var Store = __webpack_require__(307);
 ;// ./discourse-pro/src/module/widescreenMode.ts
+var widescreenStyleId = 'discourse-pro-widescreen-mode-style';
+var topicMountObserver = null;
+
 /**
  * 添加 history 的 pushState 和 replaceState 事件
  *
@@ -39,16 +42,11 @@ function loadWidescreenMode(options) {
   var headerWrap = options.headerWrap,
     mainOutletWrapper = options.mainOutletWrapper,
     mainOutlet = options.mainOutlet;
-  var $headerWrap = $(headerWrap),
-    $mainOutletWrapper = $(mainOutletWrapper),
-    $mainOutlet = $(mainOutlet);
 
-  // 顶部撑满
-  $headerWrap.css('max-width', '100%');
-  // 侧边栏和主内容撑满
-  $mainOutletWrapper.css('max-width', '100%');
-  // 主内容撑满
-  $mainOutlet.css('width', '100%');
+  // 新版 Discourse 可能在脚本执行后才挂载页面布局，样式规则可自动覆盖后续出现的节点
+  if ($('#' + widescreenStyleId).length === 0) {
+    $(document.head).append("<style id=\"".concat(widescreenStyleId, "\">\n      ").concat(headerWrap, ",\n      ").concat(mainOutletWrapper, " {\n        max-width: 100% !important;\n      }\n      ").concat(mainOutlet, " {\n        width: 100% !important;\n      }\n    </style>"));
+  }
 
   // console.debug('话题页首次加载宽屏模式 + 监听话题列表变化')
   // 话题页首次加载宽屏模式 + 监听话题列表变化
@@ -95,8 +93,16 @@ function loadWidescreenModeByTopicAndObserver(options) {
   if (location.href.indexOf('/t/') == -1) {
     return;
   }
-  loadWidescreenModeByTopic(options);
   var $postStream = $(options.postStream);
+  if ($postStream.length === 0) {
+    observeTopicMount(options);
+    return;
+  }
+  if (topicMountObserver !== null) {
+    topicMountObserver.disconnect();
+    topicMountObserver = null;
+  }
+  loadWidescreenModeByTopic(options);
   if ($postStream.data('hasObserver')) {
     // console.debug('[discourse-pro-widescreenMode] 已存在话题内容变化监听器，跳过');
     return;
@@ -122,6 +128,29 @@ function loadWidescreenModeByTopicAndObserver(options) {
     childList: true,
     // 不监听子节点下的节点
     subtree: false
+  });
+}
+
+/**
+ * 等待新版 Discourse 挂载话题流
+ * @param options 选项
+ */
+function observeTopicMount(options) {
+  if (topicMountObserver !== null) {
+    return;
+  }
+  topicMountObserver = new MutationObserver(function () {
+    var _topicMountObserver;
+    if ($(options.postStream).length === 0) {
+      return;
+    }
+    (_topicMountObserver = topicMountObserver) === null || _topicMountObserver === void 0 || _topicMountObserver.disconnect();
+    topicMountObserver = null;
+    loadWidescreenModeByTopicAndObserver(options);
+  });
+  topicMountObserver.observe(document.body, {
+    childList: true,
+    subtree: true
   });
 }
 
@@ -298,7 +327,7 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // ==UserScript==
 // @name         Discourse Pro
 // @namespace    http://tampermonkey.net/
-// @version      0.1.8
+// @version      0.1.9
 // @description  增强 Discourse 论坛
 // @author       duanluan
 // @copyright    2024, duanluan (https://github.com/duanluan)
@@ -315,10 +344,14 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 // @match        *://discourse.webflow.com/*
 // @match        *://idcflare.com/*
 // @require      https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js
+// @require      https://cdn.jsdelivr.net/npm/layui-tampermonkey@2.9.9-rc.3/layui.js
+// @resource     css https://cdn.jsdelivr.net/npm/layui-tampermonkey@2.9.9-rc.3/css/layui.css
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @grant        GM_unregisterMenuCommand
+// @grant        GM_getResourceText
+// @grant        GM_addStyle
 // ==/UserScript==
 
 // ==OpenUserJS==
@@ -333,6 +366,10 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
 (function (_$) {
   'use strict';
 
+  // 加载 CSS
+  GM_addStyle(GM_getResourceText('css'));
+  // layer 图标未知原因失效，手动添加样式
+  $(document.head).append("<style>\n    .layui-layer-ico{background:url('https://cdn.jsdelivr.net/npm/layer-src@3.5.1/dist/theme/default/icon.png') no-repeat}\n    .layui-layer-ico1{background-position:-30px 0}\n    .layui-layer-ico2{background-position:-60px 0}\n    .layui-layer-ico3{background-position:-90px 0}\n    .layui-layer-ico4{background-position:-120px 0}\n    .layui-layer-ico5{background-position:-150px 0}\n    .layui-layer-ico6{background-position:-180px 0}\n  </style>");
   Options/* default */.A.registerAll();
   Options/* default */.A.loadInGreasyfork();
 
@@ -372,12 +409,101 @@ function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e 
     // 话题底部按钮
     topicFooterBtns: '#topic-footer-buttons',
     // 更多话题列表
-    moreTopicsContainer: '.more-topics__container'
+    moreTopicsContainer: '.more-topics__container',
+    // 顶部图标栏
+    headerIcons: '.icons.d-header-icons'
   };
   var storeKeys = {
     // 侧边栏宽度
     sidebarWidth: 'sidebarWidth_'
   };
+
+  /**
+   * 打开设置弹窗
+   */
+  var openSettings = function openSettings() {
+    // 生成表单 HTML
+    var formHtml = '';
+    Options/* default */.A.options.forEach(function (opt) {
+      // 从 Store 获取最新状态
+      var storeOption = JSON.parse(Store/* default */.A.get(opt.name));
+      var isChecked = storeOption ? storeOption.value : opt.value;
+      formHtml += "\n        <div class=\"layui-form-item\">\n          <label class=\"layui-form-label\">".concat(opt.label, "</label>\n          <div class=\"layui-input-block\">\n            <input type=\"checkbox\" name=\"").concat(opt.name, "\" lay-skin=\"switch\" lay-text=\"ON|OFF\" ").concat(isChecked ? 'checked' : '', " lay-filter=\"discourse-pro-settings\">\n          </div>\n        </div>\n      ");
+    });
+    layer.open({
+      type: 1,
+      area: ['400px', '300px'],
+      title: 'Discourse Pro 设置',
+      shadeClose: true,
+      content: "\n        <style>\n          .layui-form-label { width: 100px !important; }\n          .layui-input-block { margin-left: 130px !important; }\n        </style>\n        <form class=\"layui-form\" style=\"padding: 20px;\">\n          ".concat(formHtml, "\n        </form>\n      ")
+    });
+
+    // 渲染表单并添加监听
+    layui.use('form', function () {
+      layui.form.render();
+
+      // 监听复选框变更
+      layui.form.on('switch(discourse-pro-settings)', function (data) {
+        var name = data.elem.name;
+        var checked = data.elem.checked;
+
+        // 获取当前配置并更新
+        var currentConfig = JSON.parse(Store/* default */.A.get(name));
+        currentConfig.value = checked;
+
+        // 保存配置
+        Store/* default */.A.set(name, JSON.stringify(currentConfig));
+
+        // 提示
+        layer.msg('保存成功，刷新页面后生效', {
+          time: 1000,
+          offset: 't'
+        });
+      });
+    });
+  };
+
+  // 添加设置按钮到 header
+  var addSettingsButton = function addSettingsButton() {
+    var $headerIcons = $(selector.headerIcons);
+    if ($headerIcons.length > 0) {
+      // 构造按钮 HTML，模仿 Discourse 原生风格
+      var btnHtml = "\n        <li class=\"header-dropdown-toggle discourse-pro-settings-btn\">\n          <a class=\"btn no-text icon btn-flat\" title=\"Discourse Pro \u8BBE\u7F6E\" tabindex=\"0\">\n            <svg class=\"fa d-icon d-icon-cog svg-icon svg-string\" aria-hidden=\"true\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\">\n              <path d=\"M487.4 315.7l-42.6-24.6c4.3-23.2 4.3-47 0-70.2l42.6-24.6c4.9-2.8 7.1-8.6 5.5-14-11.1-35.6-30-67.8-54.7-94.6-3.8-4.1-10-5.1-14.8-2.3L380.8 110c-17.9-15.4-38.5-27.3-60.8-35.1V25.8c0-5.6-3.9-10.5-9.4-11.7-36.7-8.2-74.3-7.8-109.2 0-5.5 1.2-9.4 6.1-9.4 11.7V75c-22.2 7.9-42.8 19.8-60.8 35.1L88.7 85.5c-4.9-2.8-11-1.9-14.8 2.3-24.7 26.7-43.6 58.9-54.7 94.6-1.7 5.4.6 11.2 5.5 14L67.3 221c-4.3 23.2-4.3 47 0 70.2l-42.6 24.6c-4.9 2.8-7.1 8.6-5.5 14 11.1 35.6 30 67.8 54.7 94.6 3.8 4.1 10 5.1 14.8 2.3l42.6-24.6c17.9 15.4 38.5 27.3 60.8 35.1v49.2c0 5.6 3.9 10.5 9.4 11.7 36.7 8.2 74.3 7.8 109.2 0 5.5-1.2 9.4-6.1 9.4-11.7v-49.2c22.2-7.9 42.8-19.8 60.8-35.1l42.6 24.6c4.9 2.8 11 1.9 14.8-2.3 24.7-26.7 43.6-58.9 54.7-94.6 1.5-5.5-.7-11.3-5.6-14.1zM256 336c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z\"></path>\n            </svg>\n          </a>\n        </li>\n      ";
+
+      // 插入到最左边
+      $headerIcons.prepend(btnHtml);
+
+      // 绑定点击事件
+      $('.discourse-pro-settings-btn').on('click', function (e) {
+        e.preventDefault();
+        openSettings();
+      });
+    }
+  };
+
+  // 尝试添加按钮（处理动态加载的情况）
+  var initUI = function initUI() {
+    // 如果已经存在则不重复添加
+    if ($('.discourse-pro-settings-btn').length > 0) return;
+
+    // 如果 header icons 存在，则添加
+    if ($(selector.headerIcons).length > 0) {
+      addSettingsButton();
+    } else {
+      // 否则等待加载
+      var observer = new MutationObserver(function () {
+        if ($(selector.headerIcons).length > 0) {
+          addSettingsButton();
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    }
+  };
+  initUI();
 
   // 加载拖拽条
   if (JSON.parse(Store/* default */.A.get(Options/* default */.A.Keys.dragBar)).value) {
@@ -755,7 +881,7 @@ _defineProperty(Options, "Keys", {
 });
 /**
  * 选项
- * @private
+ * @public
  */
 _defineProperty(Options, "options", [{
   label: '侧边栏拖拽条',

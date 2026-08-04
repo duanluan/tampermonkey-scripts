@@ -14,6 +14,9 @@ interface WideScreenModeOptions {
   moreTopicsContainer: string
 }
 
+const widescreenStyleId = 'discourse-pro-widescreen-mode-style'
+let topicMountObserver: MutationObserver | null = null
+
 /**
  * 添加 history 的 pushState 和 replaceState 事件
  *
@@ -43,16 +46,19 @@ function loadWidescreenMode(options: WideScreenModeOptions) {
   addPushReplaceStateEvent()
 
   const {headerWrap, mainOutletWrapper, mainOutlet} = options
-  const $headerWrap = $(headerWrap)
-    , $mainOutletWrapper = $(mainOutletWrapper)
-    , $mainOutlet = $(mainOutlet)
 
-  // 顶部撑满
-  $headerWrap.css('max-width', '100%')
-  // 侧边栏和主内容撑满
-  $mainOutletWrapper.css('max-width', '100%')
-  // 主内容撑满
-  $mainOutlet.css('width', '100%')
+  // 新版 Discourse 可能在脚本执行后才挂载页面布局，样式规则可自动覆盖后续出现的节点
+  if ($('#' + widescreenStyleId).length === 0) {
+    $(document.head).append(`<style id="${widescreenStyleId}">
+      ${headerWrap},
+      ${mainOutletWrapper} {
+        max-width: 100% !important;
+      }
+      ${mainOutlet} {
+        width: 100% !important;
+      }
+    </style>`)
+  }
 
   // console.debug('话题页首次加载宽屏模式 + 监听话题列表变化')
   // 话题页首次加载宽屏模式 + 监听话题列表变化
@@ -99,9 +105,20 @@ function loadWidescreenModeByTopicAndObserver(options) {
   if (location.href.indexOf('/t/') == -1) {
     return;
   }
-  loadWidescreenModeByTopic(options)
 
   const $postStream = $(options.postStream)
+  if ($postStream.length === 0) {
+    observeTopicMount(options)
+    return
+  }
+
+  if (topicMountObserver !== null) {
+    topicMountObserver.disconnect()
+    topicMountObserver = null
+  }
+
+  loadWidescreenModeByTopic(options)
+
   if ($postStream.data('hasObserver')) {
     // console.debug('[discourse-pro-widescreenMode] 已存在话题内容变化监听器，跳过');
     return;
@@ -129,6 +146,30 @@ function loadWidescreenModeByTopicAndObserver(options) {
     // 不监听子节点下的节点
     subtree: false,
   });
+}
+
+/**
+ * 等待新版 Discourse 挂载话题流
+ * @param options 选项
+ */
+function observeTopicMount(options: WideScreenModeOptions) {
+  if (topicMountObserver !== null) {
+    return
+  }
+
+  topicMountObserver = new MutationObserver(() => {
+    if ($(options.postStream).length === 0) {
+      return
+    }
+
+    topicMountObserver?.disconnect()
+    topicMountObserver = null
+    loadWidescreenModeByTopicAndObserver(options)
+  })
+  topicMountObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+  })
 }
 
 /**

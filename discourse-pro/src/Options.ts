@@ -16,9 +16,9 @@ export default class Options {
 
   /**
    * 选项
-   * @private
+   * @public
    */
-  protected static options = [
+  public static options = [
     {label: '侧边栏拖拽条', name: this.Keys.dragBar, version: 1, value: false, menuCmdId: null},
     {label: '宽屏模式', name: this.Keys.widescreenMode, version: 1, value: false, menuCmdId: null, token: ''}
   ];
@@ -38,7 +38,7 @@ export default class Options {
     CommonOptions.registerAll(this.options, 'https://greasyfork.org/scripts/' + this.SCRIPT_ID);
   }
 
-  static onChangByBoolOption( key) {
+  static onChangByBoolOption(key) {
     let optionSelector = '#script-options-' + key;
     $(document.body).on('change', optionSelector, () => {
       const option = JSON.parse(Store.get(key));
